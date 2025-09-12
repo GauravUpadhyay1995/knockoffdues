@@ -208,7 +208,7 @@ export default function AddGalleryPage() {
             onChange={setDescription}
             height={300}
             fullWidth
-            className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden"
+            className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden dark:text-gray-800"
           />
         </div>
 

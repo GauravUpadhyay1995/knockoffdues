@@ -265,7 +265,7 @@ function TeamMemberCard({ member, index, variants, onClick }: {
 }) {
   return (
     <motion.div
-      className="shadow-xl text-center relative overflow-hidden border border-gray-100 group cursor-pointer bg-gradient-to-r from-orange-50 to-cyan-50 p-8 rounded-3xl"
+      className="shadow-xl text-center relative overflow-hidden border border-gray-100 group cursor-pointer bg-gradient-to-r from-orange-50 to-cyan-50 p-8 rounded-3xl dark:bg-gradient-to-r dark:from-gray-800 dark:to-gray-900"
       variants={variants.card}
       whileHover="hover"
       onClick={() => onClick(member)}
@@ -407,7 +407,7 @@ function MemberModal({ member, onClose, variants }: {
     <AnimatePresence>
       <>
         <motion.div
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-50"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 "
           initial="hidden"
           animate="visible"
           exit="exit"
@@ -416,13 +416,13 @@ function MemberModal({ member, onClose, variants }: {
         />
 
         <motion.div
-          className="fixed inset-0 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 flex items-center justify-center p-4 z-50 "
           initial="hidden"
           animate="visible"
           exit="exit"
           variants={variants.modal}
         >
-          <div className="bg-gradient-to-r from-orange-100 to-cyan-100 dark:from-gray-700 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-gradient-to-r from-orange-100 to-cyan-100 dark:from-gray-700 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative dark:from-gray-800 dark:to-gray-900">
             <button
               className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               onClick={onClose}

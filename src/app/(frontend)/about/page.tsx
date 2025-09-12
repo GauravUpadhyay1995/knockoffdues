@@ -43,7 +43,6 @@ type Particle = {
 };
 
 export default function About() {
-
   const images = [
 
     // {
@@ -53,8 +52,9 @@ export default function About() {
     // }
     // ,
     {
-
-      bgImage: "/images/about/about.png",
+      title: "Know More About Us",
+      subtitle: "We are committed to innovation and excellence",
+      bgImage: "/images/about/about.jpg",
 
     }
   ];
@@ -141,7 +141,7 @@ export default function About() {
           <Carousel images={images} />
         </section>
         {/* <Drawer /> */}
-     
+
         <section className="py-20 px-4 container mx-auto">
           <motion.div
             className="max-w-5xl mx-auto"
@@ -162,7 +162,7 @@ export default function About() {
                 className="text-xl text-gray-700 mb-6 leading-relaxed"
                 whileHover={{ scale: 1.01 }}
               >
-                The <strong className="text-orange-600">Knock Off Dues – Innovation & Development</strong> at IIT Delhi is a collaborative initiative dedicated to transforming the future of healthcare through precision and personalized solutions.
+                The <strong className="text-orange-600">{process.env.NEXT_PUBLIC_COMPANY_NAME} – Innovation & Development</strong> we combine smart IT solutions with professional debt collection services to help businesses recover outstanding payments quickly, securely, and ethically.
               </motion.p>
             </motion.div>
 
@@ -180,7 +180,7 @@ export default function About() {
                   <h3 className="text-xl font-semibold text-gray-800">Strategic Partnership</h3>
                 </div>
                 <p className="text-gray-700">
-                  Established via a strategic partnership between the <strong>Wadhwani Charitable Foundation</strong> and <strong>IIT Delhi</strong> in December 2024, Knock Off Dues aims to accelerate translational research that delivers direct patient and societal benefits.
+                  Established via a strategic partnership between the <strong>Banks</strong> and <strong>{process.env.NEXT_PUBLIC_COMPANY_NAME}</strong> ,{process.env.NEXT_PUBLIC_COMPANY_NAME} don’t just collect debts — we build reliable financial recovery systems that drive growth.
                 </p>
               </motion.div>
 
@@ -197,7 +197,7 @@ export default function About() {
                   <h3 className="text-xl font-semibold text-gray-800">Collaborative Ecosystem</h3>
                 </div>
                 <p className="text-gray-700">
-                  At Knock Off Dues, clinicians, engineers, scientists, and industry experts converge to create impactful healthcare technologies supported by IIT Delhi&apos;s strong research ecosystem.
+                  At {process.env.NEXT_PUBLIC_COMPANY_NAME}, believe that sustainable debt recovery and digital transformation are only possible through collaboration. Our collaborative ecosystem brings together clients, financial institutions, technology partners, and customers on a single integrated platform.
                 </p>
               </motion.div>
             </motion.div>
@@ -207,7 +207,7 @@ export default function About() {
                 className="text-xl text-gray-700 mb-6 leading-relaxed bg-gradient-to-r from-gray-50 to-white p-8 rounded-xl border-l-4 border-orange-500"
                 whileHover={{ scale: 1.005 }}
               >
-                By bridging the gap between lab research and real-world clinical implementation, Knock Off Dues fuels innovation and promotes the commercialization of life-changing health technologies.
+                By fostering strong partnerships and leveraging advanced IT capabilities, we create a win–win environment where businesses achieve higher recovery rates, customers experience fairness and convenience, and industries benefit from a more resilient financial system.{process.env.NEXT_PUBLIC_COMPANY_NAME} fuels innovation and promotes the commercialization of life-changing  technologies.
               </motion.p>
             </motion.div>
           </motion.div>
@@ -249,11 +249,11 @@ export default function About() {
                 viewport={{ once: true }}
               >
                 {[
-                  'Translation of patient-specific research, products and technologies',
-                  'Capacity building through advanced training and employability programs',
-                  'Fostering collaborations with focus on personalized healthcare',
-                  'Developing affordable and accessible healthcare solutions',
-                  'Creating a platform for interdisciplinary research and innovation'
+                  'Technology-First Solutions',
+                  'Efficient Debt Recovery',
+                  'Regulatory Compliance',
+                  'DCustomer-Centric Approach',
+                  'Innovation & Growth'
                 ].map((point, index) => (
                   <motion.li
                     key={index}
@@ -283,9 +283,9 @@ export default function About() {
             variants={staggerContainer}
           >
             {[
-              { number: "30+", label: "Proposals", color: "from-orange-500 to-orange-600" },
-              // { number: "30+", label: "Collaborators", color: "from-cyan-500 to-cyan-600" },
-              // { number: "5+", label: "Patents Filed", color: "from-indigo-500 to-indigo-600" }
+              { number: "150+", label: "Members", color: "from-orange-500 to-orange-600" },
+              { number: "30+", label: "Collaborators", color: "from-cyan-500 to-cyan-600" },
+              { number: "5+", label: "Office Branches", color: "from-indigo-500 to-indigo-600" }
             ].map((stat, index) => (
               <motion.div
                 key={index}

@@ -6,7 +6,7 @@ import Footer from '@/components/home/Footer';
 import ScrollAnimation from '@/components/common/ScrollAnimation';
 import Carousel from '@/components/carousel/carousel';
 import ScrollLinked from '@/components/wave/scrollLinked';
-import WhatWeDo from '@/app/(frontend)/what-we-do/page';
+// import WhatWeDo from '@/app/(frontend)/what-we-do/page';
 import Photo from './(frontend)/events/photo';
 // import ImportantDocuments from './(frontend)/docs-links/page';
 import { motion } from "framer-motion";
@@ -27,43 +27,36 @@ export default function HomePage() {
   {
     title: "Smart Debt Recovery Solutions",
     subtitle: "AI-powered strategies to maximize collections",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
+    bgImage: "/images/carousel/carousel-01.png",
   },
   {
     title: "Cutting-Edge IT Infrastructure",
     subtitle: "Secure servers, cloud solutions, and scalable systems",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-04.png",  },
   {
     title: "Automated Payment Tracking",
     subtitle: "Real-time monitoring for faster settlements",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-02.png",  },
   {
     title: "AI & Analytics in Debt Collection",
     subtitle: "Predictive insights for better recovery rates",
-     bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-03.png",  },
   {
     title: "Client-Centric IT Services",
     subtitle: "Tailored tech solutions for financial institutions",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-04.png",  },
   {
     title: "Secure FinTech Applications",
     subtitle: "Low-cost, scalable, and compliant platforms",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-02.png",  },
   {
     title: "Data Security & Compliance",
     subtitle: "Protecting sensitive financial information",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  },
+  bgImage: "/images/carousel/carousel-01.png",  },
   {
     title: "24/7 IT Support & Monitoring",
     subtitle: "Ensuring uptime and smooth operations",
-    bgImage: "https://knock-off-dues.s3.ap-south-1.amazonaws.com/gallery/1757507241514-about-new.jpg",
-  }
+  bgImage: "/images/carousel/carousel-04.png",  }
 ];
 
 
@@ -80,9 +73,9 @@ export default function HomePage() {
                 </section>
 
                 {/* What We Do */}
-                <section className=" px-4">
+                {/* <section className=" px-4">
                     <WhatWeDo customLimit={2} />
-                </section>
+                </section> */}
 
              
 

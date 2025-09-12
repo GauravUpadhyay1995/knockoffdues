@@ -19,7 +19,7 @@ const EventCard = ({ title, startDate, endDate, description, image, delay = 0 ,e
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: delay }}
       viewport={{ once: true }}
-      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border-2 border-orange-600 hover:border-orange-600"
+      className="bg-gradient-to-r from-orange-100 to-cyan-50 dark:bg-gray-900 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border-2 border-orange-600 hover:border-orange-600"
     >
       <div className="relative aspect-video">
         <Image
@@ -32,10 +32,10 @@ const EventCard = ({ title, startDate, endDate, description, image, delay = 0 ,e
 
       <div className="p-6">
         <div className="flex items-center mb-2">
-          <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-gray-400 mr-2 dark:text-gray-300 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-gray-500 dark:text-gray-300">
             {new Date(startDate).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
@@ -49,8 +49,8 @@ const EventCard = ({ title, startDate, endDate, description, image, delay = 0 ,e
           </span>
 
         </div>
-        <h3 className="text-xl font-bold text-orange-600 mb-3">{title}</h3>
-        <p className="text-gray-600">{description.length > 80 ? description.slice(0, 80) + '...' : description}</p>
+        <h3 className="text-xl font-bold text-orange-600 mb-3 dark:text-gray-300">{title}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{description.length > 80 ? description.slice(0, 80) + '...' : description}</p>
 
         <button className="mt-4 inline-flex items-center text-orange-600 hover:text-orange-400 font-medium"   onClick={() => router.push(`/events/${eventID}`)}>
           View

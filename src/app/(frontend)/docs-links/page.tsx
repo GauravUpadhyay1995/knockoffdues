@@ -156,9 +156,9 @@ export default function ImportantDocuments() {
                     viewport={{ amount: 0.3 }}
                 >
                     {data.data.docs.map((group: any, groupIndex: number) => (
-                        <div key={group._id} className="mb-12">
+                        <div key={group._id} className="mb-12 ">
                             {/* Title and Metadata Section */}
-                            <div className="flex flex-col items-center mb-6">
+                            <div className="flex flex-col items-center mb-6 ">
                                 <div className="flex items-center gap-2 mb-2">
                                     <h3 className="text-xl sm:text-2xl font-bold text-[#ec4a0a] text-center">
                                         {group.title}
@@ -201,7 +201,7 @@ export default function ImportantDocuments() {
 
                             {/* Description Section */}
                             {group.description && (
-                                <div className="mb-8 px-4 sm:px-0">
+                                <div className="mb-8 px-4 sm:px-0 ">
                                     <div
                                         className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed text-center max-w-3xl mx-auto"
                                         dangerouslySetInnerHTML={{
@@ -219,14 +219,23 @@ export default function ImportantDocuments() {
                                 {group.documents.map((doc: any, index: number) => (
                                     <motion.div
                                         key={doc._id}
-                                        className="bg-gradient-to-br from-orange-50 to-cyan-50 border border-gray-100 dark:border-gray-700 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm sm:shadow-md hover:shadow-lg cursor-pointer group relative overflow-hidden hover:border-2 sm:hover:border-4 hover:border-orange-600"
+                                        className="bg-gradient-to-br from-orange-200 to-cyan-100 dark:from-gray-500 dark:to-gray-50 
+           border-2 border-gray-100 dark:border-gray-700 
+           rounded-lg sm:rounded-xl 
+           p-4 sm:p-6 
+           shadow-sm sm:shadow-md 
+           hover:shadow-lg 
+           cursor-pointer group relative overflow-hidden 
+           transition-all duration-300 
+           hover:border-orange-600"
+
                                         variants={cardVariants}
                                         whileHover="hover"
                                         whileTap={{ scale: 0.98 }}
                                     >
                                         <AnimatePresence>
                                             <motion.div
-                                                className="absolute -top-8 -right-8 sm:-top-10 sm:-right-10 w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-orange-100 dark:bg-orange-900 opacity-10 group-hover:opacity-20"
+                                                className="absolute -top-8 -right-8 sm:-top-10 sm:-right-10 w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-orange-100 dark:bg-orange-900 opacity-10 group-hover:opacity-20 "
                                                 animate={{ rotate: 360 }}
                                                 transition={{
                                                     repeat: Infinity,
@@ -255,7 +264,7 @@ export default function ImportantDocuments() {
                                             download
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 sm:gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 text-xs sm:text-sm font-medium transition-colors"
+                                            className="inline-flex items-center gap-1 sm:gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-800 dark:hover:text-orange-300 text-xs sm:text-sm font-medium transition-colors "
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: 0.5 + index * 0.1 }}

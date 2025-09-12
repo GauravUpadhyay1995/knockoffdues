@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, LogIn, UserPlus, Sparkles, User } from "lucide-react";
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext'; // Import the auth hook
 
 const RightSideDrawer = () => {
   const [open, setOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { isAuthenticatedAdmin } = useAuth(); // Get authentication state
 
   // 🔑 Close on ESC key
   useEffect(() => {
@@ -18,9 +20,22 @@ const RightSideDrawer = () => {
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
+  // ✅ Stable particle positions (no hydration mismatch)
+  const particles = useMemo(() => {
+    return Array.from({ length: 3 }, () => ({
+      x: Math.random() * 20 - 10,
+      y: Math.random() * 20 - 10,
+    }));
+  }, []);
+
+  // Don't render anything if user is authenticated
+  if (isAuthenticatedAdmin) {
+    return null;
+  }
+
   return (
     <>
-      {/* Combined Sticky Button with Animation */}
+      {/* Floating button */}
       <motion.button
         onClick={() => setOpen(true)}
         className="fixed right-0 top-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-l-xl shadow-lg z-[10] flex flex-col items-center justify-center gap-1"
@@ -45,11 +60,11 @@ const RightSideDrawer = () => {
           Account
         </motion.span>
         
-        {/* Floating particles animation */}
+        {/* Floating particles */}
         <AnimatePresence>
           {isHovered && (
             <>
-              {[...Array(3)].map((_, i) => (
+              {particles.map((p, i) => (
                 <motion.div
                   key={i}
                   className="absolute w-1 h-1 bg-white rounded-full"
@@ -57,8 +72,8 @@ const RightSideDrawer = () => {
                   animate={{ 
                     opacity: [0, 1, 0],
                     scale: [0, 1, 0],
-                    x: Math.random() * 20 - 10,
-                    y: Math.random() * 20 - 10
+                    x: p.x,
+                    y: p.y
                   }}
                   transition={{ 
                     duration: 0.8, 
@@ -76,7 +91,7 @@ const RightSideDrawer = () => {
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop with blur effect */}
+            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.6 }}
@@ -98,7 +113,7 @@ const RightSideDrawer = () => {
               }}
               className="fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-white to-gray-50 shadow-2xl z-500 flex flex-col border-l border-gray-200"
             >
-              {/* Decorative elements */}
+              {/* Top border */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500" />
               
               {/* Header */}
@@ -129,6 +144,7 @@ const RightSideDrawer = () => {
 
               {/* Body */}
               <div className="flex-1 p-5 space-y-4 overflow-y-auto">
+                {/* Login */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -152,6 +168,7 @@ const RightSideDrawer = () => {
                   </Link>
                 </motion.div>
                 
+                {/* Register */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -175,6 +192,7 @@ const RightSideDrawer = () => {
                   </Link>
                 </motion.div>
                 
+                {/* More options */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

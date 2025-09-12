@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <Suspense fallback={null}>
           <TopLoadingBar />
-          <Drawer />
+        
           {/* <button
        
                  className="fixed right-0 top-1/2 -translate-y-1/2 bg-orange-600 text-white px-3 py-2 rounded-l-lg shadow-md z-50 hover:bg-indigo-700 transition"
@@ -43,6 +43,7 @@ export default function RootLayout({
                </button> */}
         </Suspense>
         <AuthProvider>
+            <Drawer />
           <ThemeProvider>
             <SidebarProvider>
               <LoadingProvider>

@@ -69,7 +69,7 @@ const UpcomingEvent = ({
 
     return (
         <div className="px-4 md:px-0 max-w-7xl mx-auto dark:text-gray-300 dark:bg-gray-800">
-            <div className="flex flex-col md:flex-row gap-4 bg-gradient-to-r from-orange-50 to-cyan-50 rounded-2xl p-4  dark:text-gray-300 dark:bg-gray-800 ">
+            <div className="flex flex-col md:flex-row gap-4 bg-gradient-to-r from-orange-300 to-cyan-200 rounded-2xl p-4  dark:text-gray-300 dark:bg-gray-800 ">
 
                 {/* Content Section */}
                 <motion.div
@@ -88,7 +88,7 @@ const UpcomingEvent = ({
                             }
                         }
                     }}
-                    className="md:w-3/5 p-6 md:p-8 dark:text-gray-300 dark:bg-gray-800"
+                    className="md:w-3/5 p-6 md:p-8 dark:text-gray-300 dark:bg-gray-800 "
                 >
                     <motion.h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
                         {title}
@@ -100,7 +100,7 @@ const UpcomingEvent = ({
 
                     {/* Countdown Timer */}
                     <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-300 mb-2">
                             EVENT STARTS IN:
                         </h4>
                         <div className="flex flex-wrap sm:flex-nowrap gap-2">
@@ -121,7 +121,7 @@ const UpcomingEvent = ({
                                             {formatTime(value)}
                                         </motion.span>
                                     </AnimatePresence>
-                                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 uppercase">
+                                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 uppercase">
                                         {unit}
                                     </span>
                                 </div>

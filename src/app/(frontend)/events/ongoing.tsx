@@ -147,7 +147,7 @@ const OngoingEvent = ({
 
                     {/* Countdown Timer */}
                     <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                        <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-300 mb-2">
                             EVENT ENDS IN:
                         </h4>
                         <div className="flex space-x-2">
@@ -168,7 +168,7 @@ const OngoingEvent = ({
                                             {formatTime(value)}
                                         </motion.span>
                                     </AnimatePresence>
-                                    <span className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+                                    <span className="text-xs text-gray-500 dark:text-gray-300 uppercase">
                                         {unit}
                                     </span>
                                 </div>
@@ -183,8 +183,8 @@ const OngoingEvent = ({
                         transition={{ delay: 0.4, duration: 0.5 }}
                     >
                         <button className="relative overflow-hidden group bg-gradient-to-r from-orange-400 to-orange-600 text-white px-6 py-3 rounded-full font-medium"
-                        onClick={() => router.push(`/events/${eventID}`)}
-                         >
+                            onClick={() => router.push(`/events/${eventID}`)}
+                        >
                             <span className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-full transition-transform duration-500 ease-in-out rotate-12 blur-sm" />
                             <span className="relative z-10">{ctaText}</span>
                         </button>

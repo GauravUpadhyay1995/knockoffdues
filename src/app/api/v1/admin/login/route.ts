@@ -158,6 +158,8 @@ const getAdminPermissions = () => [
   { module: 'Gallery', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Docs & Links', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Dashboard', actions: ['create', 'read', 'update', 'delete'] },
+    { module: 'Team', actions: ['create', 'read', 'update', 'delete'] },
+
 
 
 ];

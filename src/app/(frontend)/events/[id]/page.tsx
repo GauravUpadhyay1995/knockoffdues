@@ -53,11 +53,11 @@ export default function EventDetailsPage() {
                     <FiArrowLeft className="mr-1" /> Back to Events
                 </Link>
 
-                <motion.h1 className="text-4xl font-bold text-center text-orange-700">
+                <motion.h1 className="text-4xl font-bold text-center text-orange-700 dark:text-gray-300 mb-4">
                     {event.title}
                 </motion.h1>
 
-                <div className="flex items-center gap-4 text-gray-600">
+                <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300 mb-4">
                     <FiCalendar />
                     <span>
                         {formatInTimeZone(new Date(event.startDate), "Asia/Kolkata", "dd MMM yyyy hh:mm a")} –
@@ -77,7 +77,7 @@ export default function EventDetailsPage() {
                         <FiFileText className="mr-2" />
                         Description
                     </h3>
-                    <p className="text-gray-800 whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{
+                    <p className="text-gray-800 whitespace-pre-line leading-relaxed dark:text-gray-300 mb-4" dangerouslySetInnerHTML={{
                         __html: event.description
                             // Ensure Summernote's HTML has proper spacing between paragraphs
                             .replace(/<p>/g, '<p class="mb-4">')

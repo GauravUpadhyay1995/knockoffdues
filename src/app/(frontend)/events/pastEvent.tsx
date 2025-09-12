@@ -86,7 +86,7 @@ export default function PastEvents({ events = [] }: { events: Event[] }) {
 
           <motion.p
 
-            className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto"
+            className="text-lg text-gray-600 text-center mb-12 max-w-3xl mx-auto dark:text-gray-300"
           >
             Highlights from our recent activities and gatherings
           </motion.p>

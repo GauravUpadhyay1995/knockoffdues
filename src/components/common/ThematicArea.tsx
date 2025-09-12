@@ -1,28 +1,32 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { FaHeartbeat, FaMicroscope, FaBrain, FaWheelchair, FaMobileAlt } from 'react-icons/fa';
+import {FaChartLine , FaHeartbeat, FaMicroscope, FaBrain, FaRupeeSign , FaMobileAlt } from 'react-icons/fa';
 
 const areas = [
     {
-        title: 'Personalized Medicine & Rehabilitation',
+        title: 'Technology-Driven Debt Recovery',
         icon: <FaHeartbeat className="text-orange-600 w-8 h-8" />,
     },
     {
-        title: 'Diagnostic Tools',
+        title: 'Financial Risk Management',
         icon: <FaMicroscope className="text-orange-600 w-8 h-8" />,
     },
     {
-        title: 'Bio-Imaging and AI as Diagnostic Tools',
+        title: 'Regulatory Compliance & Data Security',
         icon: <FaBrain className="text-orange-600 w-8 h-8" />,
     },
     {
-        title: 'Assistive Technology for Elderly & Disabled',
-        icon: <FaWheelchair className="text-orange-600 w-8 h-8" />,
+        title: 'Customer-Centric Collection Strategies',
+        icon: <FaRupeeSign  className="text-orange-600 w-8 h-8" />,
     },
     {
-        title: 'Low-cost Wearable Health Devices',
+        title: 'Business Process Outsourcing (BPO) for Collections',
         icon: <FaMobileAlt className="text-orange-600 w-8 h-8" />,
+    },
+     {
+        title: 'Analytics & Reporting',
+        icon: <FaChartLine  className="text-orange-600 w-8 h-8" />,
     },
 ];
 
@@ -37,7 +41,7 @@ const cardVariants = {
 
 export default function ThematicAreas() {
     return (
-        <div className="py-16 px-4 md:px-8 bg-white text-center">
+        <div className="py-16 px-4 md:px-8 bg-white text-center dark:bg-gray-900">
            <motion.h2
             className="text-3xl font-bold text-orange-600 flex items-center justify-center gap-4 mb-4"
             initial={{ opacity: 0, y: 40 }}
@@ -65,10 +69,10 @@ export default function ThematicAreas() {
                             scale: 1.05,
                             boxShadow: '0 10px 20px rgba(255, 102, 0, 0.2)',
                         }}
-                        className="bg-gray-50 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center transition-transform duration-300 hover:bg-orange-50"
+                        className="bg-gray-50 rounded-2xl shadow-md p-6 flex flex-col items-center justify-center transition-transform duration-300 hover:bg-orange-50 dark:bg-gray-800 dark:hover:bg-gray-700 cursor-pointer h-48"
                     >
                         {area.icon}
-                        <h3 className="text-lg font-semibold mt-4 text-gray-800">{area.title}</h3>
+                        <h3 className="text-lg font-semibold mt-4 text-gray-800 dark:text-gray-300">{area.title}</h3>
                     </motion.div>
                 ))}
             </div>

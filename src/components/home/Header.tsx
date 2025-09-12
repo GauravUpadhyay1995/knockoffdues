@@ -40,8 +40,8 @@ const Header = () => {
         // { href: '/steering-committee', label: 'Steering Committee' },
         { href: '/contact-us', label: 'Contact' },
         { href: '/docs-links', label: 'Docs & Links' },
-        { href: '/what-we-do', label: 'TRLs / What We Do' },
-        { href: '/founder', label: 'About Founder' },
+        // { href: '/what-we-do', label: 'TRLs / What We Do' },
+        // { href: '/founder', label: 'About Founder' },
       ]
     },
   ];
