@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { File } from 'buffer';
 import { useParams } from 'next/navigation';
-import { join } from 'path';
+
 
 
 
@@ -195,6 +195,7 @@ export default function UserEditForm() {
     const [user, setUser] = useState<UserData | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [departments, setDepartments] = useState<Array<{ _id: string; name: string }>>([]);
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         personal: true,
         contact: false,
@@ -271,18 +272,33 @@ export default function UserEditForm() {
 
 
     useEffect(() => {
-        const fetchUser = async () => {
-            // Simulate API call
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/${userId}`);
+        const fetchData = async () => {
+            try {
+                const [userRes, deptRes] = await Promise.all([
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/${userId}`),
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/departments/list?perPage=all`,)
+                ]);
 
-            setTimeout(() => {
-                const mockUser = response.data.data;
-                setUser(mockUser);
-                reset(mockUser);
-            }, 800);
+                setTimeout(() => {
+                    const mockUser = userRes.data.data;
+
+                    // Ensure array
+                    const deptArray = Array.isArray(deptRes.data.data)
+                        ? deptRes.data.data
+                        : deptRes.data.data?.departments || [];
+
+                    setUser(mockUser);
+                    setDepartments(deptArray);
+                    reset(mockUser);
+                }, 800);
+            } catch (err) {
+                console.error("Failed to fetch data:", err);
+            }
         };
-        fetchUser();
-    }, [reset]);
+
+        fetchData();
+    }, [reset, userId]);
+
 
 
     const onSubmit = async (data: UserData) => {
@@ -451,7 +467,7 @@ export default function UserEditForm() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
             >
-                <div className="bg-gradient-to-r from-orange-600 to-indigo-400 p-6 text-white">
+                <div className="bg-gradient-to-r from-orange-300 to-indigo-300 p-6 text-white">
                     <h2 className="text-2xl md:text-3xl font-bold"> {user?.name}`s Profile</h2>
                     <p className="text-blue-100 mt-1">Update  {user?.name}`s information and preferences</p>
                 </div>
@@ -603,11 +619,26 @@ export default function UserEditForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Department</label>
-                                <input
+                                {/* <input
                                     {...register('department')}
                                     placeholder="Department"
                                     className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
-                                />
+                                /> */}
+                                <select
+                                    {...register("department")}
+                                    className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                    defaultValue={user?.department || ""} // 👈 preselect from user data
+                                >
+                                    <option value="" disabled>
+                                        Select Department
+                                    </option>
+                                    {departments.map((dept) => (
+                                        <option key={dept._id} value={dept._id}>
+                                            {dept.department}
+                                        </option>
+                                    ))}
+
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Total Experience (years)</label>
@@ -1070,11 +1101,11 @@ export default function UserEditForm() {
                                 </label>
 
 
-                                <span className="ml-2 text-gray-700 dark:text-gray-300">Block Member</span>
+                                <span className="ml-2 text-gray-700 dark:text-gray-300">Acitve Member</span>
                             </label>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300 ">Member Role</label>
-                                <select {...register('role')} className="input-field w-auto dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
+                                <select {...register('role')} className="input-field w-auto dark:bg-gray-800 dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
                                     <option value="user">Employee</option>
                                     <option value="admin">Admin</option>
                                 </select>

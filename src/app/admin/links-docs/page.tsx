@@ -25,7 +25,7 @@ export default async function DocumentsTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Links & Documents List" />
+      <PageBreadcrumb pageTitle="Documents Management" />
       <div className="space-y-6">
         <DocumentsTable initialData={DocData} />
       </div>

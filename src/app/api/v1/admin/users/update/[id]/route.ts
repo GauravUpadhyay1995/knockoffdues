@@ -165,12 +165,12 @@ export const PATCH = verifyAdmin(
     }
 
     // ------------------ Sanitize ObjectId fields ------------------
-    const objectIdFields = ['department', 'role'];
-    objectIdFields.forEach((field) => {
-      if (!updateFields[field] || updateFields[field] === '') {
-        updateFields[field] = null;
-      }
-    });
+    // const objectIdFields = ['department', 'role'];
+    // objectIdFields.forEach((field) => {
+    //   if (!updateFields[field] || updateFields[field] === '') {
+    //     updateFields[field] = null;
+    //   }
+    // });
 
     // ------------------ Update ------------------
     const updated = await User.findByIdAndUpdate(

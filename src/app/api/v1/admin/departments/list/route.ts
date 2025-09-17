@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { connectToDB } from '@/config/mongo';
 import { asyncHandler } from '@/lib/asyncHandler';
 import { sendResponse } from '@/lib/sendResponse';
-import { Department } from '@/models/Department'; // make sure you import the model
+import { Department } from '@/models/Department';
 
 export const GET = asyncHandler(async (req: NextRequest) => {
     await connectToDB();
@@ -13,6 +13,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const perPage = (searchParams.get('perPage') || '10').toLowerCase();
     const customLimit = parseInt(searchParams.get('customLimit') || '', 10) || 0;
+
     const showAll = perPage === 'all';
     const limit = customLimit || (showAll ? 0 : Math.min(parseInt(perPage, 10) || 10, 100));
     const skip = showAll ? 0 : (page - 1) * limit;
@@ -24,57 +25,92 @@ export const GET = asyncHandler(async (req: NextRequest) => {
         );
     }
 
-    // Build match condition
-    const match: Record<string, any> = {};
-    if (department) match.department = { $regex: department, $options: 'i' };
+    // Build match conditions
+    const filter: Record<string, any> = {};
+    if (department) filter.department = { $regex: department, $options: 'i' };
+    if (search) filter.$or = [{ department: { $regex: search, $options: 'i' } }];
 
+    // Base pipeline
     const pipeline: any[] = [];
-
-    if (search) {
-        pipeline.push({
-            $match: {
-                $or: [{ department: { $regex: search, $options: 'i' } }],
-            },
-        });
-    } else if (Object.keys(match).length > 0) {
-        pipeline.push({ $match: match });
+    if (Object.keys(filter).length > 0) {
+        pipeline.push({ $match: filter });
     }
 
     pipeline.push(
-        { $project: { __v: 0, createdBy: 0, updatedBy: 0, updatedAt: 0 } },
-        { $sort: { createdAt: -1 } } // ✅ use createdAt since publishDate doesn't exist
+        { $project: { __v: 0, createdBy: 0, updatedBy: 0 } },
+        { $sort: { createdAt: -1 } }
     );
 
+    const dataPipeline = [...pipeline];
     if (!showAll) {
-        pipeline.push({ $skip: skip }, { $limit: limit });
+        dataPipeline.push({ $skip: skip }, { $limit: limit });
     }
 
-    // Execute pipeline
-    const docs = await Department.aggregate(pipeline);
+    const countPipeline = [...(Object.keys(filter).length ? [{ $match: filter }] : []), { $count: 'count' }];
 
-    // Count total separately (without skip/limit)
-    const countPipeline: any[] = [];
-    if (search) {
-        countPipeline.push({
-            $match: { $or: [{ department: { $regex: search, $options: 'i' } }] },
+    const aggregationOptions = { allowDiskUse: true };
+
+    try {
+        // Run in parallel
+        const [departments, totalCountArr] = await Promise.all([
+            Department.aggregate(dataPipeline, aggregationOptions),
+            Department.aggregate(countPipeline, aggregationOptions)
+        ]);
+
+        const totalRecords = totalCountArr?.[0]?.count ?? 0;
+
+        return sendResponse({
+            success: true,
+            message: departments.length ? 'Departments fetched successfully' : 'No departments found',
+            data: {
+                totalRecords,
+                currentPage: page,
+                perPage: showAll ? totalRecords : limit,
+                totalPages: showAll ? 1 : Math.ceil(totalRecords / limit),
+                departments
+            }
         });
-    } else if (Object.keys(match).length > 0) {
-        countPipeline.push({ $match: match });
+    } catch (error) {
+        console.error('Aggregation error:', error);
+
+        // Fallback to simpler query
+        try {
+            console.log('Trying fallback query without aggregation...');
+
+            let query = Department.find(filter)
+                .select('-__v')
+                .sort({ createdAt: -1 });
+
+            if (!showAll) {
+                query = query.skip(skip).limit(limit);
+            }
+
+            const [departments, totalRecords] = await Promise.all([
+                query.exec(),
+                Department.countDocuments(filter)
+            ]);
+
+            return sendResponse({
+                success: true,
+                message: departments.length ? 'Departments fetched successfully' : 'No departments found',
+                data: {
+                    totalRecords,
+                    currentPage: page,
+                    perPage: showAll ? totalRecords : limit,
+                    totalPages: showAll ? 1 : Math.ceil(totalRecords / limit),
+                    departments
+                }
+            });
+        } catch (fallbackError) {
+            console.error('Fallback query also failed:', fallbackError);
+            return sendResponse(
+                {
+                    success: false,
+                    message: 'Failed to fetch departments due to database error',
+                    data: null
+                },
+                500
+            );
+        }
     }
-    countPipeline.push({ $count: 'count' });
-
-    const totalCountArr = await Department.aggregate(countPipeline);
-    const totalRecords = totalCountArr?.[0]?.count ?? 0;
-
-    return sendResponse({
-        success: true,
-        message: docs.length ? 'Department fetched successfully' : 'No Department found',
-        data: {
-            totalRecords,
-            currentPage: page,
-            perPage: showAll ? totalRecords : limit,
-            departments: docs, // ✅ rename docs to Department
-        },
-    });
-
 });

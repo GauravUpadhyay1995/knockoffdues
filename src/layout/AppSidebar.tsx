@@ -51,12 +51,22 @@ const AppSidebar: React.FC = () => {
       path: "/admin",
     },
     {
-      name: "Users",
+      name: "Employee Management",
       icon: <UserCircleIcon />,
       path: "/admin/users-list",
     },
     {
-      name: "Teams",
+      name: "Tasks Management",
+      icon: <FolderIcon />,
+      path: "/admin/tasks",
+    },
+    {
+      name: "Departments",
+      icon: <FolderIcon />,
+      path: "/admin/departments",
+    },
+    {
+      name: "Teams Management",
       icon: <GroupIcon />,
       path: "/admin/teams",
       subItems: [
@@ -65,7 +75,7 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      name: "Events",
+      name: "Events Management",
       icon: <GroupIcon />,
       path: "/admin/events",
       subItems: [
@@ -74,7 +84,7 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      name: "Docs & Links",
+      name: "Docs&Links Mgmt",
       icon: <GroupIcon />,
       path: "/admin/links-docs",
       subItems: [
@@ -83,7 +93,7 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      name: "News",
+      name: "News Management",
       icon: <DocsIcon />,
       path: "/admin/news",
       subItems: [
@@ -93,7 +103,7 @@ const AppSidebar: React.FC = () => {
     },
 
     {
-      name: "TRL",
+      name: "TRL Management",
       icon: <ShootingStarIcon />,
       path: "/admin/trl",
       subItems: [
@@ -102,7 +112,7 @@ const AppSidebar: React.FC = () => {
       ],
     },
     {
-      name: "Gallery",
+      name: "Gallery Management",
       icon: <FolderIcon />,
       path: "/admin/gallery",
       subItems: [
@@ -110,18 +120,13 @@ const AppSidebar: React.FC = () => {
         { name: "Add Gallery", path: "/admin/gallery/add", pro: false },
       ],
     },
+
   ];
 
 
   const othersItems: NavItem[] = [
-    // {
-    //   icon: <PieChartIcon />,
-    //   name: "Charts",
-    //   subItems: [
-    //     { name: "Line Chart", path: "/admin/line-chart", pro: false },
-    //     { name: "Bar Chart", path: "/admin/bar-chart", pro: false },
-    //   ],
-    // },
+
+
     // {
     //   icon: <BoxCubeIcon />,
     //   name: "UI Elements",
@@ -164,14 +169,18 @@ const AppSidebar: React.FC = () => {
       <ul className="flex flex-col gap-4">
         {navItems.map((nav, index) => {
           // Check if user has permission to view this menu item
-          if (nav.name === "Users" && !canAccess("User", "read")) return null;
-          if (nav.name === "Teams" && !canAccess("Team", "read")) return null;
-          if (nav.name === "Events" && !canAccess("Event", "read")) return null;
-          if (nav.name === "Docs & Links" && !canAccess("Docs & Links", "read")) return null;
-          if (nav.name === "News" && !canAccess("New", "read")) return null;
-          if (nav.name === "TRL" && !canAccess("TRL", "read")) return null;
-          if (nav.name === "Gallery" && !canAccess("Gallery", "read")) return null;
+          if (nav.name === "Employee Management" && !canAccess("User", "read")) return null;
+          if (nav.name === "Teams Management" && !canAccess("Team", "read")) return null;
+          if (nav.name === "Events Management" && !canAccess("Event", "read")) return null;
+          if (nav.name === "Docs&Links Mgmt" && !canAccess("Docs & Links", "read")) return null;
+          if (nav.name === "News Management" && !canAccess("New", "read")) return null;
+          if (nav.name === "TRL Management" && !canAccess("TRL", "read")) return null;
+          if (nav.name === "Gallery Management" && !canAccess("Gallery", "read")) return null;
           if (nav.name === "Dashboard" && !canAccess("Dashboard", "read")) return null;
+          if (nav.name === "Tasks Management" && !canAccess("Task", "read")) return null;
+          if (nav.name === "Departments" && !canAccess("Department", "read")) return null;
+
+
           // Filter subItems for Upload Customers permission
           let filteredSubItems = nav.subItems;
 
@@ -376,7 +385,7 @@ const AppSidebar: React.FC = () => {
             <div className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-400 bg-clip-text text-transparent">
 
-                 <Image   className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
+                <Image className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
 
               </span>
             </div>

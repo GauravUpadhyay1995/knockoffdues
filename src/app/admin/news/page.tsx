@@ -32,7 +32,7 @@ export default async function NewsTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="News List" />
+      <PageBreadcrumb pageTitle="News Management" />
       <div className="space-y-6">
         <NewsListTable initialData={newsData} />
       </div>

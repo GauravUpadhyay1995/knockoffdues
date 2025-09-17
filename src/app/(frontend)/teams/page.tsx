@@ -156,7 +156,7 @@ const regularMembers = teamMembers
                   viewport={{ once: true }}
                   variants={titleVariants}
                 >
-                  Meet Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">Win CoE Team</span>
+                  Meet Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">Team</span>
                 </motion.h2>
                 <motion.p
                   className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed text-center max-w-3xl mx-auto"

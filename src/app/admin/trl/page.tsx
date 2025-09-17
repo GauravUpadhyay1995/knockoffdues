@@ -30,7 +30,7 @@ export default async function TRLTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="TRL List" />
+      <PageBreadcrumb pageTitle="TRL Management" />
       <div className="space-y-6">
         <TRLListTable initialData={TRLsData} />
       </div>

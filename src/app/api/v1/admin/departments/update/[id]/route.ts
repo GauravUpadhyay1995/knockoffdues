@@ -48,7 +48,12 @@ export const PATCH = verifyAdmin(
             );
         }
 
-        const updatedDepartment = await Department.findByIdAndUpdate(departmentID, { $set: rawBody }, { new: true });
+        const updatedDepartment = await Department.findByIdAndUpdate(
+            departmentID,
+            { $set: rawBody },
+            { new: true, runValidators: true, timestamps: true }
+        );
+
 
         if (!updatedDepartment) {
             return NextResponse.json({ success: false, message: 'Department not found' }, { status: 404 });

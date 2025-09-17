@@ -1,7 +1,10 @@
+// GalleriesTable.tsx
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import {
     Table,
     TableBody,
@@ -9,15 +12,29 @@ import {
     TableHeader,
     TableRow,
 } from '../ui/table';
-
-import Pagination from './Pagination';
-import PageLoader from '../ui/loading/PageLoader';
+import Button from '@/components/ui/button/Button';
+import Pagination from '../tables/Pagination';
+import Label from "@/components/form/Label";
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import { FiFilter, FiChevronDown, FiChevronUp, FiX } from 'react-icons/fi';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-// import Badge from '@/components/ui/badge/Badge';
-import { AnimatePresence, motion } from 'framer-motion';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import { UserPermissionGuard } from '@/components/common/PermissionGuard';
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
+import * as XLSX from 'xlsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiFilter, FiChevronDown, FiChevronUp, FiX, FiRefreshCw } from 'react-icons/fi';
+import LoadingScreen from "@/components/common/LoadingScreen";
+
+interface GalleryApiResponse {
+    success: boolean;
+    message?: string;
+    data?: {
+        galleries?: Gallery[];
+        totalRecords?: number;
+        perPage?: number;
+        limit?: number;
+        currentPage?: number;
+    };
+}
 
 interface Gallery {
     _id: string;
@@ -25,17 +42,9 @@ interface Gallery {
     images: { url: string; _id: string }[];
     video_url: { url: string; title: string; description: string; _id: string }[];
     isActive: boolean;
-    createdAt: string;
-}
-
-interface GalleryApiResponse {
-    success: boolean;
-    message?: string;
-    data?: {
-        galleries: Gallery[];
-        totalRecords: number;
-        perPage: number;
-    };
+    __v?: number;
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
 interface Filters {
@@ -46,67 +55,143 @@ interface Props {
     initialData: Gallery[];
 }
 
-export default function GalleriesListTable({ initialData }: Props) {
-    const [allGalleries, setAllGalleries] = useState<Gallery[]>(initialData);
-    const [loading, setLoading] = useState(true);
+export default function GalleriesTable({ initialData }: Props) {
+    const [galleries, setGalleries] = useState<Gallery[]>(initialData);
+    const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [filters, setFilters] = useState<Filters>({ title: '' });
+    const [isAuthorized, setIsAuthorized] = useState(true);
     const [showFilterPanel, setShowFilterPanel] = useState(false);
     const router = useRouter();
-    const debouncedFilters = useDebounce(filters, 300);
 
-    const filteredGalleries = useMemo(() => {
-        return allGalleries.filter(gallery => {
-            const titleMatch = gallery.title
-                .toLowerCase()
-                .includes(debouncedFilters.title.toLowerCase());
-            return titleMatch;
-        });
-    }, [allGalleries, debouncedFilters]);
+    const [filters, setFilters] = useState<Filters>({
+        title: '',
+    });
 
-    const totalPages = Math.ceil(filteredGalleries.length / pageSize);
-    const basePageSizes = [10, 25, 50, 100, 500];
+    // Debounced filters with 500ms delay
+    const debouncedFilters = useDebounce(filters, 500);
 
-    const pageSizeOptions = useMemo(() => {
-        if (filteredGalleries.length === 0) return [10];
-        const filtered = basePageSizes.filter(size => size < filteredGalleries.length);
-        if (!filtered.includes(filteredGalleries.length)) {
-            filtered.push(filteredGalleries.length);
-        }
-        return [...new Set(filtered)].sort((a, b) => a - b);
-    }, [filteredGalleries.length]);
-
-    const paginatedData = useMemo(() => {
-        const start = (currentPage - 1) * pageSize;
-        return filteredGalleries.slice(start, start + pageSize);
-    }, [filteredGalleries, currentPage, pageSize]);
-
-    const fetchAllGalleries = useCallback(async () => {
+    // Fetch galleries with current filters and pagination
+    const fetchGalleries = useCallback(async (abortController?: AbortController) => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/v1/admin/gallery/list/?perPage=${pageSize}`, {
-                credentials: 'include',
+            const params = new URLSearchParams({
+                page: currentPage.toString(),
+                perPage: pageSize.toString(),
+                ...(debouncedFilters.title && { title: debouncedFilters.title }),
             });
+
+            const response = await fetch(`/api/v1/admin/gallery/list?${params}`, {
+                credentials: 'include',
+                signal: abortController?.signal,
+            });
+
+            if (response.status === 401) {
+                setIsAuthorized(false);
+                return;
+            }
+
             const result: GalleryApiResponse = await response.json();
+
             if (result.success && result.data) {
-                setAllGalleries(result.data.galleries || []);
+                setGalleries(result.data.galleries || []);
+                setTotalRecords(result.data.totalRecords || 0);
+                setTotalPages(Math.ceil((result.data.totalRecords || 0) / pageSize));
+                setIsAuthorized(true);
+
+                // Reset to first page if current page exceeds total pages
+                if (currentPage > Math.ceil((result.data.totalRecords || 0) / pageSize)) {
+                    setCurrentPage(1);
+                }
             } else {
                 toast.error(result.message || 'Failed to load galleries');
-                setAllGalleries([]);
+                setGalleries([]);
+                setTotalRecords(0);
+                setTotalPages(1);
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.name === 'AbortError') {
+                // Request was cancelled, do nothing
+                return;
+            }
             console.error('Error fetching galleries:', error);
             toast.error('Error fetching gallery list');
-            setAllGalleries([]);
+            setGalleries([]);
+            setTotalRecords(0);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
-    }, [pageSize]);
+    }, [currentPage, pageSize, debouncedFilters]);
 
+    // Fetch galleries when filters, page, or pageSize changes
     useEffect(() => {
-        fetchAllGalleries();
-    }, [fetchAllGalleries]);
+        const abortController = new AbortController();
+        fetchGalleries(abortController);
+
+        return () => {
+            abortController.abort();
+        };
+    }, [fetchGalleries]);
+
+    const resetFilters = () => {
+        setFilters({
+            title: '',
+        });
+        setCurrentPage(1);
+    };
+
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize);
+        setCurrentPage(1); // Reset to first page when page size changes
+    };
+
+    const handleEditClick = (gallery: Gallery) => {
+        router.push(`/admin/gallery/add?id=${gallery._id}`);
+    };
+
+    const changeStatus = async (galleryId: string, isActive: boolean) => {
+        if (!galleryId) return;
+        const formData = new FormData();
+        formData.append('isActive', (!isActive).toString());
+
+        const promise = fetch(`/api/v1/admin/gallery/update/${galleryId}`, {
+            method: 'PATCH',
+            body: formData,
+        }).then(async (res) => {
+            try {
+                const text = await res.text();
+                const result = text ? JSON.parse(text) : {};
+
+                if (!res.ok || !result.success) {
+                    toast.error(result.message || 'Update failed');
+                }
+
+                return result;
+            } catch (error) {
+                console.error('Failed to parse response:', error);
+                toast.error('Invalid server response');
+                throw new Error('Invalid server response');
+            }
+        });
+
+        toast.promise(promise, {
+            loading: 'Updating gallery...',
+            success: (res) => res?.success ? 'Gallery updated successfully!' : null,
+            error: (err) => err.message || 'Update failed',
+        });
+
+        try {
+            const result = await promise;
+            if (result.success) {
+                fetchGalleries();
+            }
+        } catch (error) {
+            console.error('Update error:', error);
+        }
+    };
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -114,243 +199,215 @@ export default function GalleriesListTable({ initialData }: Props) {
         setCurrentPage(1);
     };
 
-    const resetFilters = () => {
-        setFilters({ title: '' });
-        setCurrentPage(1);
+    const handleDownloadExcel = () => {
+        // Prepare data for Excel
+        const data = galleries.map((gallery, idx) => ({
+            'Sr. No.': (currentPage - 1) * pageSize + idx + 1,
+            'Title': gallery.title,
+            'Status': gallery.isActive ? 'Active' : 'Inactive',
+            'CreatedAt': gallery.createdAt ? new Date(gallery.createdAt).toLocaleString() : "N/A",
+        }));
+
+        // Create worksheet
+        const ws = XLSX.utils.json_to_sheet(data);
+
+        // Create workbook and add worksheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Galleries');
+
+        // Generate file name with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const fileName = `galleries_export_${timestamp}.xlsx`;
+
+        // Download the file
+        XLSX.writeFile(wb, fileName);
     };
 
-    const handleToggle = (galleryId: string, currentStatus: boolean) => {
-        setAllGalleries(prev =>
-            prev.map(item =>
-                item._id === galleryId ? { ...item, isActive: !currentStatus } : item
-            )
-        );
-    };
-
-    const changeStatus = async (galleryId: string, currentStatus: boolean) => {
-        try {
-            const formData = new FormData();
-            formData.append('isActive', (!currentStatus).toString());
-
-            const response = await fetch(`/api/v1/admin/gallery/update/${galleryId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                body: formData,
-            });
-
-            const result: GalleryApiResponse = await response.json();
-
-            if (result.success) {
-                handleToggle(galleryId, currentStatus);
-                toast.success('Gallery status updated');
-            } else {
-                toast.error(result.message || 'Failed to update gallery status');
-            }
-        } catch (error) {
-            console.error('Error updating gallery status:', error);
-            toast.error('Error updating gallery status');
-        }
-    };
-
-    const handleEdit = (galleryId: string) => {
-        router.push(`/admin/gallery/add?id=${galleryId}`);
-    };
-
+    if (!isAuthorized) {
+        return <UnauthorizedComponent />;
+    }
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
             {loading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-black/40 backdrop-blur-sm">
-                    <PageLoader />
-                </div>
+                <LoadingScreen />
             )}
 
-            <div className="flex flex-col gap-4 p-4">
-                {/* Filter Section */}
-                <div className="flex flex-col gap-4 border-b border-gray-200 dark:border-white/[0.05]">
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        {/* Page Size */}
-                        <div className="flex items-center gap-2 min-w-[150px]">
-                            <label className="text-sm font-medium text-gray-700 dark:text-white">
-                                Page Size:
-                            </label>
-                            <select
-                                value={pageSize}
-                                onChange={e => {
-                                    setPageSize(Number(e.target.value));
-                                    setCurrentPage(1);
-                                }}
-                                className="py-1.5 pl-3 pr-6 text-sm border rounded-md bg-white dark:bg-gray-900 dark:text-white dark:border-gray-700 text-gray-800"
+            <UserPermissionGuard action="read">
+                <div className="flex flex-col gap-4 p-4">
+                    {/* Header with filters and controls */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Galleries Management</h2>
+
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                onClick={() => fetchGalleries()}
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
                             >
-                                {pageSizeOptions.map(size => (
-                                    <option key={size} value={size}>
-                                        {size}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                                <FiRefreshCw className="w-4 h-4" />
+                                Refresh
+                            </Button>
 
-                        {/* Right-side Buttons */}
-                        <div className="flex flex-wrap justify-end gap-1">
+                            <Button
+                                onClick={handleDownloadExcel}
+                                variant="outline"
+                                size="sm"
+                            >
+                                Download Excel
+                            </Button>
 
-                            <div className=" mb-2 grid grid-cols-1 sm:grid-cols-2 gap-2 md:flex md:justify-end">
-                                <button
-                                    onClick={() => setShowFilterPanel(!showFilterPanel)}
-                                    className="inline-flex items-center px-4 py-2 justify-center gap-2 rounded-full font-medium text-sm bg-blue-light-500/15 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500 cursor-pointer"
-                                >
-                                    <FiFilter className="w-4 h-4" />
-                                    {showFilterPanel ? 'Hide Filters' : 'Advanced Filters'}
-                                    {showFilterPanel ? (
-                                        <FiChevronUp className="w-4 h-4" />
-                                    ) : (
-                                        <FiChevronDown className="w-4 h-4" />
-                                    )}
-                                </button>
-
-                                <button
-                                    onClick={resetFilters}
-                                    className="inline-flex items-center px-4 py-2 justify-center gap-2 rounded-full font-medium text-sm bg-blue-light-500/15 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500 cursor-pointer"
-                                >
-                                    <FiX className="w-4 h-4" />
-                                    Reset
-                                </button>
-
-                                <button
-                                    onClick={() => router.push('/admin/gallery/add')}
-                                    className="inline-flex items-center px-4 py-2 justify-center gap-2 rounded-full font-medium text-sm bg-blue-light-500/15 text-blue-light-500 dark:bg-blue-light-500/15 dark:text-blue-light-500 cursor-pointer"
-                                >
-                                    + Add Gallery
-                                </button>
-                            </div>
-
+                            <Button
+                                onClick={() => setShowFilterPanel(!showFilterPanel)}
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
+                            >
+                                <FiFilter className="w-4 h-4" />
+                                {showFilterPanel ? 'Hide Filters' : 'Show Filters'}
+                                {showFilterPanel ? <FiChevronUp className="w-4 h-4" /> : <FiChevronDown className="w-4 h-4" />}
+                            </Button>
                         </div>
                     </div>
-                </div>
 
-                <AnimatePresence>
-                    {showFilterPanel && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="overflow-hidden w-full"
-                        >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-white/[0.05]">
-                                {/* Name Filter */}
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-gray-700 dark:text-white">
-                                        Title:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="title"
-                                        value={filters.title}
-                                        onChange={handleFilterChange}
-                                        placeholder="Search by Title"
-                                        className="w-full py-2 px-3 text-sm border rounded-lg dark:bg-gray-900 dark:text-white dark:border-gray-700"
-                                    />
+                    {/* Filter Panel */}
+                    <AnimatePresence>
+                        {showFilterPanel && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="overflow-hidden"
+                            >
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div>
+                                        <Label htmlFor="title-filter">Title</Label>
+                                        <input
+                                            id="title-filter"
+                                            type="text"
+                                            name="title"
+                                            value={filters.title}
+                                            onChange={handleFilterChange}
+                                            placeholder="Filter by title"
+                                            className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-3 flex justify-end">
+                                        <Button
+                                            onClick={resetFilters}
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex items-center gap-2"
+                                        >
+                                            <FiX className="w-4 h-4" />
+                                            Reset Filters
+                                        </Button>
+                                    </div>
                                 </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                    {/* Page Size Selector */}
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="page-size">Galleries per page:</Label>
+                        <select
+                            id="page-size"
+                            value={pageSize}
+                            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                            className="p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+                        >
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
 
-            </div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-auto">
+                            Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalRecords)} of {totalRecords} galleries
+                        </span>
+                    </div>
+                </div>
+            </UserPermissionGuard>
 
-            <div className="max-w-full overflow-x-auto">
-                <div className="min-w-[700px] md:min-w-[900px]">
-                    <Table>
-                        <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                            <TableRow>
-                                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Sr. No.</TableCell>
-                                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Title</TableCell>
-                                {/* <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500"># Images</TableCell>
-                                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500"># Videos</TableCell> */}
-                                <TableCell isHeader className="px-5 py-3 text-start text-theme-xs font-medium text-gray-500">Created At</TableCell>
-                                <TableCell isHeader className="px-5 py-3 text-end text-theme-xs font-medium text-gray-500">Action</TableCell>
-                            </TableRow>
-                        </TableHeader>
+            {/* Galleries Table */}
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+                        <TableRow>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Sr. No.</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Title</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Created At</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Status</TableCell>
+                            <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Action</TableCell>
+                        </TableRow>
+                    </TableHeader>
 
-                        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                            {!loading && filteredGalleries.map((galleryInfo, index) => (
-                                <TableRow key={galleryInfo._id}>
-                                    <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                                        {(currentPage - 1) * pageSize + index + 1}
+                    <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                        {galleries.length > 0 ? (
+                            galleries.map((gallery, index) => (
+                                <TableRow key={gallery._id}>
+                                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">{(currentPage - 1) * pageSize + index + 1}</TableCell>
+                                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">{gallery.title}</TableCell>
+                                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                                        {gallery.createdAt ? new Date(gallery.createdAt).toLocaleString() : 'N/A'}
                                     </TableCell>
-
-                                    <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400 max-w-[200px] truncate whitespace-nowrap overflow-hidden text-ellipsis" title={galleryInfo.title}>
-                                        {galleryInfo.title}
+                                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                                         <label className="inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={gallery.isActive}
+                                                    onChange={() => changeStatus(gallery._id, gallery.isActive)}
+                                                />
+                                                <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600 dark:peer-checked:bg-purple-600">
+                                                </div>
+                                            </label>
                                     </TableCell>
-
-                                    {/* <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400 max-w-[200px] truncate whitespace-nowrap overflow-hidden text-ellipsis" title={galleryInfo.video_url}>
-                                        {galleryInfo.video_url}
-                                    </TableCell>
-                                
-                                    <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                                        {galleryInfo.images ? (
-                                            <img
-                                                src={galleryInfo.images}
-                                                alt="Profile"
-                                                className="h-10 w-10 object-cover rounded-full shadow"
-                                            />
-                                        ) : 'N/A'}
-                                    </TableCell> */}
-
-                                    <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                                        {galleryInfo.createdAt ?
-                                            new Date(galleryInfo.createdAt).toLocaleString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                // minute: '2-digit',
-                                                // second: '2-digit',
-                                                hour12: true
-                                            })
-                                            : 'N/A'}
-                                    </TableCell>
-                                    <TableCell className="px-5 py-2 text-end text-theme-sm text-gray-600 dark:text-gray-400">
-                                        <div className="flex justify-end items-center gap-2">
-                                            <div key={`${galleryInfo._id}_status`} className="flex items-center space-x-2">
-                                                <label className="inline-flex items-center cursor-pointer">
-                                                    <input
-                                                        onChange={() => changeStatus(galleryInfo._id, galleryInfo.isActive)}
-                                                        type="checkbox"
-                                                        className="sr-only peer"
-                                                        checked={galleryInfo.isActive ? true : false}
-                                                    />
-                                                    <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
-                                                </label>
-                                            </div>
-
-                                            <button
-                                                onClick={() => handleEdit(galleryInfo._id)}
-                                                className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                                                title="Edit Team"
-                                            >
-                                                <PencilSquareIcon className="w-5 h-5" />
-                                            </button>
-
+                                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                           
+                                            <UserPermissionGuard action="update">
+                                                <Button
+                                                    onClick={() => handleEditClick(gallery)}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    title="Edit gallery"
+                                                >
+                                                    <PencilSquareIcon className="w-4 h-4" />
+                                                    Edit
+                                                </Button>
+                                            </UserPermissionGuard>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    {loading ? 'Loading galleries...' : 'No galleries found'}
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
 
-                    </Table>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={totalRecords}
+                        onPageChange={setCurrentPage}
+                        itemsPerPage={pageSize}
+                    />
                 </div>
-            </div>
-
-            <div className="flex justify-between items-center px-5 py-4">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={filteredGalleries.length}
-                    onPageChange={setCurrentPage}
-                />
-            </div>
+            )}
         </div>
     );
 }

@@ -34,6 +34,17 @@ export const UserPermissionGuard: React.FC<{
   </PermissionGuard>
 );
 
+
+export const TaskPermissionGuard: React.FC<{
+  action: string | string[];
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}> = ({ action, children, fallback }) => (
+  <PermissionGuard module="Task" action={action} fallback={fallback}>
+    {children}
+  </PermissionGuard>
+);
+
 export const CustomerPermissionGuard: React.FC<{
   action: string | string[];
   children: React.ReactNode;

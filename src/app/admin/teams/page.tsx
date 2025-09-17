@@ -31,7 +31,7 @@ export default async function TeamsTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Teams List" />
+      <PageBreadcrumb pageTitle="Teams Management" />
       <div className="space-y-6">
         <TeamsListTable initialData={teamsData} />
       </div>

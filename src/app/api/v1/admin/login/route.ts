@@ -41,7 +41,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     return sendResponse({
       success: false,
       statusCode: 401,
-      message: 'User not found1',
+      message: 'User not found',
     });
   }
   if (!user.isActive) {
@@ -60,7 +60,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
       message: 'Invalid credentials',
     });
   }
-  const permissions = user.role == "admin" ? getAdminPermissions() : getUserPermission();
+  const permissions = user.role == "super admin" ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermission() : getUserPermission();
 
   // ✅ JWT creation
   const token = generateToken({
@@ -92,7 +92,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 1, // 1 days
   });
 
   return response;
@@ -126,8 +126,7 @@ export const GET = asyncHandler(async () => {
 
   const user = await User.findById(decodedToken.id);
 
-  const permissions = user.role == "admin" ? getAdminPermissions() : getUserPermission();
-
+  const permissions = user.role == "super admin" ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermission() : getUserPermission();
   return sendResponse({
     message: 'Admin info fetched successfully',
     token,
@@ -145,7 +144,7 @@ const generateToken = (payload: object) => {
 };
 
 // 📦 Admin role-based permission object
-const getAdminPermissions = () => [
+const getSuperAdminPermissions = () => [
   { module: 'User', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Account', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Setting', actions: ['create', 'read', 'update', 'delete'] },
@@ -158,9 +157,22 @@ const getAdminPermissions = () => [
   { module: 'Gallery', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Docs & Links', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Dashboard', actions: ['create', 'read', 'update', 'delete'] },
-    { module: 'Team', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Team', actions: ['create', 'read', 'update', 'delete'] },
 
 
 
 ];
-const getUserPermission = () => []
+const getAdminPermissions = () => [
+
+  { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Project', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Dashboard', actions: ['create', 'read', 'update', 'delete'] },
+
+
+
+
+];
+const getUserPermission = () => [
+    { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },
+
+]

@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'user'],
+    enum: ['admin', 'user', 'super admin'],
   },
   mobile: {
     type: String,
@@ -191,10 +191,10 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
       },
       joiningDate: {
-       type: String,
+        type: String,
       },
       relievingDate: {
-       type: String,
+        type: String,
       },
     },
   ],

@@ -5,89 +5,90 @@ import { asyncHandler } from '@/lib/asyncHandler';
 import { sendResponse } from '@/lib/sendResponse';
 import { Trl } from '@/models/Trl';
 
-export const GET =  asyncHandler(async (req: NextRequest) => {
-        await connectToDB();
+export const GET = asyncHandler(async (req: NextRequest) => {
+  await connectToDB();
 
-        const params = req.nextUrl.searchParams;
+  const params = req.nextUrl.searchParams;
 
-        const filters = {
-            search: params.get('search')?.trim() || '',
-            title: params.get('title')?.trim(),
-        };
-        const from = params.get('from')?.trim() || '';
+  const filters = {
+    search: params.get('search')?.trim() || '',
+    title: params.get('title')?.trim(),
+  };
+  const from = params.get('from')?.trim() || '';
 
-        const page = Math.max(1, parseInt(params.get('page') || '1'));
-        const perPage = params.get('perPage') || '10';
-        const customLimit = parseInt(params.get('customLimit') || '') || 0;
+  const page = Math.max(1, parseInt(params.get('page') || '1'));
+  const perPage = params.get('perPage') || '10';
+  const customLimit = parseInt(params.get('customLimit') || '') || 0;
 
-        const isShowAll = perPage === 'All';
-        const limit = customLimit || (isShowAll ? 0 : parseInt(perPage) || 10);
-        const skip = isShowAll ? 0 : (page - 1) * limit;
+  const isShowAll = perPage === 'All';
+  const limit = isShowAll ? 0 : customLimit || parseInt(perPage) || 10;
+  const skip = (page - 1) * limit;
 
-        const pipeline: any[] = [];
+  const pipeline: any[] = [];
 
-        //  Full-text search via Atlas Search (optional block, can be removed if not using Atlas)
-        if (filters.search) {
-            pipeline.push({
-                $search: {
-                    index: 'default',
-                    compound: {
-                        should: [
-                            { text: { query: filters.search, path: 'title' } },
-                        ],
-                    },
-                },
-            });
-        }
+  // Atlas Search (preferred)
+  if (filters.search) {
+    pipeline.push({
+      $search: {
+        index: 'default',
+        compound: {
+          should: [
+            { text: { query: filters.search, path: 'title' } },
+          ],
+        },
+      },
+    });
+  }
 
-        //  Regex-based partial match on title
-        const match: Record<string, any> = {};
-        if (filters.title) {
-            match.title = { $regex: filters.title, $options: 'i' }; // Case-insensitive partial match
-        }
-    if (from === 'frontend') match.isActive = true;
+  // Regex fallback for title filter
+  const match: Record<string, any> = {};
+  if (filters.title) {
+    match.title = { $regex: filters.title, $options: 'i' };
+  }
+  if (from === 'frontend') match.isActive = true;
 
-        if (Object.keys(match).length) {
-            pipeline.push({ $match: match });
-        }
+  if (Object.keys(match).length) {
+    pipeline.push({ $match: match });
+  }
 
-        //  Projection & sorting
-        pipeline.push(
-            {
-                $project: {
-                    __v: 0,
-                    createdBy: 0,
-                    updatedBy: 0,
-                },
-            },
-            { $sort: { updatedAt: -1 } }
-        );
+  // Projection
+  pipeline.push({
+    $project: {
+      __v: 0,
+      createdBy: 0,
+      updatedBy: 0,
+    },
+  });
 
-        //  Pagination
-        if (!isShowAll) {
-            pipeline.push({ $skip: skip }, { $limit: limit });
-        }
+  // Faceted aggregation for pagination + count
+  const facetPipeline = [
+    ...pipeline,
+    {
+      $facet: {
+        paginatedResults: [
+          { $sort: { updatedAt: -1 } },
+          ...(isShowAll ? [] : [{ $skip: skip }, { $limit: limit }]),
+        ],
+        totalCount: [{ $count: 'count' }],
+      },
+    },
+  ];
 
-        //  Parallel data and count aggregation
-        const [trls, countArr] = await Promise.all([
-            Trl.aggregate(pipeline),
-            Trl.aggregate([
-                ...pipeline.filter(stage => !('$skip' in stage || '$limit' in stage)),
-                { $count: 'count' },
-            ]),
-        ]);
+  // ✅ Allow disk usage for large dataset handling
+  const [result] = await Trl.aggregate(facetPipeline).option({ allowDiskUse: true });
 
-        const totalRecords = countArr[0]?.count || 0;
+  const trls = result?.paginatedResults || [];
+  const totalRecords = result?.totalCount?.[0]?.count || 0;
 
-        return sendResponse({
-            success: true,
-            message: trls.length ? 'TRLs fetched successfully' : 'No TRLs found',
-            data: {
-                totalRecords,
-                currentPage: page,
-                perPage: isShowAll ? totalRecords : limit,
-                trls,
-                limit,
-            },
-        });
-    })
+  return sendResponse({
+    success: true,
+    message: trls.length ? 'TRLs fetched successfully' : 'No TRLs found',
+    data: {
+      totalRecords,
+      currentPage: page,
+      perPage: isShowAll ? totalRecords : limit,
+      trls,
+      limit,
+    },
+  });
+});

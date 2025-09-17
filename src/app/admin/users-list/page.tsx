@@ -28,7 +28,7 @@ export default async function UsersTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Employee List" />
+      <PageBreadcrumb pageTitle="Employee Management" />
       <div className="space-y-6">
         <UsersListTable initialData={usersData} />
       </div>

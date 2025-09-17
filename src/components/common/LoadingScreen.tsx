@@ -45,7 +45,7 @@ const LoadingScreen = () => {
                             }}
                             className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-6"
                         >
-                            Knock Off Dues
+                            {process.env.NEXT_PUBLIC_COMPANY_NAME || "Knock Off Dues"}
                         </motion.div>
 
                         {/* Loading Animation */}
