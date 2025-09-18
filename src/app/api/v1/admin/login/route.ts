@@ -34,7 +34,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
 
   // ⛔ Must include password field manually due to select: false
   const user = await User.findOne({ email }).select('+password');
-  console.log('>>>>>>>>', user);
+
 
 
   if (!user) {

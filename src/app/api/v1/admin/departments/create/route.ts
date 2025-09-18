@@ -15,17 +15,14 @@ export const POST = verifyAdmin(
     await connectToDB();
 
     let body = await req.json();
-    console.log("Received payload:", body); // Debug: Log the raw payload
 
     // Transform array of strings into array of objects if needed
     if (Array.isArray(body) && body.every((item) => typeof item === "string")) {
       body = body.map((department) => ({ department }));
-      console.log("Transformed payload:", body); // Debug: Log transformed payload
     }
 
     // Normalize into array for consistent processing
     const departments: CreateDepartmentBody[] = Array.isArray(body) ? body : [body];
-    console.log("Normalized departments:", departments); // Debug: Log normalized data
 
     // Validate each department
     const validationErrors: { index: number; errors: Record<string, string> }[] = [];

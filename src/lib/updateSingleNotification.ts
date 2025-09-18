@@ -1,0 +1,40 @@
+import { NotificationStatus } from "@/models/NotificationStatus";
+import { db } from "./firebase";
+import { collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+
+/**
+ * Mark a single notification as read (MongoDB + Firestore)
+ */
+export async function markAsRead(notificationStatusId: string) {
+  try {
+    // Step 1: Update in MongoDB
+    const updated = await NotificationStatus.findByIdAndUpdate(
+      notificationStatusId,
+      { isSeen: true },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new Error("Notification status not found");
+    }
+
+    // Step 2: Update in Firestore
+    // We stored `notificationId` + `userId` in Firestore
+    const q = query(
+      collection(db, "notifications"),
+      where("notificationId", "==", updated.notificationId.toString()),
+      where("userId", "==", updated.userId.toString())
+    );
+
+    const snap = await getDocs(q);
+    const updates = snap.docs.map((doc) =>
+      updateDoc(doc.ref, { isSeen: true })
+    );
+    await Promise.all(updates);
+
+    return updated;
+  } catch (err) {
+    console.error("Error marking notification as read:", err);
+    throw new Error("Failed to mark notification as read");
+  }
+}

@@ -39,6 +39,8 @@
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "express": "^5.1.0",
+    "firebase": "^12.2.1",
     "flatpickr": "^4.6.13",
     "framer-motion": "^12.23.12",
     "joi": "^17.13.3",

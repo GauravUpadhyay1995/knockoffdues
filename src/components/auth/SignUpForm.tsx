@@ -52,7 +52,6 @@ export default function AdminLoginForm() {
       //   throw new Error(responce.message || 'Failed to login1');
       // }
 
-      // console.log('>>>>>>>>>>>>', responce);
 
       if (responce.success) {
 

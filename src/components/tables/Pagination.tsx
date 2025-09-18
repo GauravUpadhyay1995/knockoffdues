@@ -34,7 +34,6 @@ const Pagination: React.FC<PaginationProps> = ({
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    // console.log('>>>>>>',pages);
     return pages;
 
     

@@ -13,7 +13,6 @@ import { User } from '@/types/User';
 
 export default function DashboardPage() {
   const { user, loading, checkAuth } = useAuth();
-  // console.log(user)
 
   useEffect(() => {
     checkAuth();

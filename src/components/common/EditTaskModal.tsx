@@ -234,7 +234,6 @@ export default function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: 
         // Only validate date comparison if both dates exist
         if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) {
             newErrors.endDate = "End date must be after start date.";
-            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", newErrors.endDate)
 
         }
 

@@ -22,7 +22,6 @@ export const PATCH = verifyAdmin(
     }
 
     const formData = await req.formData();
-    console.log("formData>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>:", formData);
 
     // ------------------ Parse Form Data ------------------
     const rawBody: any = { academics: [], documents: [] ,workExperience: []};

@@ -75,9 +75,7 @@ export default function AddGalleryPage() {
 
   const handleRemoveVideo = (index: number) => {
     const updated = [...videos];
-    console.log("Removing video at index:", index);
     updated.splice(index, 1);
-    console.log("Removing video at updated:", updated);
     setVideos(updated);
   };
 

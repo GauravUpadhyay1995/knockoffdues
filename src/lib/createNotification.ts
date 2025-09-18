@@ -1,10 +1,10 @@
 import { Notification } from "@/models/Notification";
 import { NotificationStatus } from "@/models/NotificationStatus";
-
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 /**
- * Create a new notification
- * @param data - Notification data
- * @returns created notification document
+ * Create a new notification and statuses for multiple users
+ * and also insert into Firestore for realtime updates
  */
 export async function createNotification(data: {
     notificationType?: string;
@@ -12,33 +12,43 @@ export async function createNotification(data: {
     descriptions?: string;
     docs?: { url: string }[];
     createdBy: string;
-    updatedBy: string;
-    userId?: string[];
+    userId?: string[]; // multiple users allowed
 }) {
     try {
-        // create new notification
-        console.log("Creating notification with data:", data);
+        // Step 1: Create notification in MongoDB
         const notification = await Notification.create({
             notificationType: data.notificationType || "Other",
             title: data.title,
             descriptions: data.descriptions || "",
             docs: data.docs || [],
             createdBy: data.createdBy,
-            updatedBy: data.updatedBy,
+            updatedBy: data.createdBy,
         });
 
-        if (data?.userId && data?.userId?.length > 0) {
-            // Create notification status for each user
-            const notificationStatusPromises = data.userId.map(userId =>
-                NotificationStatus.create({
-                    notificationId: notification._id,
-                    userId: userId,
+        // Step 2: Create NotificationStatus + Firestore docs for each user
+        if (data?.userId && data.userId.length > 0) {
+            const statusDocs = data.userId.map((uid) => ({
+                notificationId: notification._id,
+                userId: uid,
+                isSeen: false,
+            }));
+
+            // Insert into MongoDB
+            await NotificationStatus.insertMany(statusDocs);
+
+            // Insert into Firestore
+            const batch = data.userId.map((uid) =>
+                addDoc(collection(db, "notifications"), {
+                    userId: uid,
+                    notificationId: notification._id.toString(),
+                    title: data.title,
+                    timestamp: serverTimestamp(), // Use server timestamp
                     isSeen: false,
+                    type: data.notificationType
                 })
             );
 
-            // Wait for all notification status documents to be created
-            await Promise.all(notificationStatusPromises);
+            await Promise.all(batch);
         }
 
         return notification;

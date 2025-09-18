@@ -28,7 +28,6 @@ export default function NewsDetails({ params }: { params: { id: string } }) {
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/news/${id}`)
             .then(res => res.json())
             .then(data => {
-                console.log("API Response:", data);
                 // Fix: Access the news data directly from data.data
                 setNews(data.data || null); // Changed from data?.data?.news to data.data
                 setLoading(false);

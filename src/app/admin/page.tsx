@@ -19,6 +19,7 @@ export default function Ecommerce() {
     <div className="grid grid-cols-12 gap-6">
       <div className="col-span-12 xl:col-span-12 space-y-6">
         <EcommerceMetrics />
+        
         <MonthlySalesChart />
       </div>
 

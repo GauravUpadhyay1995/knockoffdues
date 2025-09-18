@@ -29,7 +29,7 @@ export const POST = verifyAdmin(asyncHandler(async (req: NextRequest) => {
 
   const body = await req.json();
   const { error, value } = createUserSchema.validate(body, { abortEarly: false });
-  // console.log('>>>>>>>>>>>>>>>',error, value)
+
   if (error) {
     const errorMessages = error.details.reduce((acc, curr) => {
       acc[curr.path[0] as string] = curr.message;
