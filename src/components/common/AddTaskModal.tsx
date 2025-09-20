@@ -373,10 +373,6 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded }: AddTaskMo
                       />
                       {errors.taskName && <p className="text-red-700 text-sm mt-1">{errors.taskName}</p>}
                     </div>
-
-
-
-
                     <div>
                       <label htmlFor="priority" className="block text-sm font-Medium text-gray-700 dark:text-gray-300">
                         Priority *

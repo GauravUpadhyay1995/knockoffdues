@@ -2,7 +2,7 @@ import mongoose, { Schema, Types } from 'mongoose';
 const notificationSchema = new Schema({
     notificationType: {
         type: String,
-        enum: ['Task', 'Meeting', 'Birthday', 'Event', 'Other'],
+        enum: ['Task', 'Meeting', 'Birthday', 'Event', 'Followup', 'Other'],
         default: 'Other',
         required: true,
     },

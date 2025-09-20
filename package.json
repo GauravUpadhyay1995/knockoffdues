@@ -75,6 +75,7 @@
     "react-top-loading-bar": "^3.0.2",
     "styled-components": "^6.1.19",
     "summernote": "^0.9.1",
+    "sweetalert2": "^11.23.0",
     "swiper": "^11.2.0",
     "swr": "^2.3.4",
     "tailwind-merge": "^2.6.0",

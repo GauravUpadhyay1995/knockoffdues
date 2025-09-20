@@ -51,6 +51,11 @@ const AppSidebar: React.FC = () => {
       path: "/admin",
     },
     {
+      icon: <GridIcon />,
+      name: "Calender",
+      path: "/admin/calender",
+    },
+    {
       name: "Employee Management",
       icon: <UserCircleIcon />,
       path: "/admin/users-list",

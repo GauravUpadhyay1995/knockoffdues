@@ -46,7 +46,7 @@ interface Notification {
     message: string;
     type: string;
     read: boolean;
-    createdAt: string;
+    timestamp: string;
 }
 
 const App = () => {
@@ -215,7 +215,7 @@ const App = () => {
                                         {notification.message}
                                     </p>
                                     <p className="text-sm mt-1 opacity-75">
-                                        {new Date(notification.createdAt).toLocaleString()}
+                                        {new Date(notification.timestamp).toLocaleString()}
                                     </p>
                                 </div>
                                 <button
