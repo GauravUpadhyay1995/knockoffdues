@@ -41,7 +41,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             return;
         }
 
-        console.log("Fetching notifications for user:", userId);
 
         const q = query(
             collection(db, "notifications"),
@@ -57,7 +56,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                     ...doc.data()
                 })) as Notification[];
 
-                console.log("Notifications fetched:", notifs.length);
                 setNotifications(notifs);
                 setIsLoading(false);
             },
@@ -68,7 +66,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
         );
 
         return () => {
-            console.log("Cleaning up notification listener");
             unsubscribe();
         };
     }, [isOpen, userId]); // Only depend on isOpen and userId
@@ -87,14 +84,12 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
         };
 
         if (isOpen) {
-            console.log("Adding event listeners");
             document.addEventListener("mousedown", handleClickOutside);
             document.addEventListener("keydown", handleEscape);
             document.body.style.overflow = "hidden";
         }
 
         return () => {
-            console.log("Removing event listeners");
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", handleEscape);
             document.body.style.overflow = "unset";
@@ -192,7 +187,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     }
 
     // Add debug logging
-    console.log("Dropdown state:", { isOpen, userId, notificationsCount: notifications.length, isLoading });
 
     if (!isOpen) return null;
 
