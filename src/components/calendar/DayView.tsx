@@ -39,8 +39,8 @@ const DayView: React.FC<DayViewProps> = ({
   return (
     <div
       className="relative flex flex-col flex-grow overflow-y-auto bg-white dark:bg-gray-800 rounded-lg p-4"
-      onDragOver={e => !isPastDay && onDragOver(e)}
-      onDrop={e => !isPastDay && onDrop(e, selectedDay)}
+      // onDragOver={e => !isPastDay && onDragOver(e)}
+      // onDrop={e => !isPastDay && onDrop(e, selectedDay)}
     >
       {isDragging && !isPastDay && (
         <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-lg pointer-events-none z-10" />
@@ -59,12 +59,12 @@ const DayView: React.FC<DayViewProps> = ({
             return (
               <div
                 key={meeting.id}
-                draggable={isOwner && !isPastMeeting}
-                onDragStart={e => !isPastMeeting && onDragStart(e, meeting)}
-                onDragEnd={onDragEnd}
+                // draggable={isOwner && !isPastMeeting}
+                // onDragStart={e => !isPastMeeting && onDragStart(e, meeting)}
+                // onDragEnd={onDragEnd}
                 className={`flex items-start p-4 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg ${
                   meeting.color
-                } ${isPastMeeting ? 'opacity-60' : 'cursor-move'}`}
+                } ${isPastMeeting ? 'opacity-60' : ''}`}
               >
                 {!isPastMeeting && (
                   <GripVertical size={16} className="flex-shrink-0 opacity-70 mr-3 mt-1" />

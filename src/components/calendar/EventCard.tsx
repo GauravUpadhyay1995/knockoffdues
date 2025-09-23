@@ -43,15 +43,15 @@ const EventCard: React.FC<EventCardProps> = ({
       className="group/event relative"
     >
       {/* Meeting pill */}
+      {/* <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">In Progress</span> */}
       <div
         className={`
-          text-xs sm:text-sm dark:text-gray-100 text-gray-700 
-          p-2 sm:p-3 rounded-md overflow-hidden whitespace-nowrap overflow-ellipsis 
-          flex items-center space-x-1 ${colorClass} hover:opacity-80 transition-opacity
+         overflow-hidden whitespace-nowrap overflow-ellipsis 
+          ${colorClass} 
           ${canDrag ? 'cursor-move' : 'cursor-default'}
         `}
       >
-        <GripVertical size={12} className="flex-shrink-0 opacity-70" />
+
         <span className="truncate">
           {format(new Date(meeting.start), 'ha')} {meeting.title}
         </span>
@@ -61,25 +61,25 @@ const EventCard: React.FC<EventCardProps> = ({
       <div
         className={`
           absolute w-full sm:w-72 lg:w-64 hidden group-hover/event:block z-50 top-full left-0 mt-1 
-          p-3 sm:p-4 bg-gray-800 border border-gray-600 rounded-lg shadow-xl 
+          p-3 sm:p-4 bg-white dark:bg-gray-800 border border-gray-600 rounded-lg shadow-xl 
           transform origin-top transition-all duration-200 scale-95 group-hover/event:scale-100 hover-card
         `}
       >
         <div className="space-y-2 sm:space-y-3">
           {/* Title & Category */}
           <div className="flex items-start justify-between">
-            <h4 className="font-semibold dark:text-gray-100 text-gray-700 text-sm sm:text-base">{meeting.title}</h4>
-            <div className={`px-2 py-1 rounded-full text-xs sm:text-sm ${colorClass} dark:text-gray-100 text-gray-700`}>
+            <h4 className="font-semibold dark:text-gray-100 text-gray-900 text-sm sm:text-base">{meeting.title}</h4>
+            <div className={`px-2 py-1 rounded-full text-xs sm:text-sm ${colorClass} dark:text-gray-100 text-gray-900`}>
               {meeting.category}
             </div>
           </div>
 
           {/* Date & Time */}
-          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300">
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-900 dark:text-gray-300">
             <Calendar size={14} />
             <span>{format(new Date(meeting.start), 'MMM d, yyyy')}</span>
           </div>
-          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300">
+          <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-900 dark:text-gray-300">
             <Clock size={14} />
             <span>
               {format(new Date(meeting.start), 'h:mm a')} – {format(new Date(meeting.end), 'h:mm a')}
@@ -88,14 +88,14 @@ const EventCard: React.FC<EventCardProps> = ({
 
           {/* Description */}
           {meeting.description && (
-            <div className="text-xs sm:text-sm text-gray-400 mt-2">
+            <div className="text-xs sm:text-sm text-gray-900 dark:text-gray-400 mt-2">
               <p className="line-clamp-3 sm:line-clamp-4">{meeting.description}</p>
             </div>
           )}
 
           {/* Attendees */}
           <div className="mt-2">
-            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300 mb-1">
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-900 dark:text-gray-300 mb-1">
               <Users size={14} />
               <span className="font-medium">Attendees:</span>
             </div>
@@ -105,14 +105,14 @@ const EventCard: React.FC<EventCardProps> = ({
                 return user ? (
                   <span
                     key={_id}
-                    className="text-xs sm:text-sm bg-gray-700 text-gray-300 px-2 py-1 rounded-full"
+                    className="text-xs sm:text-sm bg-gray-700  dark:bg-gray-700 text-gray-100 dark:text-gray-300 px-2 py-1 rounded-full"
                   >
                     {user.name}
                   </span>
                 ) : null;
               })}
               {meeting.attendees.length > 3 && (
-                <span className="text-xs sm:text-sm bg-gray-700 text-gray-300 px-2 py-1 rounded-full">
+                <span className="text-xs sm:text-sm bg-gray-700  dark:bg-gray-700 text-gray-100 dark:text-gray-300 px-2 py-1 rounded-full">
                   +{meeting.attendees.length - 3} more
                 </span>
               )}

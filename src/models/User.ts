@@ -1,4 +1,4 @@
-import { required } from 'joi';
+
 import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'user', 'super admin'],
+    enum: ['admin', 'user', 'super admin', 'lead'],
   },
   mobile: {
     type: String,
@@ -50,7 +50,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-
+  resume: {
+    type: String,
+    required: true,
+  },
+  isRejected: {
+    type: Boolean,
+    default: false,
+  },
   isEmailVerified: {
     type: Boolean,
     default: false,
@@ -176,6 +183,10 @@ const userSchema = new mongoose.Schema({
       documentUrl: {
         type: String,
       },
+      isApproved: {
+        type: String,
+        default: "pending"
+      }
     },
   ],
   workExperience: [
@@ -205,12 +216,14 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
       },
-      // documentId: {
-      //   type: String,
-      // },
+
       documentUrl: {
         type: String,
       },
+      isApproved: {
+        type: String,
+        default: "pending"
+      }
     },
   ],
 }, { timestamps: true });

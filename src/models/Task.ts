@@ -58,6 +58,12 @@ const taskSchema = new Schema({
         ref: 'User',
         required: true,
     },
+    subTasks: [{
+        type: Types.ObjectId,
+        ref: 'SubTask',
+        required: false,
+
+    }],
     updatedBy: {
         type: Types.ObjectId,
         ref: 'User',

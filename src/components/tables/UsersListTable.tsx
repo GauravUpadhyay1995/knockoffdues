@@ -668,6 +668,7 @@ export default function UsersListTable({ initialData }: Props) {
                                             </option>
                                             <option value="admin">Admin</option>
                                             <option value="user">User</option>
+                                            <option value="lead">Lead</option>
 
 
                                         </select>
@@ -685,6 +686,8 @@ export default function UsersListTable({ initialData }: Props) {
                                             </option>
                                             <option value="true">Active</option>
                                             <option value="false">DeActive</option>
+                                            <option value="rejected">Rejected Lead</option>
+                                            <option value="fresh">Fresh Lead</option>
 
 
                                         </select>

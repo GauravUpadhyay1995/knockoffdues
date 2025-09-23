@@ -8,12 +8,11 @@ import { collection, query, where, getDocs, updateDoc } from "firebase/firestore
 export async function markAsRead(notificationStatusId: string) {
   try {
     // Step 1: Update in MongoDB
-    const updated = await NotificationStatus.findByIdAndUpdate(
-      notificationStatusId,
-      { isSeen: true },
-      { new: true }
+    const updated = await NotificationStatus.findOneAndUpdate(
+      { notificationId: notificationStatusId }, // filter by custom field
+      { isSeen: true },                          // fields to update
+      { new: true }                              // return the updated document
     );
-
     if (!updated) {
       throw new Error("Notification status not found");
     }

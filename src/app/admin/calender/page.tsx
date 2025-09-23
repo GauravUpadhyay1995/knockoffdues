@@ -64,6 +64,7 @@ const Calendar: React.FC = () => {
   const [assignedByUserList, setAssignedByUserList] = useState<User[]>([]);
   const [draggedEvent, setDraggedEvent] = useState<Meeting | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   // ... rest of the logic (fetchEvents, handlers, etc.)
 
@@ -315,6 +316,7 @@ const Calendar: React.FC = () => {
 
   const handleModalSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true)
     const start = new Date(newEvent.start);
     const end = new Date(newEvent.end);
     const isEditing = !!newEvent.id;
@@ -354,8 +356,11 @@ const Calendar: React.FC = () => {
       await fetchEvents();
       setIsModalOpen(false);
       setNewEvent({ id: null, title: '', description: '', attendees: [], category: 'Meeting', start: new Date(), end: addHours(new Date(), 1) });
+      setLoading(false)
     } catch (error) {
       console.error('Error saving event:', error);
+      setLoading(false)
+
     }
   }, [newEvent, currentUserId, fetchEvents]);
 
@@ -422,6 +427,7 @@ const Calendar: React.FC = () => {
             onNext={handleNextMonth}
             view={view}
             onViewChange={setView}
+            reloadData={fetchEvents}
           />
 
           {view === 'Month' && (
@@ -483,6 +489,7 @@ const Calendar: React.FC = () => {
         onSubmit={handleModalSubmit}
         onEventChange={(field, value) => setNewEvent({ ...newEvent, [field]: value })}
         onAttendeeChange={handleAttendeeChange}
+        isLoading={isLoading}
       />
     </div>
   );

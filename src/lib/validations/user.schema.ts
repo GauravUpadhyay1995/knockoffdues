@@ -22,8 +22,8 @@ export const createUserSchema = Joi.object({
             'string.pattern.base': 'Mobile must be a 10-digit Indian number starting with 6-9',
             'any.required': 'Mobile is required'
         }),
-    role: Joi.string().valid('admin', 'user').default('user').optional().messages({
-        'any.only': 'Role must be either admin or user',
+    role: Joi.string().valid('admin', 'user','lead').default('lead').optional().messages({
+        'any.only': 'Role must be either admin or user or lead',
         'any.required': 'Role is required'
     }),
     isActive: Joi.boolean().optional().messages({

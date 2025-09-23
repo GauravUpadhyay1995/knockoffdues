@@ -498,7 +498,7 @@ export default function TaskListTable({ initialData }: Props) {
                                             <option value="">All Users</option>
                                             {assignedByUserList.map((user) => (
                                                 <option key={user._id} value={user._id}>
-                                                    {user.name} <small>({user.email})</small>
+                                                    {user.name}  ({user.email})
                                                 </option>
                                             ))}
                                         </select>

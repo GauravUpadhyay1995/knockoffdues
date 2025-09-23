@@ -48,8 +48,8 @@ const DayCell: React.FC<DayCellProps> = ({
 
         border border-gray-400 dark:border-gray-100 
         transition-colors duration-200 relative group
-        ${isTodayCheck ? 'relative bg-gray-900' : ''}
-        ${isPastDay ? 'cursor-not-allowed opacity-50' : 'dark:hover:bg-gray-700 hover:bg-gray-200 cursor-pointer'}
+        ${isTodayCheck ? 'relative bg-gray-100' : ''}
+        ${isPastDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-900' : 'dark:hover:bg-gray-700 hover:bg-gray-200 cursor-pointer'}
         ${isDragging && draggedEvent ? 'opacity-75' : ''}
         flex flex-col
       `}
@@ -59,13 +59,12 @@ const DayCell: React.FC<DayCellProps> = ({
     >
       <div className="flex justify-between items-start mb-1 px-1 sm:px-2">
         <div
-          className={`text-sm sm:text-base font-medium relative z-20 ${
-            !isSameMonth(day, currentDate)
+          className={`text-sm sm:text-base font-medium relative ${!isSameMonth(day, currentDate)
               ? 'text-gray-600'
               : isTodayCheck
-              ? 'text-blue-500 font-bold'
-              : 'dark:text-gray-100 text-gray-700'
-          }`}
+                ? 'text-blue-500 font-bold'
+                : 'dark:text-gray-100 text-gray-700'
+            }`}
         >
           {format(day, 'd')}
         </div>
@@ -94,7 +93,7 @@ const DayCell: React.FC<DayCellProps> = ({
       </div>
 
       {isDragging && draggedEvent && !isPastDay && (
-        <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-lg pointer-events-none border-2 border-dashed border-blue-400"></div>
+        <div className="absolute inset-0 bg-blue-500  rounded-lg pointer-events-none border-2 border-dashed border-blue-400"></div>
       )}
     </div>
   );

@@ -26,7 +26,10 @@ export async function createNotification(data: {
         });
 
         // Step 2: Create NotificationStatus + Firestore docs for each user
+
         if (data?.userId && data.userId.length > 0) {
+                               console.log("NOTIFICATION FIREBASE API RESPONSE>>>>>>>>>>>>>>>>>>>>>>>>",data)
+
             const statusDocs = data.userId.map((uid) => ({
                 notificationId: notification._id,
                 userId: uid,
@@ -48,7 +51,7 @@ export async function createNotification(data: {
                 })
             );
 
-            await Promise.all(batch);
+           const reult= await Promise.all(batch);
         }
 
         return notification;

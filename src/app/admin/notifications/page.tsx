@@ -47,6 +47,7 @@ interface Notification {
     type: string;
     read: boolean;
     timestamp: string;
+    descriptions?:string;
 }
 
 const App = () => {
@@ -92,21 +93,21 @@ const App = () => {
 
     const getIcon = (type: string) => {
         const icons: Record<string, JSX.Element> = {
-            Task: <ClipboardList className="h-5 w-5 text-blue-500" />,
-            Message: <MessageSquare className="h-5 w-5 text-orange-500" />,
-            Alert: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
-            Success: <CheckCircle className="h-5 w-5 text-green-600" />,
-            Warning: <AlertTriangle className="h-5 w-5 text-orange-500" />,
-            Info: <Info className="h-5 w-5 text-blue-400" />,
-            Error: <XCircle className="h-5 w-5 text-red-500" />,
-            Other: <Bell className="h-5 w-5 text-gray-400" />,
-            Meeting: <CalendarDays className="h-5 w-5 text-indigo-500" />,
-            Update: <RefreshCw className="h-5 w-5 text-purple-500" />,
-            Promotion: <Gift className="h-5 w-5 text-pink-500" />,
-            Birthday: <Cake className="h-5 w-5 text-pink-400" />,
-            Reminder: <Clock className="h-5 w-5 text-teal-500" />,
-            Social: <Users className="h-5 w-5 text-violet-500" />,
-            System: <Monitor className="h-5 w-5 text-gray-600" />,
+            Task: <ClipboardList className="h-5 w-5 text-orange-500 dark:text-blue-500" />,
+            Message: <MessageSquare className="h-5 w-5 text-orange-500 dark:text-orange-500" />,
+            Alert: <AlertTriangle className="h-5 w-5 text-orange-500 dark:text-yellow-500" />,
+            Success: <CheckCircle className="h-5 w-5 text-orange-500 dark:text-green-600" />,
+            Warning: <AlertTriangle className="h-5 w-5 text-orange-500 dark:text-orange-500" />,
+            Info: <Info className="h-5 w-5 text-orange-500 dark:text-blue-400" />,
+            Error: <XCircle className="h-5 w-5 text-orange-500 dark:text-red-500" />,
+            Other: <Bell className="h-5 w-5 text-orange-500 dark:text-gray-400" />,
+            Meeting: <CalendarDays className="h-5 w-5 text-orange-500 dark:text-indigo-500" />,
+            Update: <RefreshCw className="h-5 w-5 text-orange-500 dark:text-purple-500" />,
+            Promotion: <Gift className="h-5 w-5 text-orange-500 dark:text-pink-500" />,
+            Birthday: <Cake className="h-5 w-5 text-orange-500 dark:text-pink-400" />,
+            Reminder: <Clock className="h-5 w-5 text-orange-500 dark:text-teal-500" />,
+            Social: <Users className="h-5 w-5 text-orange-500 dark:text-violet-500" />,
+            System: <Monitor className="h-5 w-5 text-orange-500 dark:text-gray-600" />,
         };
         return icons[type as keyof typeof icons] || icons.Other;
     };
@@ -173,7 +174,7 @@ const App = () => {
                             <FiRefreshCw className="mr-2" /> Refresh</button>
                         <button
                             onClick={markAllAsRead}
-                            className={`px-4 py-2 text-sm font-semibold rounded-full bg-slate-800 text-indigo-400 hover:bg-slate-700 transition-colors duration-200 shadow-md hover:shadow-lg ${notifications.length === 0 ? "cursor-not-allowed" : ""
+                            className={`px-4 py-2 text-sm font-semibold rounded-full dark:bg-slate-800 bg-orange-600 dark:text-indigo-400 text-orange-100 hover:bg-orange-700 dark:hover:bg-slate-700 transition-colors duration-200 shadow-md hover:shadow-lg ${notifications.length === 0 ? "cursor-not-allowed" : ""
                                 }`}
                             disabled={notifications.length === 0}
                         >
@@ -197,22 +198,26 @@ const App = () => {
                         notifications.map((notification) => (
                             <div key={notification.id}
                                 className={`relative flex items-center p-5 rounded-2xl shadow-xl transition-all duration-300 transform hover:scale-[1.02]  ${notification.read
-                                    ? "bg-slate-800 text-slate-400"
-                                    : "bg-zinc-800 text-slate-100 ring-2 ring-indigo-500"
+                                    ? "dark:bg-slate-800 dark:text-slate-400 bg-orange-200 text-orange-500"
+                                    : "dark:bg-zinc-800 dark:text-slate-100 ring-2 ring-orange-500 bg-orange-300 text-orange-700"
                                     }`}
                             >
                                 {!notification.read && (
-                                    <div className="absolute top-3 left-3 h-2.5 w-2.5 bg-indigo-500 rounded-full animate-pulse"></div>
+                                    <div className="absolute top-3 left-3 h-2.5 w-2.5 bg-orange-500 rounded-full animate-pulse"></div>
                                 )}
                                 <div className="flex-shrink-0 mr-4 pl-4">
                                     {getIcon(notification.type)}
                                 </div>
                                 <div className="flex-grow">
                                     <p
-                                        className={`font-semibold ${!notification.read ? "text-white" : ""
-                                            }`}
+                                        className={`font-semibold `}
                                     >
                                         {notification.message}
+                                    </p>
+                                     <p
+                                        className={`font-semibold `}
+                                    >
+                                        {notification?.descriptions}
                                     </p>
                                     <p className="text-sm mt-1 opacity-75">
                                         {new Date(notification.timestamp).toLocaleString()}
@@ -220,15 +225,15 @@ const App = () => {
                                 </div>
                                 <button
                                     onClick={() => deleteNotification(notification.id)}
-                                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-red-400 transition-colors duration-200 rounded-full hover:bg-slate-700"
+                                    className="absolute top-2 right-2 p-1 text-slate-400 hover:text-red-400 transition-colors duration-200 rounded-full dark:hover:bg-slate-700 hover:bg-orange-500"
                                     aria-label="Delete notification"
                                 >
-                                    <X className="h-5 w-5" />
+                                    <X className="h-5 w-5 text-orange-900 dark:text-orange-500" />
                                 </button>
                                 {!notification.read && (
                                     <button
                                         onClick={() => markAsRead(notification.id)}
-                                        className="flex-shrink-0 ml-4 px-4 py-2 text-xs font-bold rounded-full bg-indigo-600 text-white hover:bg-indigo-500 transition-colors duration-200 shadow-md"
+                                        className="flex-shrink-0 ml-4 px-4 py-2 text-xs font-bold rounded-full bg-orange-600 text-white hover:bg-orange-500 transition-colors duration-200 shadow-md"
                                     >
                                         Mark as Read
                                     </button>

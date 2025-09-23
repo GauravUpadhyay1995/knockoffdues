@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import { connectToDB } from "@/config/mongo";
 import { Task } from "@/models/Task";
-import { User } from "@/models/User"; // make sure you have User model
+import { SubTask } from "@/models/SubTask";
+import { User } from "@/models/User";
 import { asyncHandler } from "@/lib/asyncHandler";
 
-// Utility: validate MongoDB ObjectId
 function isValidObjectId(id: string) {
   return mongoose.Types.ObjectId.isValid(id);
 }
@@ -24,11 +24,23 @@ export const GET = asyncHandler(
 
     await connectToDB();
 
-    // fetch task (with basic populate for single refs)
+    // ✅ Populate assignedBy, createdBy, updatedBy and subTasks with sorting
     const task = await Task.findById(id)
       .populate("assignedBy", "name email")
       .populate("createdBy", "name email")
-      .populate("updatedBy", "name email");
+      .populate("updatedBy", "name email")
+      .populate({
+        path: "subTasks",
+        model: SubTask,
+        options: { 
+          sort: { createdAt: -1 } // 🔥 NEW: Sort subtasks by createdAt descending (newest first)
+        },
+        populate: {
+          path: "createdBy",
+          model: User,
+          select: "name email role",
+        },
+      });
 
     if (!task) {
       return NextResponse.json(
@@ -37,14 +49,12 @@ export const GET = asyncHandler(
       );
     }
 
-    // manually fetch assigned users based on assignedTo (string[] of IDs)
+    // ✅ Fetch assigned users for assignedTo string[] field
     let assignedUsers: any[] = [];
     if (task.assignedTo && task.assignedTo.length > 0) {
-      // filter valid ObjectIds only
       const validIds = task.assignedTo.filter((id: string) =>
         mongoose.Types.ObjectId.isValid(id)
       );
-
       if (validIds.length > 0) {
         assignedUsers = await User.find(
           { _id: { $in: validIds } },
@@ -53,15 +63,12 @@ export const GET = asyncHandler(
       }
     }
 
-    // merge into final response
+    // ✅ Final response
     const responseData = {
       ...task.toObject(),
-      assignedTo: assignedUsers, // replace array of strings with user objects
+      assignedTo: assignedUsers, // Replace string IDs with user objects
     };
 
-    return NextResponse.json(
-      { success: true, data: responseData },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: responseData }, { status: 200 });
   }
 );

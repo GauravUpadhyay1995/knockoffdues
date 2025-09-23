@@ -6,13 +6,15 @@ import { collection, query, where, onSnapshot, updateDoc, doc, orderBy } from "f
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
+
 interface Notification {
     id: string;
+    notificationId: string;
     title: string;
     description: string;
     type: string;
     isSeen: boolean;
-    timestamp: any; // Firestore timestamp
+    timestamp: any;
     data?: any;
 }
 
@@ -30,6 +32,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     const router = useRouter();
 
 
+
     useEffect(() => {
         // Only fetch if dropdown is open AND we have a userId
         if (!isOpen || !userId) {
@@ -41,11 +44,10 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             return;
         }
 
-
         const q = query(
             collection(db, "notifications"),
             where("userId", "==", userId),
-            orderBy("timestamp", "desc") // Use timestamp instead of createdAt
+            orderBy("timestamp", "desc")
         );
 
         const unsubscribe = onSnapshot(
@@ -68,39 +70,16 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
         return () => {
             unsubscribe();
         };
-    }, [isOpen, userId]); // Only depend on isOpen and userId
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                onClose();
-            }
-        };
-
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                onClose();
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-            document.addEventListener("keydown", handleEscape);
-            document.body.style.overflow = "hidden";
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEscape);
-            document.body.style.overflow = "unset";
-        };
-    }, [isOpen, onClose]);
+    }, [isOpen, userId]);
 
     const markAsRead = async (notificationId: string) => {
         try {
-            await updateDoc(doc(db, "notifications", notificationId), {
-                isSeen: true
-            });
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}/read`,
+                {
+                    method: "PATCH",
+                }
+            );
         } catch (error) {
             console.error("Error marking as read:", error);
         }
@@ -109,17 +88,29 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     const markAllAsRead = async () => {
         try {
             const unreadNotifications = notifications.filter(notif => !notif.isSeen);
+
+            // 2️⃣ Call your API for each unread notification
             await Promise.all(
-                unreadNotifications.map(notif =>
-                    updateDoc(doc(db, "notifications", notif.id), {
-                        isSeen: true
-                    })
-                )
+                unreadNotifications.map(async (notif, idx) => {
+
+                    const response = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_URL}/notifications/read-all/${userId}`,
+                        {
+                            method: "PATCH",
+                        }
+                    );
+
+                    if (!response.ok) {
+                        console.error(`Failed to update notification ${notif.id}`);
+                    }
+                })
             );
+
         } catch (error) {
             console.error("Error marking all as read:", error);
         }
     };
+
 
     const getNotificationIcon = (type: string) => {
         const icons = {
@@ -138,8 +129,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             Reminder: "⏰",
             Social: "👥",
             System: "💻",
-
-
         };
 
         return icons[type as keyof typeof icons] || icons.Other;
@@ -164,7 +153,6 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
         if (!timestamp) return "Just now";
 
         try {
-            // Convert Firestore timestamp to Date
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             const now = new Date();
             const diff = now.getTime() - date.getTime();
@@ -182,33 +170,38 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             return "Recently";
         }
     };
+
     const viewAllNotification = () => {
         router.push(`/admin/notifications`);
     }
-
-    // Add debug logging
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* Backdrop */}
-            <div className="fixed" onClick={onClose} />
+            {/* Backdrop - removed onClick handler */}
+            <div className="fixed inset-0 bg-black/5 backdrop-blur-xs z-40" />
 
             {/* Dropdown */}
             <div
                 ref={dropdownRef}
-                className="fixed top-16 right-4 w-96 max-w-sm dark:bg-gray-800 bg-white  rounded-xl shadow-2xl border border-gray-200  animate-slideIn"
+                onClick={(e) => {
+                    // stop only if the click is NOT on the "View all" button
+                    if (!(e.target as HTMLElement).closest('#viewAllBtn')) {
+                        e.stopPropagation();
+                    }
+                }} // 🛑 Prevent closing when clicking inside
+                className="fixed top-16 right-4 w-96 max-w-sm dark:bg-gray-800 bg-white rounded-xl shadow-2xl border border-gray-200 animate-slideIn z-50"
             >
                 {/* Header */}
-                <div className="p-4 border-b border-gray-200  dark:bg-gray-800 rounded-t-xl">
+                <div className="p-4 border-b border-gray-200 dark:bg-gray-800 rounded-t-xl">
                     <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Notifications</h3>
                         <div className="flex items-center space-x-2">
                             {notifications.some(notif => !notif.isSeen) && (
                                 <button
                                     onClick={markAllAsRead}
-                                    className="text-xs text-blue-600 dark:hover:text-gray-100 hover:text-blue-800 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition-colors dark:text-gray-100  dark:hover:bg-gray-500"
+                                    className="text-xs text-blue-600 dark:hover:text-gray-100 hover:text-blue-800 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition-colors dark:text-gray-100 dark:hover:bg-gray-500"
                                 >
                                     Mark all read
                                 </button>
@@ -223,13 +216,13 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                             </button>
                         </div>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1  dark:text-gray-100">
+                    <p className="text-sm text-gray-600 mt-1 dark:text-gray-100">
                         {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
                     </p>
                 </div>
 
                 {/* Notifications List */}
-                <div className="max-h-96 overflow-y-auto " >
+                <div className="max-h-96 overflow-y-auto">
                     {isLoading ? (
                         <div className="p-8 text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
@@ -242,12 +235,11 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                             <p className="text-sm text-gray-500 mt-1">We'll notify you when something arrives</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-gray-100 ">
+                        <div className="divide-y divide-gray-100">
                             {notifications.map((notification, index) => (
                                 <div
                                     key={notification.id}
-                                    className={`p-4 dark:bg-gray-800 transition-all duration-300 hover:bg-gray-50  ${index === 0 ? 'animate-bounceIn' : ''
-                                        } ${!notification.isSeen ? 'bg-blue-50' : ''}`}
+                                    className={`p-4 dark:bg-gray-800 transition-all duration-300 hover:bg-gray-50 ${index === 0 ? 'animate-bounceIn' : ''} ${!notification.isSeen ? 'bg-blue-50' : ''}`}
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     <div className="flex items-start space-x-3">
@@ -257,20 +249,19 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                                         </div>
 
                                         {/* Content */}
-                                        <div className="flex-1 min-w-0 ">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-1">
                                                 <h4 className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100">
                                                     {notification.title}
                                                 </h4>
                                                 {!notification.isSeen && (
-                                                    <span className=" dark:text-gray-100 flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
+                                                    <span className="dark:text-gray-100 flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2 ">
+                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                                                 {notification.description}
                                             </p>
                                             <div className="flex items-center justify-between">
-                                               
                                                 <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-300">
                                                     <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                                     <span>{formatTimestamp(notification.timestamp)}</span>
@@ -278,7 +269,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
 
                                                 {!notification.isSeen && (
                                                     <button
-                                                        onClick={() => markAsRead(notification.id)}
+                                                        onClick={() => markAsRead(notification.notificationId)}
                                                         className="text-xs text-blue-600 dark:hover:bg-gray-500 dark:hover:text-gray-100 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-100 transition-colors dark:text-gray-100"
                                                     >
                                                         Mark read
@@ -294,8 +285,8 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl dark:bg-gray-800 ">
-                    <button onClick={viewAllNotification} className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium py-2 rounded-md hover:bg-blue-100 transition-colors dark:text-gray-100  dark:hover:bg-gray-500">
+                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl dark:bg-gray-800">
+                    <button id="viewAllBtn" onClick={viewAllNotification} className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium py-2 rounded-md hover:bg-blue-100 transition-colors dark:text-gray-100 dark:hover:bg-gray-500">
                         View all notifications
                     </button>
                 </div>
@@ -303,65 +294,65 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
 
             {/* Animation Styles */}
             <style jsx global>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateX(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes bounceIn {
-          0% {
-            opacity: 0;
-            transform: scale(0.3);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.05);
-          }
-          70% {
-            transform: scale(0.9);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out;
-        }
-        
-        .animate-bounceIn {
-          animation: bounceIn 0.6s ease-out;
-        }
-        
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+                
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+                
+                @keyframes bounceIn {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0.3);
+                    }
+                    50% {
+                        opacity: 1;
+                        transform: scale(1.05);
+                    }
+                    70% {
+                        transform: scale(0.9);
+                    }
+                    100% {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-slideIn {
+                    animation: slideIn 0.3s ease-out;
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.5s ease-out;
+                }
+                
+                .animate-bounceIn {
+                    animation: bounceIn 0.6s ease-out;
+                }
+                
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                }
+            `}</style>
         </>
     );
 }

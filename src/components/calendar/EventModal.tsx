@@ -16,6 +16,7 @@ interface EventModalProps {
   onSubmit: (e: React.FormEvent) => void;
   onEventChange: (field: string, value: any) => void;
   onAttendeeChange: (attendees: string[]) => void;
+  isLoading: boolean;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -29,6 +30,7 @@ const EventModal: React.FC<EventModalProps> = ({
   onSubmit,
   onEventChange,
   onAttendeeChange,
+  isLoading
 }) => {
   if (!isOpen) return null;
 
@@ -129,10 +131,11 @@ const EventModal: React.FC<EventModalProps> = ({
             ></textarea>
           </div>
           <button
+            disabled={isLoading}
             type="submit"
-            className="bg-indigo-600 dark:text-gray-100 text-gray-700 p-3 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+            className={`bg-indigo-600 dark:text-gray-100 text-gray-700 p-3 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${isLoading?"cursor-not-allowed":""}`}
           >
-            {isEditing ? 'Update Event' : 'Save Event'}
+            {(isEditing && !isLoading) ? 'Update Event' : isLoading ? 'Please Wait' : 'Save Event'}
           </button>
         </form>
       </div>

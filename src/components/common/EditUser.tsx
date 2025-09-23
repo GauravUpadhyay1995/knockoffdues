@@ -7,7 +7,7 @@ import axios from 'axios';
 import { File } from 'buffer';
 import { useParams } from 'next/navigation';
 
-
+import { FiX, FiCheck, FiEye } from 'react-icons/fi';
 
 
 type Academic = {
@@ -17,6 +17,7 @@ type Academic = {
     passingYear: number;
     percentage: number;
     documentUrl: string;
+    isApproved: string;
 };
 
 type WorkExperience = {
@@ -29,6 +30,8 @@ type WorkExperience = {
 type Document = {
     documentName: string;
     documentUrl: string;
+    isApproved: string;
+
 };
 
 type UserData = {
@@ -63,7 +66,9 @@ type UserData = {
     workExperience: WorkExperience[];
     documents: Document[];
     avatar?: File;
-    isVerified?: boolean
+    isVerified?: boolean;
+    isEmailVerified?: boolean;
+    isRejected?: boolean
 };
 
 type AccordionSectionProps = {
@@ -96,8 +101,8 @@ const AccordionSection: React.FC<AccordionSectionProps> = ({
             className="w-full flex justify-between items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-gray-800 dark:to-gray-700 transition-all duration-300"
         >
             <div className="flex items-center space-x-3">
-                {icon && <span className="text-blue-600">{icon}</span>}
-                <span className="font-semibold text-gray-800 dark:text-gray-100 text-left">
+                {icon && <span className="text-orange-500 dark:text-orange-600">{icon}</span>}
+                <span className="font-semibold text-gray-900 dark:text-gray-100 text-left">
                     {title}
                 </span>
             </div>
@@ -362,6 +367,7 @@ export default function UserEditForm() {
                 appendIfValue(`academics[${index}][passingYear]`, academic.passingYear?.toString());
                 appendIfValue(`academics[${index}][percentage]`, academic.percentage?.toString());
                 formData.append(`academics[${index}][isRegular]`, String(academic.isRegular || false));
+                appendIfValue(`academics[${index}][isApproved]`, academic.isApproved);
 
                 if (academic.documentFile?.[0]) {
                     // new file uploaded
@@ -383,7 +389,7 @@ export default function UserEditForm() {
             // ------------------ Documents ------------------
             data.documents.forEach((doc, index) => {
                 appendIfValue(`documents[${index}][documentName]`, doc.documentName);
-
+                appendIfValue(`documents[${index}][isApproved]`, doc.isApproved);
                 if (doc.documentFile?.[0]) {
                     // new file uploaded
                     formData.append(`documents[${index}][documentFile]`, doc.documentFile[0]);
@@ -397,7 +403,8 @@ export default function UserEditForm() {
             formData.append("isActive", String(data.isActive || false));
             appendIfValue("role", data.role || "user");
             formData.append("isVerified", String(data.isVerified || false));
-
+            formData.append("isEmailVerified", String(data.isEmailVerified || false));
+            formData.append("isRejected", String(data.isRejected || false));
 
 
             //--------------------Profile Image-----------------
@@ -459,18 +466,66 @@ export default function UserEditForm() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="max-w-6xl mx-auto p-4 md:p-6"
+            className="max-w-8xl mx-auto p-4 md:p-6"
         >
+            <AnimatePresence>
+                {submitSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="fixed top-26 right-6 items-center bg-green-100 text-green-700 px-4 py-2 rounded-lg"
+                    >
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Profile updated successfully!
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
             >
-                <div className="bg-gradient-to-r from-orange-300 to-indigo-300 p-6 text-white">
-                    <h2 className="text-2xl md:text-3xl font-bold"> {user?.name}`s Profile</h2>
-                    <p className="text-blue-100 mt-1">Update  {user?.name}`s information and preferences</p>
+
+                <div className="dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-100 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 className="text-2xl md:text-3xl font-bold">
+                            {user?.name}&apos;s Profile
+                        </h2>
+                        <p className="text-gray-900 dark:text-gray-100 mt-1">
+                            Update {user?.name}&apos;s information and preferences
+                        </p>
+                    </div>
+
+                    {user?.resume && (
+                        <a
+                            href={user.resume}      // S3 public URL
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            className="mt-4 md:mt-0 inline-flex items-center gap-2 rounded-lg bg-orange-500 hover:bg-orange-700 text-white px-4 py-2 text-sm font-medium transition"
+                        >
+                            Download Resume
+                            <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+                                />
+                            </svg>
+                        </a>
+                    )}
                 </div>
+
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 dark:bg-gray-900 dark:border-gray-700">
                     {/* Personal Information */}
@@ -547,7 +602,7 @@ export default function UserEditForm() {
                                     />
                                 </label>
 
-                                <p className="mt-2 text-sm text-gray-500">Click to change</p>
+                                <p className="mt-2 text-sm text-gray-900 dark:text-gray-100">Click to change</p>
                             </div>
 
 
@@ -562,7 +617,7 @@ export default function UserEditForm() {
                         onToggle={() => toggleSection('contact')}
                         icon={<ContactIcon />}
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Email</label>
                                 <input
@@ -580,6 +635,19 @@ export default function UserEditForm() {
                                 />
                                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                             </div>
+                            <label className="flex items-center">
+                                <label className="inline-flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        {...register('isEmailVerified')}
+                                        disabled={loggedInUserData?.id === user._id}
+                                        className={`appearance-none h-4 w-4 border rounded border-gray-300 checked:bg-green-600 hecked:border-green-600 disabled:checked:bg-green-600 disabled:checked:border-green-600      relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-1 after:w-1.5 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45      checked:after:block after:hidden`}
+                                    />
+                                </label>
+
+
+                                <span className="ml-2 text-red-800 dark:text-red-300">Email Verified</span>
+                            </label>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Mobile Number</label>
                                 <input
@@ -590,7 +658,7 @@ export default function UserEditForm() {
                                 />
                                 {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile.message}</p>}
                             </div>
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Permanent Address</label>
                                 <input
                                     {...register('permanentAddress')}
@@ -598,7 +666,7 @@ export default function UserEditForm() {
                                     className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
                                 />
                             </div>
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Current Address</label>
                                 <input
                                     {...register('currentAddress')}
@@ -775,7 +843,7 @@ export default function UserEditForm() {
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
                             <div>
-                                <label className="dark:bg-gray-800 dark:text-white block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Recruiter Name</label>
+                                <label className=" dark:text-white block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Recruiter Name</label>
                                 <input
                                     {...register('recruiterName')}
                                     placeholder="Recruiter Name"
@@ -815,46 +883,64 @@ export default function UserEditForm() {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Class/Course Name</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 {...register(`academics.${index}.className` as const)}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                                 placeholder="e.g., Bachelor of Technology"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">University/Institution</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 {...register(`academics.${index}.university` as const)}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                                 placeholder="University Name"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Passing Year</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 type="number"
                                                 {...register(`academics.${index}.passingYear` as const, { valueAsNumber: true })}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                 className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                                 placeholder="YYYY"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Percentage/CGPA</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 type="number"
                                                 step="0.01"
                                                 {...register(`academics.${index}.percentage` as const, { valueAsNumber: true })}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                                 placeholder="Percentage or CGPA"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Upload Document</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 type="file"
                                                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                 {...register(`academics.${index}.documentFile` as const)}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                             />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium   mb-1 text-gray-800 dark:text-gray-300 ">Document Status</label>
+                                            <select  {...register(`academics.${index}.isApproved` as const)} className="input-field w-auto bg-white-300 text-gray-800 dark:bg-gray-800 dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
+                                                  <option value="pending">Pending</option>
+                                                <option value="approved">Approved</option>
+                                                <option value="rejected">Rejected</option>
+                                              
+                                            </select>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+
+                                            </label>
+
                                         </div>
 
 
@@ -863,6 +949,7 @@ export default function UserEditForm() {
                                         <div className="flex items-center justify-end md:justify-start">
                                             <label className="flex items-center space-x-2 mt-6 dark:bg-gray-800 dark:text-white">
                                                 <input
+                                                    disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                     type="checkbox"
                                                     {...register(`academics.${index}.isRegular` as const)}
                                                     className="rounded text-blue-600 focus:ring-blue-500"
@@ -873,35 +960,33 @@ export default function UserEditForm() {
                                     </div>
                                     <div className="flex justify-start">
                                         {field.documentUrl && (
-                                            <a
-                                                href={field.documentUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    strokeWidth="1.5"
-                                                    stroke="currentColor"
-                                                    className="w-4 h-4"
+                                            <>
+                                               <a
+                                                    href={field.documentUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        d="M12 4.5v15m7.5-7.5h-15"
-                                                    />
-                                                </svg>   View File
-                                            </a>
+                                                    <FiEye className='w-4 h-4' />  View File
+                                                </a>
+                                                {field?.isApproved && (
+                                                    <span className={`mr-2 inline-flex items-center gap-2 px-3 py-1.5  rounded-lg text-xs font-medium              bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-100 text-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-700              hover:bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out`}>
+                                                        {field?.isApproved == "pending" ? <FiEye className='w-4 h-4' /> : field?.isApproved == "approved" ? <FiCheck className='w-4 h-4' /> : <FiX className='w-4 h-4' />}
+                                                        {field.isApproved.charAt(0).toUpperCase() + field.isApproved.slice(1)}
+                                                    </span>
+
+                                                )}
+                                            </>
+
                                         )}
 
                                     </div>
                                     <div className="flex justify-end">
                                         <button
+                                            disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                             type="button"
                                             onClick={() => removeAcademic(index)}
-                                            className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                                            className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
                                         >
                                             Remove
                                         </button>
@@ -958,7 +1043,12 @@ export default function UserEditForm() {
                                             </label>
                                             <input
                                                 type="date"
-                                                {...register('12-12-2003')}
+                                                {...register(`workExperience.${index}.joiningDate` as const)}
+                                                defaultValue={
+                                                    user?.workExperience[index]?.joiningDate
+                                                        ? new Date(user?.workExperience[index].joiningDate).toISOString().split('T')[0]
+                                                        : ''
+                                                }
 
                                                 className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
                                             />
@@ -1017,63 +1107,83 @@ export default function UserEditForm() {
                                     transition={{ duration: 0.2 }}
                                     className="p-4 border border-gray-200 rounded-lg bg-gray-50  dark:bg-gray-800"
                                 >
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Document Name</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 {...register(`documents.${index}.documentName` as const)}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                                                 placeholder="e.g., Resume, Degree Certificate"
                                             />
                                         </div>
                                         <div>
+                                            <label className="block text-sm font-medium   mb-1 text-red-800 dark:text-red-300 ">Document Status</label>
+                                            <select  {...register(`documents.${index}.isApproved` as const)} className="input-field w-auto bg-red-300 text-red-800 dark:bg-red-800 dark:text-red-300" disabled={loggedInUserData?.id == user._id}>
+                                                  <option value="pending">Pending</option>
+                                                <option value="approved">Approved</option>
+                                                <option value="rejected">Rejected</option>
+                                              
+                                            </select>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+
+                                            </label>
+
+                                        </div>
+
+                                        <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Upload Document</label>
                                             <input
+                                                disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 type="file"
                                                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                                 {...register(`documents.${index}.documentFile` as const)}
-                                                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                             />
                                         </div>
 
 
                                     </div>
+
                                     <div className="flex justify-start">
                                         {field.documentUrl && (
-                                            <a
-                                                href={field.documentUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    strokeWidth="1.5"
-                                                    stroke="currentColor"
-                                                    className="w-4 h-4"
+                                            <>
+                                                <a
+                                                    href={field.documentUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        d="M12 4.5v15m7.5-7.5h-15"
-                                                    />
-                                                </svg>   View File
-                                            </a>
+                                                    <FiEye className='w-4 h-4' />  View File
+                                                </a>
+                                                {field?.isApproved && (
+                                                    <span className={`mr-2 inline-flex items-center gap-2 px-3 py-1.5  rounded-lg text-xs font-medium              bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-100 text-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-700              hover:bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out`}>
+                                                        {field?.isApproved == "pending" ? <FiEye className='w-4 h-4' /> : field?.isApproved == "approved" ? <FiCheck className='w-4 h-4' /> : <FiX className='w-4 h-4' />}
+                                                        {field.isApproved.charAt(0).toUpperCase() + field.isApproved.slice(1)}
+                                                    </span>
+
+                                                )}
+
+
+                                            </>
+
+
                                         )}
 
                                     </div>
+
                                     <div className="flex justify-end">
 
                                         <button
+                                            disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                             type="button"
                                             onClick={() => removeDocument(index)}
-                                            className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                                            className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
                                         >
                                             Remove
                                         </button>
                                     </div>
+
                                 </motion.div>
                             ))}
                             <button
@@ -1087,9 +1197,13 @@ export default function UserEditForm() {
                     </AccordionSection>
 
                     {/* Status and Role */}
-                    <div className="mb-6 p-4 bg-gray-50 rounded-xl  dark:bg-gray-800">
-                        <h3 className="font-medium text-gray-800 mb-3 dark:text-gray-300">Status & Role</h3>
+                    <div className="mb-6 p-4 bg-red-300 rounded-xl  dark:bg-red-800">
+                        <h3 className="font-medium  text-red-800 dark:text-red-300">Status & Role (Critical Zone)</h3>
+                        <small className='text-red-800 dark:text-red-300 mb-3 '>
+                            (Note: this is sensitive data handle carefully.)
+                        </small>
                         <div className="flex flex-wrap gap-6">
+
                             <label className="flex items-center">
                                 <label className="inline-flex items-center">
                                     <input
@@ -1101,73 +1215,112 @@ export default function UserEditForm() {
                                 </label>
 
 
-                                <span className="ml-2 text-gray-700 dark:text-gray-300">Acitve Member</span>
+                                <span className="ml-2 text-red-800 dark:text-red-300">Activated</span>
                             </label>
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300 ">Member Role</label>
-                                <select {...register('role')} className="input-field w-auto dark:bg-gray-800 dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
+                                <label className="block text-sm font-medium   mb-1 text-red-800 dark:text-red-300 "> Role</label>
+                                <select {...register('role')} className="input-field w-auto bg-red-300 text-red-800 dark:bg-red-800 dark:text-red-300" disabled={loggedInUserData?.id == user._id}>
+                                    <option value="lead">Lead</option>
                                     <option value="user">Employee</option>
                                     <option value="admin">Admin</option>
                                 </select>
                             </div>
-                            <label className="flex items-center">
-                                <label className="inline-flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        {...register('isVerified')}
-                                        disabled={loggedInUserData?.id === user._id}
-                                        className={`appearance-none h-4 w-4 border rounded border-gray-300 checked:bg-green-600 hecked:border-green-600 disabled:checked:bg-green-600 disabled:checked:border-green-600      relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-1 after:w-1.5 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45      checked:after:block after:hidden`}
-                                    />
-                                </label>
+                            {
+                                user?.role === "lead" && (
+                                    <label className="flex items-center">
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                {...register('isRejected')}
+                                                disabled={loggedInUserData?.id === user._id}
+                                                className={`appearance-none h-4 w-4 border rounded border-gray-300 checked:bg-green-600 hecked:border-green-600 disabled:checked:bg-green-600 disabled:checked:border-green-600      relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-1 after:w-1.5 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45      checked:after:block after:hidden`}
+                                            />
+                                        </label>
 
 
-                                <span className="ml-2 text-gray-700 dark:text-gray-300">Verify Member</span>
-                            </label>
+                                        <span className="ml-2 text-red-800 dark:text-red-300">Is Rejected</span>
+                                    </label>
+                                )}
+                            {
+                                user?.role !== "lead" && (
+                                    <label className="flex items-center">
+                                        <label className="inline-flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                {...register('isVerified')}
+                                                disabled={loggedInUserData?.id === user._id}
+                                                className={`appearance-none h-4 w-4 border rounded border-gray-300 checked:bg-green-600 hecked:border-green-600 disabled:checked:bg-green-600 disabled:checked:border-green-600      relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-1 after:w-1.5 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45      checked:after:block after:hidden`}
+                                            />
+                                        </label>
+
+
+                                        <span className="ml-2 text-red-800 dark:text-red-300">Verify Member
+
+                                        </span>
+                                        <small className='ml-2 text-red-800 dark:text-red-100'>(If all details have been verified and approved by the authorized panel, the profile will be locked and marked as “Checked.” Once a profile is marked as Checked, users will no longer be able to edit or update their information. )</small>
+                                    </label>
+                                )
+                            }
+
                         </div>
                     </div>
 
                     {/* Submit Button */}
                     <div className="flex justify-end mt-8 space-x-4">
-                        <AnimatePresence>
-                            {submitSuccess && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    className="flex items-center bg-green-100 text-green-700 px-4 py-2 rounded-lg"
-                                >
-                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Profile updated successfully!
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
 
                         <motion.button
                             type="submit"
                             disabled={isSubmitting}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 flex items-center"
-                        >
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="fixed bottom-6 right-6 px-6 py-3 bg-orange-500 text-white font-medium                rounded-full shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400   disabled:opacity-70 flex items-center z-50" >
                             {isSubmitting ? (
                                 <>
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg
+                                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
+                       5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 
+                       5.824 3 7.938l3-2.647z"
+                                        ></path>
                                     </svg>
                                     Saving...
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    <svg
+                                        className="w-5 h-5 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M5 13l4 4L19 7"
+                                        />
                                     </svg>
                                     Update
                                 </>
                             )}
                         </motion.button>
+
                     </div>
                 </form>
             </motion.div>

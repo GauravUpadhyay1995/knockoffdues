@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { File } from 'buffer';
 import { useAuth } from "@/context/AuthContext";
-
+import { FiX, FiPlus, FiUpload, FiChevronDown, FiCheck, FiEye } from 'react-icons/fi';
 type Academic = {
   className: string;
   university: string;
@@ -21,11 +21,13 @@ type WorkExperience = {
   companyName: string;
   joiningDate: string;
   relievingDate: string;
+   isApproved: string;
 };
 
 type Document = {
   documentName: string;
   documentUrl: string;
+  isApproved: string;
 };
 
 type UserData = {
@@ -60,7 +62,8 @@ type UserData = {
   workExperience: WorkExperience[];
   documents: Document[];
   avatar?: File;
-  isVerified?: boolean
+  isVerified?: boolean,
+  isEmailVerified?: boolean,
 };
 
 type AccordionSectionProps = {
@@ -398,9 +401,10 @@ export default function UserEditForm() {
       const result = await response.json();
       if (result?.success) {
         // ✅ Update state & reset form with new data
-        updateAdmin({ avatar: result?.data?.avatar,
+        updateAdmin({
+          avatar: result?.data?.avatar,
           name: result?.data?.name
-         });
+        });
         setUser(result?.data);
         reset(result.data);
         setSubmitSuccess(true);
@@ -437,7 +441,7 @@ export default function UserEditForm() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="max-w-6xl mx-auto p-4 md:p-6"
+      className="max-w-8xl mx-auto p-4 md:p-6"
     >
       <motion.div
         initial={{ y: -20, opacity: 0 }}
@@ -445,10 +449,31 @@ export default function UserEditForm() {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
       >
-        <div className="bg-gradient-to-r from-orange-600 to-indigo-400 p-6 text-white">
-          <h2 className="text-2xl md:text-3xl font-bold"> {user?.name}`s Profile</h2>
-          <p className="text-blue-100 mt-1">Update  {user?.name}`s information and preferences</p>
+        <div className="dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-100">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Left Content */}
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold">{user?.name}`s Profile</h2>
+              <p className="text-gray-900 dark:text-gray-100 mt-1">
+                Update {user?.name}`s information and preferences
+              </p>
+            </div>
+
+            {/* Right Badges */}
+            <div className="flex flex-wrap gap-2 ml-auto">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isEmailVerified ? "green" : "red"}-100 text-${user?.isEmailVerified ? "green" : "red"}-800 dark:bg-${user?.isEmailVerified ? "green" : "red"}-900/30 dark:text-${user?.isEmailVerified ? "green" : "red"}-400`}>
+                Email {user?.isEmailVerified ? "" : "Not"} Verified {user?.isEmailVerified ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isActive ? "green" : "red"}-100 text-${user?.isActive ? "green" : "red"}-800 dark:bg-${user?.isActive ? "green" : "red"}-900/30 dark:text-${user?.isActive ? "green" : "red"}-400`}>
+                Account {user?.isActive ? "" : "Not"} Activated {user?.isActive ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isVerified ? "green" : "red"}-100 text-${user?.isVerified ? "green" : "red"}-800 dark:bg-${user?.isVerified ? "green" : "red"}-900/30 dark:text-${user?.isVerified ? "green" : "red"}-400`}>
+                Account {user?.isVerified ? "" : "Not"}Verified {user?.isVerified ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+              </span>
+            </div>
+          </div>
         </div>
+
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 dark:bg-gray-900 dark:border-gray-700">
           {/* Personal Information */}
@@ -787,7 +812,7 @@ export default function UserEditForm() {
                       <input
                         disabled={isSubmitting || user.isVerified}
                         {...register(`academics.${index}.className` as const)}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                         placeholder="e.g., Bachelor of Technology"
                       />
                     </div>
@@ -796,7 +821,7 @@ export default function UserEditForm() {
                       <input
                         disabled={isSubmitting || user.isVerified}
                         {...register(`academics.${index}.university` as const)}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                         placeholder="University Name"
                       />
                     </div>
@@ -806,7 +831,7 @@ export default function UserEditForm() {
                         disabled={isSubmitting || user.isVerified}
                         type="number"
                         {...register(`academics.${index}.passingYear` as const, { valueAsNumber: true })}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                         placeholder="YYYY"
                       />
                     </div>
@@ -817,7 +842,7 @@ export default function UserEditForm() {
                         type="number"
                         step="0.01"
                         {...register(`academics.${index}.percentage` as const, { valueAsNumber: true })}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                         placeholder="Percentage or CGPA"
                       />
                     </div>
@@ -828,7 +853,7 @@ export default function UserEditForm() {
                         type="file"
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         {...register(`academics.${index}.documentFile` as const)}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                       />
                     </div>
 
@@ -838,7 +863,7 @@ export default function UserEditForm() {
                     <div className="flex items-center justify-end md:justify-start">
                       <label className="flex items-center space-x-2 mt-6 dark:bg-gray-800 dark:text-white">
                         <input
-                          disabled={isSubmitting || user.isVerified}
+                          disabled={isSubmitting || user.isVerified || field?.isApproved==="approved"}
                           type="checkbox"
                           {...register(`academics.${index}.isRegular` as const)}
                           className="rounded text-blue-600 focus:ring-blue-500"
@@ -847,38 +872,38 @@ export default function UserEditForm() {
                       </label>
                     </div>
                   </div>
-                  <div className="flex justify-start">
+                   <div className="flex justify-start">
                     {field.documentUrl && (
-                      <a
-                        href={field.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-4 h-4"
+                      <>
+                        <a
+                          href={field.documentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4.5v15m7.5-7.5h-15"
-                          />
-                        </svg>   View File
-                      </a>
+                          <FiEye className='w-4 h-4' />  View File
+                        </a>
+                        {field?.isApproved && (
+                          <span className={`mr-2 inline-flex items-center gap-2 px-3 py-1.5  rounded-lg text-xs font-medium              bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-100 text-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-700              hover:bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out`}>
+                            {field?.isApproved == "pending" ? <FiEye className='w-4 h-4' /> : field?.isApproved == "approved" ? <FiCheck className='w-4 h-4' /> : <FiX className='w-4 h-4' />}
+                            {field.isApproved.charAt(0).toUpperCase() + field.isApproved.slice(1)}
+                          </span>
+
+                        )}
+
+
+                      </>
+
+
                     )}
 
                   </div>
                   <div className="flex justify-end">
                     <button
-                      disabled={isSubmitting || user.isVerified}
+                       disabled={isSubmitting || user.isVerified || field?.isApproved==="approved"}
                       type="button"
                       onClick={() => removeAcademic(index)}
-                      className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                       className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
                     >
                       Remove
                     </button>
@@ -995,20 +1020,20 @@ export default function UserEditForm() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Document Name</label>
                       <input
-                        disabled={isSubmitting || user.isVerified}
+                        disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                         {...register(`documents.${index}.documentName` as const)}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500 ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"}`}
                         placeholder="e.g., Resume, Degree Certificate"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Upload Document</label>
                       <input
-                        disabled={isSubmitting || user.isVerified}
+                        disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                         type="file"
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         {...register(`documents.${index}.documentFile` as const)}
-                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+                        className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                       />
                     </div>
 
@@ -1016,37 +1041,37 @@ export default function UserEditForm() {
                   </div>
                   <div className="flex justify-start">
                     {field.documentUrl && (
-                      <a
-                        href={field.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="w-4 h-4"
+                      <>
+                        <a
+                          href={field.documentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4.5v15m7.5-7.5h-15"
-                          />
-                        </svg>   View File
-                      </a>
+                          <FiEye className='w-4 h-4' />  View File
+                        </a>
+                        {field?.isApproved && (
+                          <span className={`mr-2 inline-flex items-center gap-2 px-3 py-1.5  rounded-lg text-xs font-medium              bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-100 text-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-700              hover:bg-${field?.isApproved == "pending" ? "yellow" : field?.isApproved == "approved" ? "green" : "red"}-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out`}>
+                            {field?.isApproved == "pending" ? <FiEye className='w-4 h-4' /> : field?.isApproved == "approved" ? <FiCheck className='w-4 h-4' /> : <FiX className='w-4 h-4' />}
+                            {field.isApproved.charAt(0).toUpperCase() + field.isApproved.slice(1)}
+                          </span>
+
+                        )}
+
+
+                      </>
+
+
                     )}
 
                   </div>
                   <div className="flex justify-end">
 
                     <button
-                      disabled={isSubmitting || user.isVerified}
+                      disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                       type="button"
                       onClick={() => removeDocument(index)}
-                      className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                      className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
                     >
                       Remove
                     </button>
@@ -1114,7 +1139,7 @@ export default function UserEditForm() {
               disabled={isSubmitting || user.isVerified}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 flex items-center"
+              className="px-6 py-3 bg-orange-500 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 flex items-center"
             >
               {isSubmitting ? (
                 <>

@@ -1,125 +1,90 @@
+import { NextRequest, NextResponse } from "next/server";
+import { connectToDB } from "@/config/mongo";
+import { createUserSchema } from "@/lib/validations/user.schema";
+import { User } from "@/models/User";
+import bcrypt from "bcryptjs";
+import { uploadBufferToS3 } from "@/lib/uploadToS3";
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createUserSchema } from '@/lib/validations/user.schema';
-import { asyncHandler } from '@/lib/asyncHandler';
-import { withAuth } from '@/lib/withAuth';
-import { verifyAdmin } from '@/lib/verifyAdmin';
-import { connectToDB } from '@/config/mongo';
-import { User } from '@/models/User';
-import bcrypt from 'bcryptjs';
-
-type CreateUserBody = {
-    name: string;
-    email: string;
-    role: string;
-    password: string;
-    mobile: string;
-    permissions?: {
-        module: string;
-        actions: string[];
-    }[];
-};
-
-
-
-export const POST = (asyncHandler(async (req: NextRequest) => {
+export const POST = async (req: NextRequest) => {
+  try {
     await connectToDB();
 
+    const form = await req.formData();
+    const resume = form.get("resume") as File | null;
 
-    const body = await req.json();
-    const { error, value } = createUserSchema.validate(body, { abortEarly: false });
-    if (error) {
-        const errorMessages = error.details.reduce((acc, curr) => {
-            acc[curr.path[0] as string] = curr.message;
-            return acc;
-        }, {} as Record<string, string>);
-
-        return NextResponse.json(
-            {
-                success: false,
-                message: 'Validation failed',
-                errors: errorMessages,
-                data: null,
-            },
-            { status: 400 }
-        );
-    }
-    const creationResult = await createUser(body);
-    console.log("creationResult", creationResult)
-
-
-    return NextResponse.json({
-        success: creationResult.success,
-        message: creationResult.message,
-        data: creationResult.data,
-    },
-        { status: creationResult.status });
-}));
-
-export const createUser = async (body: CreateUserBody) => {
-    try {
-        const { name, email, role, password, mobile } = body;
-        await connectToDB();
-        const existingUser = await User.findOne({
-            $or: [{ email }, { mobile }]
-        });
-
-        if (existingUser) {
-            return {
-                status: 409,
-                success: false,
-                message: 'User already exists',
-                data: null
-            };
-        }
-
-        const rawPassword = password || generateSecurePassword();
-        const hashedPassword = await bcrypt.hash(rawPassword, 10);
-
-        const user = new User({
-            name,
-            email,
-            password: hashedPassword,
-            role: role || 'user',
-            mobile,
-        });
-
-        const result = await user.save();
-        const userObj = result.toObject();
-        delete userObj.password;
-        return {
-            status: 200,
-            success: true,
-            message: 'User Registered',
-            data: userObj
-        };
-    } catch (error: any) {
-        console.error("User creation failed:", error);
-        const formatted = formatMongooseError(error);
-        return {
-            status: 400,
-            success: false,
-            message: formatted.message,
-            errors: formatted.errors,
-            data: null
-        };
-    }
-};
-
-function generateSecurePassword(length = 12) {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const specialChars = '!@#$%^&*';
-    const password = Array.from({ length: length - 2 }, () =>
-        chars[Math.floor(Math.random() * chars.length)]).join('');
-    return password +
-        specialChars[Math.floor(Math.random() * specialChars.length)] +
-        chars[Math.floor(Math.random() * chars.length)];
-}
-
-function formatMongooseError(error: any) {
-    // Basic implementation: extract message and errors from Mongoose error object
-    return {
-        message: error.message || 'An error occurred',
-        errors: error.errors || {},
+    const jsonBody: any = {
+      name: form.get("name"),
+      email: form.get("email"),
+      password: form.get("password"),
+      mobile: form.get("mobile"),
+      role: 'lead',
+      isActive: form.get("isActive") === "true",
+      permissions: form.get("permissions")
+        ? JSON.parse(form.get("permissions") as string)
+        : undefined,
     };
-}
+
+    // ✅ Validate using Joi
+    const { error, value } = createUserSchema.validate(jsonBody, {
+      abortEarly: false,
+    });
+    if (error) {
+      const errors = error.details.reduce((acc, curr) => {
+        acc[curr.path[0] as string] = curr.message;
+        return acc;
+      }, {} as Record<string, string>);
+      return NextResponse.json(
+        { success: false, message: "Validation failed", errors },
+        { status: 400 }
+      );
+    }
+
+    // ✅ Check existing user
+    const existing = await User.findOne({
+      $or: [{ email: value.email }, { mobile: value.mobile }],
+    });
+    if (existing) {
+      return NextResponse.json(
+        { success: false, message: "User already exists" },
+        { status: 409 }
+      );
+    }
+
+    // ✅ Hash password
+    const hashedPassword = await bcrypt.hash(value.password, 10);
+
+    // ✅ Upload resume if provided
+    let resumeUrl: string | undefined;
+    if (resume) {
+      const buffer = Buffer.from(await resume.arrayBuffer());
+      const uploaded = await uploadBufferToS3(
+        buffer,
+        resume.type,
+        resume.name,
+        `resumes/${Date.now()}-${resume.name}`
+      );
+      resumeUrl = uploaded?.url;
+    }
+
+    // ✅ Create user
+    const newUser = await User.create({
+      ...value,
+      password: hashedPassword,
+      resume: resumeUrl,
+    });
+
+    const userObj = newUser.toObject();
+    delete userObj.password;
+
+    return NextResponse.json(
+      { success: true, message: "User Registered", data: userObj },
+      { status: 201 }
+    );
+  } catch (err: any) {
+    console.error("User creation failed:", err);
+    return NextResponse.json(
+      { success: false, message: err.message || "Server error" },
+      { status: 500 }
+    );
+  }
+};

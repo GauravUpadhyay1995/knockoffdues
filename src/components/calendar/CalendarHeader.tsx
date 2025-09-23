@@ -2,13 +2,17 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  FiRefreshCw
 
+} from 'react-icons/fi';
 interface CalendarHeaderProps {
   currentDate: Date;
   onPrev: () => void;
   onNext: () => void;
   view: string;
   onViewChange: (view: string) => void;
+  reloadData:()=>void;
 }
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({
@@ -17,6 +21,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onNext,
   view,
   onViewChange,
+  reloadData
 }) => {
   return (
     <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -30,15 +35,16 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         </button>
       </div>
       <div className="flex items-center space-x-2 bg-gray-700 p-1 rounded-full bg-white dark:bg-gray-800">
-        {['Month', 'Day', 'List'].map((viewOption) => (
+        <button onClick={reloadData} className="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
+          <FiRefreshCw className="mr-2" /> Refresh</button>
+        {['Month', 'Day'].map((viewOption) => (
           <button
             key={viewOption}
             onClick={() => onViewChange(viewOption)}
-            className={`px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors ${
-              view === viewOption
-                ? 'bg-indigo-600 text-white'
-                : 'text-gray-400 hover:text-white dark:hover:bg-gray-600 hover:bg-indigo-500'
-            }`}
+            className={`px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors ${view === viewOption
+              ? 'bg-indigo-600 text-white'
+              : 'text-gray-400 hover:text-white dark:hover:bg-gray-600 hover:bg-indigo-500'
+              }`}
           >
             {viewOption}
           </button>

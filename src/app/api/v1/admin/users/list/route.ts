@@ -34,7 +34,8 @@ export const GET = verifyAdmin(asyncHandler(async (req: NextRequest) => {
   if (department) filter.department = new mongoose.Types.ObjectId(department);
   if (role) filter.role = { $regex: role, $options: 'i' };
   if (isActive) filter.isActive = isActive === 'true';
-
+  if (isActive === "rejected") { filter.isRejected = true; delete filter.isActive; filter.role="lead"; }
+  if (isActive === "fresh") { filter.isRejected = false; delete filter.isActive;  filter.role="lead"; }
   // Build the aggregation pipeline
   const pipeline: any[] = [];
 
