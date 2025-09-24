@@ -1274,7 +1274,7 @@ export default function UserEditForm() {
                             disabled={isSubmitting}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="fixed bottom-6 right-6 px-6 py-3 bg-orange-500 text-white font-medium                rounded-full shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400   disabled:opacity-70 flex items-center z-50" >
+                            className="fixed bottom-6 right-6 px-6 py-3 bg-orange-500 text-white font-medium                rounded-full shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400   disabled:opacity-70 flex items-center" >
                             {isSubmitting ? (
                                 <>
                                     <svg

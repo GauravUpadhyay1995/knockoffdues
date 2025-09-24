@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { File } from 'buffer';
 import { useAuth } from "@/context/AuthContext";
-import { FiX, FiPlus, FiUpload, FiChevronDown, FiCheck, FiEye } from 'react-icons/fi';
+import { FiX, FiCheck, FiEye } from 'react-icons/fi';
 type Academic = {
   className: string;
   university: string;
@@ -14,6 +14,7 @@ type Academic = {
   passingYear: number;
   percentage: number;
   documentUrl: string;
+  isApproved?: string;
 };
 
 type WorkExperience = {
@@ -21,7 +22,7 @@ type WorkExperience = {
   companyName: string;
   joiningDate: string;
   relievingDate: string;
-   isApproved: string;
+  isApproved: string;
 };
 
 type Document = {
@@ -343,6 +344,7 @@ export default function UserEditForm() {
         appendIfValue(`academics[${index}][passingYear]`, academic.passingYear?.toString());
         appendIfValue(`academics[${index}][percentage]`, academic.percentage?.toString());
         formData.append(`academics[${index}][isRegular]`, String(academic.isRegular || false));
+        formData.append(`academics[${index}][isApproved]`, String(academic.isApproved || false));
 
         if (academic.documentFile?.[0]) {
           // new file uploaded
@@ -364,6 +366,7 @@ export default function UserEditForm() {
       // ------------------ Documents ------------------
       data.documents.forEach((doc, index) => {
         appendIfValue(`documents[${index}][documentName]`, doc.documentName);
+        formData.append(`documents[${index}][isApproved]`, String(doc.isApproved || false));
 
         if (doc.documentFile?.[0]) {
           // new file uploaded
@@ -443,6 +446,21 @@ export default function UserEditForm() {
       transition={{ duration: 0.5 }}
       className="max-w-8xl mx-auto p-4 md:p-6"
     >
+      <AnimatePresence>
+        {submitSuccess && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed top-20 right-6 items-center bg-green-100 text-green-700 px-4 py-2 rounded-lg"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Profile updated successfully!
+          </motion.div>
+        )}
+      </AnimatePresence>
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -863,7 +881,7 @@ export default function UserEditForm() {
                     <div className="flex items-center justify-end md:justify-start">
                       <label className="flex items-center space-x-2 mt-6 dark:bg-gray-800 dark:text-white">
                         <input
-                          disabled={isSubmitting || user.isVerified || field?.isApproved==="approved"}
+                          disabled={isSubmitting || user.isVerified || field?.isApproved === "approved"}
                           type="checkbox"
                           {...register(`academics.${index}.isRegular` as const)}
                           className="rounded text-blue-600 focus:ring-blue-500"
@@ -872,7 +890,7 @@ export default function UserEditForm() {
                       </label>
                     </div>
                   </div>
-                   <div className="flex justify-start">
+                  <div className="flex justify-start">
                     {field.documentUrl && (
                       <>
                         <a
@@ -900,10 +918,10 @@ export default function UserEditForm() {
                   </div>
                   <div className="flex justify-end">
                     <button
-                       disabled={isSubmitting || user.isVerified || field?.isApproved==="approved"}
+                      disabled={isSubmitting || user.isVerified || field?.isApproved === "approved"}
                       type="button"
                       onClick={() => removeAcademic(index)}
-                       className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
+                      className={`px-3 py-1  bg-red-100 ${field?.isApproved == "approved" ? "cursor-not-allowed" : ""} text-red-700 rounded-md hover:bg-red-200 text-sm`}
                     >
                       Remove
                     </button>
@@ -1026,6 +1044,19 @@ export default function UserEditForm() {
                         placeholder="e.g., Resume, Degree Certificate"
                       />
                     </div>
+                    <div className='hidden'>
+                      <label className="block text-sm font-medium   mb-1 text-red-800 dark:text-red-300 ">Document Status</label>
+                      <select  {...register(`documents.${index}.isApproved` as const)} className="input-field w-auto bg-red-300 text-red-800 dark:bg-red-800 dark:text-red-300" disabled={loggedInUserData?.id == user._id}>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+
+                      </select>
+                      <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+
+                      </label>
+
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Upload Document</label>
                       <input
@@ -1118,46 +1149,63 @@ export default function UserEditForm() {
 
           {/* Submit Button */}
           <div className="flex justify-end mt-8 space-x-4">
-            <AnimatePresence>
-              {submitSuccess && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="flex items-center bg-green-100 text-green-700 px-4 py-2 rounded-lg"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Profile updated successfully!
-                </motion.div>
-              )}
-            </AnimatePresence>
 
-            <motion.button
-              type="submit"
-              disabled={isSubmitting || user.isVerified}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-6 py-3 bg-orange-500 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 flex items-center"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Update
-                </>
-              )}
-            </motion.button>
+
+            <div className="flex justify-end mt-8 space-x-4">
+
+              <motion.button
+                type="submit"
+                disabled={isSubmitting}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="fixed bottom-6 right-6 px-6 py-3 bg-orange-500 text-white font-medium                rounded-full shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400   disabled:opacity-70 flex items-center " >
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
+                               5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 
+                               5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Update
+                  </>
+                )}
+              </motion.button>
+
+            </div>
           </div>
         </form>
       </motion.div>

@@ -20,6 +20,7 @@ export const GET = verifyAdmin(asyncHandler(async (req: NextRequest) => {
   const department = searchParams.get('department');
   const role = searchParams.get('role');
   const isActive = searchParams.get('isActive');
+  const isVerified=searchParams.get('isVerified');
 
   const showAll = perPage === 'All';
   const limit = showAll ? 0 : parseInt(perPage);
@@ -34,8 +35,9 @@ export const GET = verifyAdmin(asyncHandler(async (req: NextRequest) => {
   if (department) filter.department = new mongoose.Types.ObjectId(department);
   if (role) filter.role = { $regex: role, $options: 'i' };
   if (isActive) filter.isActive = isActive === 'true';
-  if (isActive === "rejected") { filter.isRejected = true; delete filter.isActive; filter.role="lead"; }
-  if (isActive === "fresh") { filter.isRejected = false; delete filter.isActive;  filter.role="lead"; }
+  if (isActive === "rejected") { filter.isRejected = true; delete filter.isActive; filter.role = "lead"; }
+  if (isActive === "fresh") { filter.isRejected = false; delete filter.isActive; filter.role = "lead"; }
+  if (isVerified) filter.isVerified = isVerified === 'true';
   // Build the aggregation pipeline
   const pipeline: any[] = [];
 

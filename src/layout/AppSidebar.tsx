@@ -369,7 +369,7 @@ const AppSidebar: React.FC = () => {
   };
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out border-r border-gray-200 
+      className={`z-50 fixed  flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out border-r border-gray-200 
         ${isExpanded || isMobileOpen
           ? "w-[290px]"
           : isHovered
@@ -381,30 +381,9 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={`py-4 px-4 flex items-center ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
-          }`}
-      >
-        <Link href="/admin" className="flex items-center">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <div className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-400 bg-clip-text text-transparent">
+      
 
-                <Image className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
-
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Knock Off Dues
-              </span>
-            </div>
-          )}
-        </Link>
-      </div>
-
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex mt-30 flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>

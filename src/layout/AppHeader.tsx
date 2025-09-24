@@ -42,14 +42,32 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-9 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header className="fixed mb-10 top-0 -left-6 flex w-full bg-white border-gray-200 z-[999] dark:border-gray-800 dark:bg-gray-900 border-b">
       <div className="flex items-center justify-between w-full px-3 py-3 lg:px-6 lg:py-4">
 
         {/* LEFT SECTION */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Sidebar toggle */}
-          <button
-            className="items-center justify-center w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
+                    <Link href="/admin" className="flex items-center ">
+            <Image
+              className="h-20 w-20 z-30 fixed rounded-full object-cover mt-10 ml-10"
+              src="/images/logo/logo.png"
+              alt="Knock Off Dues Logo"
+              width={80}
+              height={80}
+              priority
+            />
+          </Link>
+         
+
+          {/* Logo (mobile only) */}
+
+        </div>
+
+        {/* RIGHT SECTION (always visible) */}
+        <div className="flex items-center gap-3 ml-auto">
+           <button
+            className="items-center justify-center ml-30 w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
@@ -73,23 +91,6 @@ const AppHeader: React.FC = () => {
               </svg>
             )}
           </button>
-
-          {/* Logo (mobile only) */}
-          <Link href="/admin" className="flex items-center lg:hidden">
-            <Image
-              className="h-10 w-10 rounded-full object-cover"
-              src="/images/logo/logo.png"
-              alt="Knock Off Dues Logo"
-              width={40}
-              height={40}
-              priority
-            />
-          </Link>
-        </div>
-
-        {/* RIGHT SECTION (always visible) */}
-        <div className="flex items-center gap-3 ml-auto">
-          
           <NotificationBell />
           <ThemeToggleButton />
           <UserDropdown />

@@ -251,15 +251,15 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-1">
-                                                <h4 className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100">
-                                                    {notification.title}
+                                                <h4 className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100"  dangerouslySetInnerHTML={{ __html: notification.title }}>
+                                                   
                                                 </h4>
                                                 {!notification.isSeen && (
                                                     <span className="dark:text-gray-100 flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                                                {notification.description}
+                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2"  dangerouslySetInnerHTML={{ __html: notification?.description }}>
+                                               
                                             </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-300">

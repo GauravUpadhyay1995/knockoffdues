@@ -157,7 +157,7 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded }: AddTaskMo
   // Fetch users when modal opens to assign tasks
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true&isVerified=true`, {
         credentials: 'include',
       });
 

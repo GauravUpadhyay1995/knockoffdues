@@ -60,7 +60,7 @@ export const POST = asyncHandler(async (req: NextRequest) => {
       message: 'Invalid credentials',
     });
   }
-  const permissions = user.role == "super admin" ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermission() : getUserPermission();
+  const permissions = (user.role == "super admin" || user.role == "hr") ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermissions() : getUserPermission();
 
   // ✅ JWT creation
   const token = generateToken({
@@ -173,6 +173,6 @@ const getAdminPermissions = () => [
 
 ];
 const getUserPermission = () => [
-    { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },
 
 ]

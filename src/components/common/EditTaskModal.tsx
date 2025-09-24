@@ -126,7 +126,7 @@ export default function EditTaskModal({ isOpen, onClose, onTaskUpdated, task }: 
     // Fetch users when modal opens and populate form with task data
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true&isVerified=true`, {
                 credentials: 'include',
             });
 

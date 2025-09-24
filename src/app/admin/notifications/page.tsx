@@ -47,7 +47,7 @@ interface Notification {
     type: string;
     read: boolean;
     timestamp: string;
-    descriptions?:string;
+    descriptions?: string;
 }
 
 const App = () => {
@@ -210,14 +210,15 @@ const App = () => {
                                 </div>
                                 <div className="flex-grow">
                                     <p
+                                        className="font-semibold"
+                                        dangerouslySetInnerHTML={{ __html: notification.message }}
+                                    ></p>
+                                    <p
                                         className={`font-semibold `}
+                                        dangerouslySetInnerHTML={{ __html: notification?.descriptions }}
                                     >
-                                        {notification.message}
-                                    </p>
-                                     <p
-                                        className={`font-semibold `}
-                                    >
-                                        {notification?.descriptions}
+
+
                                     </p>
                                     <p className="text-sm mt-1 opacity-75">
                                         {new Date(notification.timestamp).toLocaleString()}

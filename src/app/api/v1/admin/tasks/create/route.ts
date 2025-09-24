@@ -81,7 +81,7 @@ const parseAssignedTo = (assignedToEntries: string[], rawBody: any): string[] =>
 export const POST = verifyAdmin(
   asyncHandler(async (req: NextRequest) => {
     const startTime = Date.now();
-
+    const admin = (req as any).user;
     try {
       // Start DB connection and form parsing in parallel
       const [formData] = await Promise.all([req.formData(), connectToDB()]);
@@ -181,8 +181,8 @@ export const POST = verifyAdmin(
       assignedToArray.push(user.id); // Notify the creator as well
       await createNotification({
         notificationType: "Task",
-        title: `New Task Assigned: ${task.taskName}`,
-        descriptions: `You have been assigned to task: ${task.taskName}`,
+        title: `New task assigned to you: <a href="/admin/tasks/${task._id}" class="mr-2 inline-flex items-center gap-2 px-3 py-1.5             rounded-lg text-xs font-medium              bg-green-100 text-green-700              hover:bg-green-200 hover:scale-105 hover:shadow-md             transition-all duration-300 ease-out">${task.taskName}</a>`,
+        descriptions: `${admin.name},You have been assigned a task: ${task?.taskName}`,
         docs,
         createdBy: createdBy,
         userId: assignedToArray

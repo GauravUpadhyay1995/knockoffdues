@@ -77,7 +77,7 @@ const Calendar: React.FC = () => {
   const fetchEvents = useCallback(async () => {
     try {
       const [usersRes, meetingsRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true`, { credentials: "include" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true&isVerified=true`, { credentials: "include" }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/calender/create`, { credentials: 'include' })
       ]);
 

@@ -61,7 +61,7 @@ export const POST = async (req: NextRequest) => {
         buffer,
         resume.type,
         resume.name,
-        `resumes/${Date.now()}-${resume.name}`
+        `dosuments`
       );
       resumeUrl = uploaded?.url;
     }

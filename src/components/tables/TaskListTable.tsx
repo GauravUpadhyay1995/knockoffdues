@@ -116,7 +116,7 @@ export default function TaskListTable({ initialData }: Props) {
                         credentials: "include",
                         signal: abortController?.signal,
                     }),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true`, {
+                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All&isActive=true&isVerified=true`, {
                         credentials: "include",
                         signal: abortController?.signal,
                     }),

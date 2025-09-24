@@ -35,12 +35,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <TopLoadingBar />
         
-          {/* <button
-       
-                 className="fixed right-0 top-1/2 -translate-y-1/2 bg-orange-600 text-white px-3 py-2 rounded-l-lg shadow-md z-50 hover:bg-indigo-700 transition"
-               >
-                 ⚙️hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-               </button> */}
+         
         </Suspense>
         <AuthProvider>
             <Drawer />
