@@ -31,7 +31,7 @@ const RightSideDrawer = () => {
     setMounted(true);
 
     // Open QR modal automatically on first mount
-    setIsRegisterQrOpen(true);
+    // setIsRegisterQrOpen(true);
   }, []);
 
 
