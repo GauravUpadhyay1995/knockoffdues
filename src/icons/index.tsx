@@ -32,6 +32,7 @@ import LockIcon from "./lock.svg";
 import EnvelopeIcon from "./envelope.svg";
 import UserIcon from "./user-line.svg";
 import CalenderIcon from "./calender-line.svg";
+import BankIcon from "./bank.svg";
 import EyeIcon from "./eye.svg";
 import EyeCloseIcon from "./eye-close.svg";
 import TimeIcon from "./time.svg";
@@ -53,6 +54,7 @@ import MoreDotIcon from "./more-dot.svg";
 import BellIcon from "./bell.svg";
 
 export {
+  BankIcon,
   DownloadIcon,
   BellIcon,
   MoreDotIcon,

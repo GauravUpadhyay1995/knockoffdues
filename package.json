@@ -60,6 +60,7 @@
     "next": "15.2.3",
     "next-scratchcard": "^0.0.4",
     "popper.js": "^1.16.1",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-chartjs-2": "^5.3.0",

@@ -25,7 +25,7 @@ export default async function GalleriesTables() {
 
   return (
     <div>
-      <PageBreadcrumb pageTitle="Gallery List" />
+      <PageBreadcrumb pageTitle="Galleries Management" />
       <div className="space-y-6">
         <GalleriesTable initialData={GalleriesData} />
       </div>

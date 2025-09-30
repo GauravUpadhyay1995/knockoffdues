@@ -237,7 +237,7 @@ export default function GalleriesTable({ initialData }: Props) {
                 <div className="flex flex-col gap-4 p-4">
                     {/* Header with filters and controls */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Galleries Management</h2>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white"></h2>
 
                         <div className="flex flex-wrap gap-2">
                             <Button

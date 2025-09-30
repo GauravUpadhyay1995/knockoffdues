@@ -42,7 +42,7 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="fixed mb-10 top-0 -left-6 flex w-full bg-white border-gray-200 z-[999] dark:border-gray-800 dark:bg-gray-900 border-b">
+    <header className="fixed mb-10 top-0 -left-6 flex w-full bg-white border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900 border-b">
       <div className="flex items-center justify-between w-full px-3 py-3 lg:px-6 lg:py-4">
 
         {/* LEFT SECTION */}

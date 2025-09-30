@@ -3,6 +3,7 @@ import { connectToDB } from '@/config/mongo';
 import { asyncHandler } from '@/lib/asyncHandler';
 import { sendResponse } from '@/lib/sendResponse';
 import { Department } from '@/models/Department';
+import mongoose from 'mongoose';
 
 export const GET = asyncHandler(async (req: NextRequest) => {
     await connectToDB();
@@ -10,107 +11,68 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     const searchParams = req.nextUrl.searchParams;
     const search = searchParams.get('search')?.trim() || '';
     const department = searchParams.get('department')?.trim() || '';
+    
+    // Normalize and validate pagination parameters
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const perPage = (searchParams.get('perPage') || '10').toLowerCase();
+    const perPage = searchParams.get('perPage')?.toLowerCase();
     const customLimit = parseInt(searchParams.get('customLimit') || '', 10) || 0;
 
     const showAll = perPage === 'all';
-    const limit = customLimit || (showAll ? 0 : Math.min(parseInt(perPage, 10) || 10, 100));
-    const skip = showAll ? 0 : (page - 1) * limit;
+    const limit = customLimit || (showAll ? 0 : Math.min(parseInt(perPage || '10', 10), 100));
+    const skip = (page - 1) * limit;
 
     if (page < 1 || limit < 0) {
-        return sendResponse(
-            { success: false, message: 'Invalid pagination parameters' },
-            { status: 400 }
-        );
+        return sendResponse({
+            success: false,
+            statusCode: 400,
+            message: 'Invalid pagination parameters. Page and limit must be positive.',
+        });
     }
 
-    // Build match conditions
-    const filter: Record<string, any> = {};
-    if (department) filter.department = { $regex: department, $options: 'i' };
-    if (search) filter.$or = [{ department: { $regex: search, $options: 'i' } }];
+    // Build the query filter for find()
+    const filter: mongoose.FilterQuery<any> = {};
+    const regexOptions = { $options: 'i' };
 
-    // Base pipeline
-    const pipeline: any[] = [];
-    if (Object.keys(filter).length > 0) {
-        pipeline.push({ $match: filter });
+    if (search) {
+        // A single regex search on the department field
+        filter.department = { $regex: search, ...regexOptions };
+    } else if (department) {
+        // Fallback to department-specific search if 'search' is not used
+        filter.department = { $regex: department, ...regexOptions };
     }
-
-    pipeline.push(
-        { $project: { __v: 0, createdBy: 0, updatedBy: 0 } },
-        { $sort: { createdAt: -1 } }
-    );
-
-    const dataPipeline = [...pipeline];
-    if (!showAll) {
-        dataPipeline.push({ $skip: skip }, { $limit: limit });
-    }
-
-    const countPipeline = [...(Object.keys(filter).length ? [{ $match: filter }] : []), { $count: 'count' }];
-
-    const aggregationOptions = { allowDiskUse: true };
 
     try {
-        // Run in parallel
-        const [departments, totalCountArr] = await Promise.all([
-            Department.aggregate(dataPipeline, aggregationOptions),
-            Department.aggregate(countPipeline, aggregationOptions)
+        // Execute both queries in parallel for efficiency
+        const [departments, totalRecords] = await Promise.all([
+            Department.find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(showAll ? 0 : limit)
+                .select('-__v -createdBy -updatedBy') // Project fields
+                .lean(),
+            Department.countDocuments(filter),
         ]);
 
-        const totalRecords = totalCountArr?.[0]?.count ?? 0;
+        const totalPages = showAll ? 1 : Math.ceil(totalRecords / limit);
 
         return sendResponse({
             success: true,
+            statusCode: 200,
             message: departments.length ? 'Departments fetched successfully' : 'No departments found',
             data: {
+                departments,
                 totalRecords,
                 currentPage: page,
                 perPage: showAll ? totalRecords : limit,
-                totalPages: showAll ? 1 : Math.ceil(totalRecords / limit),
-                departments
-            }
+                totalPages,
+            },
         });
     } catch (error) {
-        console.error('Aggregation error:', error);
-
-        // Fallback to simpler query
-        try {
-            console.log('Trying fallback query without aggregation...');
-
-            let query = Department.find(filter)
-                .select('-__v')
-                .sort({ createdAt: -1 });
-
-            if (!showAll) {
-                query = query.skip(skip).limit(limit);
-            }
-
-            const [departments, totalRecords] = await Promise.all([
-                query.exec(),
-                Department.countDocuments(filter)
-            ]);
-
-            return sendResponse({
-                success: true,
-                message: departments.length ? 'Departments fetched successfully' : 'No departments found',
-                data: {
-                    totalRecords,
-                    currentPage: page,
-                    perPage: showAll ? totalRecords : limit,
-                    totalPages: showAll ? 1 : Math.ceil(totalRecords / limit),
-                    departments
-                }
-            });
-        } catch (fallbackError) {
-            console.error('Fallback query also failed:', fallbackError);
-            return sendResponse(
-                {
-                    success: false,
-                    message: 'Failed to fetch departments due to database error',
-                    data: null
-                },
-                500
-            );
-        }
+        console.error('Failed to fetch departments:', error);
+        return sendResponse({
+            success: false,
+            statusCode: 500,
+            message: 'Failed to fetch departments due to a database error.',
+        });
     }
 });

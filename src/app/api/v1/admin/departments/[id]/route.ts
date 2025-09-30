@@ -1,33 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDB } from '@/config/mongo';
 import { Department } from '@/models/Department';
-
 import { asyncHandler } from '@/lib/asyncHandler';
+import { sendResponse } from '@/lib/sendResponse';
 
-export const GET =   asyncHandler(async (_req: NextRequest, { params }: { params: { id: string } }) => {
+export const GET = asyncHandler(async (_req: NextRequest, { params }: { params: { id: string } }) => {
     await connectToDB();
 
-    const { id: departmentID } = params || {};
+    const { id } = params;
 
-    if (!departmentID?.trim()) {
-      return NextResponse.json(
-        { success: false, message: 'Department ID is missing in route' },
-        { status: 400 }
-      );
+    // 1. Validate ObjectId early for security and efficiency
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        return sendResponse({
+            success: false,
+            statusCode: 400,
+            message: 'Invalid or missing department ID',
+        });
     }
 
-    const departmentData = await Department.findById(departmentID).lean();
+    // 2. Optimized findById with lean()
+    const departmentData = await Department.findById(id).lean();
 
+    // 3. Handle not found case
     if (!departmentData) {
-      return NextResponse.json(
-        { success: false, message: 'Department not found' },
-        { status: 404 }
-      );
+        return sendResponse({
+            success: false,
+            statusCode: 404,
+            message: 'Department not found',
+        });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Department fetched successfully',
-      data: departmentData,
+    // 4. Return success response
+    return sendResponse({
+        success: true,
+        statusCode: 200,
+        message: 'Department fetched successfully',
+        data: departmentData,
     });
-  })
+});

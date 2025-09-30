@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { asyncHandler } from '@/lib/asyncHandler';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { connectToDB } from '@/config/mongo';
 import { Team } from '@/models/Team';
 import { uploadBufferToS3 } from '@/lib/uploadToS3';

@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDB } from '@/config/mongo';
 import { News } from '@/models/News';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { asyncHandler } from '@/lib/asyncHandler';
 import mongoose from 'mongoose';
 

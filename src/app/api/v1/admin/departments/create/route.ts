@@ -4,6 +4,7 @@ import { asyncHandler } from "@/lib/asyncHandler";
 import { verifyAdmin } from "@/lib/verifyAdmin";
 import { connectToDB } from "@/config/mongo";
 import { Department } from "@/models/Department";
+import { sendResponse } from '@/lib/sendResponse';
 
 type CreateDepartmentBody = {
   department: string;
@@ -14,125 +15,80 @@ export const POST = verifyAdmin(
   asyncHandler(async (req: NextRequest) => {
     await connectToDB();
 
-    let body = await req.json();
+    const body = await req.json();
+    let departmentsToCreate: CreateDepartmentBody[];
 
-    // Transform array of strings into array of objects if needed
-    if (Array.isArray(body) && body.every((item) => typeof item === "string")) {
-      body = body.map((department) => ({ department }));
+    // Normalize input to an array of objects
+    if (Array.isArray(body)) {
+      departmentsToCreate = body.map(item => typeof item === "string" ? { department: item } : item as CreateDepartmentBody);
+    } else {
+      departmentsToCreate = [body as CreateDepartmentBody];
     }
-
-    // Normalize into array for consistent processing
-    const departments: CreateDepartmentBody[] = Array.isArray(body) ? body : [body];
-
-    // Validate each department
-    const validationErrors: { index: number; errors: Record<string, string> }[] = [];
-    const validDepartments: CreateDepartmentBody[] = [];
-
-    departments.forEach((dept, idx) => {
-      const { error, value } = createDepartmentSchema.validate(dept, {
-        abortEarly: false,
-      });
-
-      if (error) {
-        validationErrors.push({
-          index: idx,
-          errors: Object.fromEntries(error.details.map((d) => [d.path.join("."), d.message])),
-        });
-      } else {
-        validDepartments.push(value);
-      }
+    
+    // Validate all departments and collect errors and valid data in a single pass
+    const validationResults = departmentsToCreate.map((dept, index) => {
+      const { error, value } = createDepartmentSchema.validate(dept, { abortEarly: false });
+      return { index, error, value };
     });
 
+    const validationErrors = validationResults.filter(res => res.error).map(err => ({
+      index: err.index,
+      errors: Object.fromEntries(err.error!.details.map(d => [d.path.join("."), d.message])),
+    }));
+
     if (validationErrors.length > 0) {
-      console.log("Validation errors:", validationErrors); // Debug: Log validation errors
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Validation failed",
-          errors: validationErrors,
-        },
-        { status: 400 }
-      );
+      return sendResponse({
+        success: false,
+        statusCode: 400,
+        message: "Validation failed for some departments",
+        errors: validationErrors,
+      });
     }
+    
+    // Extract and normalize names of valid departments
+    const validDepartments = validationResults.map(res => ({
+      ...res.value,
+      department: res.value.department.trim().toLowerCase(),
+    }));
 
-    // Service call
-    const creationResult = await createDepartments(validDepartments);
+    try {
+      // Find existing departments and filter out new ones
+      const existingDepartments = await Department.find({
+        department: { $in: validDepartments.map(d => d.department) },
+      }).lean();
 
-    return NextResponse.json(
-      {
-        success: creationResult.success,
-        message: creationResult.message,
-        data: creationResult.data,
-        errors: creationResult.errors,
-      },
-      { status: creationResult.status }
-    );
+      const existingNames = new Set(existingDepartments.map(d => d.department));
+
+      const newDepartments = validDepartments.filter(d => !existingNames.has(d.department));
+      
+      if (newDepartments.length === 0) {
+        return sendResponse({
+          success: false,
+          statusCode: 409,
+          message: "All provided departments already exist",
+          errors: Array.from(existingNames),
+        });
+      }
+
+      const result = await Department.insertMany(newDepartments);
+      const skippedCount = departmentsToCreate.length - newDepartments.length;
+
+      return sendResponse({
+        success: true,
+        statusCode: 201,
+        message: `Departments added successfully. Skipped ${skippedCount} duplicate(s).`,
+        data: result,
+        errors: skippedCount > 0 ? Array.from(existingNames) : undefined,
+      });
+
+    } catch (error: any) {
+      console.error("Department creation failed:", error);
+      return sendResponse({
+        success: false,
+        statusCode: 500,
+        message: "Failed to create departments",
+        errors: error.message || "An unexpected error occurred",
+      });
+    }
   })
 );
-
-// --- Service Layer ---
-export const createDepartments = async (departments: CreateDepartmentBody[]) => {
-  try {
-    await connectToDB();
-
-    // Normalize names to lowercase
-    const deptNames = departments.map((d) => d.department.trim().toLowerCase());
-
-    // Find duplicates in DB
-    const existingDepts = await Department.find({
-      department: { $in: deptNames },
-    }).lean();
-
-    const existingNames = new Set(existingDepts.map((d) => d.department.toLowerCase()));
-
-    // Filter out new ones
-    const newDepartments = departments.filter(
-      (d) => !existingNames.has(d.department.trim().toLowerCase())
-    );
-
-    if (newDepartments.length === 0) {
-      return {
-        status: 409,
-        success: false,
-        message: "provided departments already exist",
-        data: [],
-        errors: Array.from(existingNames),
-      };
-    }
-
-    // Insert new departments
-    const result = await Department.insertMany(
-      newDepartments.map((d) => ({
-        department: d.department.trim().toLowerCase(),
-        isActive: d.isActive ?? true,
-      }))
-    );
-
-    return {
-      status: 200,
-      success: true,
-      message: `Departments added successfully. Skipped ${
-        departments.length - newDepartments.length
-      } duplicate(s).`,
-      data: result,
-      errors: Array.from(existingNames),
-    };
-  } catch (error: any) {
-    console.error("Department creation failed:", error);
-    const formatted = formatMongooseError(error);
-    return {
-      status: 400,
-      success: false,
-      message: formatted.message,
-      errors: formatted.errors,
-      data: null,
-    };
-  }
-};
-
-function formatMongooseError(error: any) {
-  return {
-    message: error.message || "An error occurred",
-    errors: error.errors || {},
-  };
-}

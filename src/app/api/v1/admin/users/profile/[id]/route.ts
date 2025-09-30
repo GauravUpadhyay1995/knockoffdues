@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDB } from '@/config/mongo';
 import { User } from '@/models/User';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { asyncHandler } from '@/lib/asyncHandler';
 import {verifyAdmin}  from '@/lib/verifyAdmin';
 

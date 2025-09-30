@@ -1,88 +1,98 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { asyncHandler } from '@/lib/asyncHandler';
-import { withAuth } from '@/lib/withAuth';
 import { connectToDB } from '@/config/mongo';
 import { ImportantDocument } from '@/models/ImportantDocument';
-import { User } from '@/models/User';
-
 import { uploadBufferToS3 } from '@/lib/uploadToS3';
 import { updateImportantDocSchema } from '@/lib/validations/document.schema';
 import mongoose, { Types } from 'mongoose';
-import {verifyAdmin}  from '@/lib/verifyAdmin';
+import { verifyAdmin } from '@/lib/verifyAdmin';
+import { sendResponse } from '@/lib/sendResponse';
 
 export const PATCH = verifyAdmin(
-  asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
-    await connectToDB();
+    asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+        await connectToDB();
+        const user = (req as any).user;
+        const { id: documentId } = params;
 
-    const user = (req as any).user;
-    const documentId = params.id;
-
-   
-
-    const existingDoc = await ImportantDocument.findById(documentId);
-    if (!existingDoc) {
-      return NextResponse.json({ success: false, message: 'Document not found' }, { status: 404 });
-    }
-
-    const formData = await req.formData();
-    const rawBody: any = {};
-    for (const [key, value] of formData.entries()) {
-      rawBody[key] = value;
-    }
-
-    if (rawBody.publishDate) {
-      rawBody.publishDate = new Date(rawBody.publishDate);
-    }
-
-    const fileList = formData.getAll('documents') as File[];
-    delete rawBody.documents;
-
-    // ✅ Joi validation
-    const { error, value } = updateImportantDocSchema.validate(rawBody, { abortEarly: false });
-    if (error) {
-      const formatted = error.details.reduce((acc, curr) => {
-        acc[curr.path[0] as string] = curr.message;
-        return acc;
-      }, {} as Record<string, string>);
-      return NextResponse.json({ success: false, message: 'Validation failed', errors: formatted }, { status: 400 });
-    }
-
-    // ✅ Upload any new documents
-    let newDocs: {
-      url: string;
-      mimetype: string;
-      size: number;
-    }[] = [];
-
-    if (fileList.length > 0) {
-      for (const file of fileList) {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const uploaded = await uploadBufferToS3(buffer, file.type, file.name, 'documents');
-
-        if (uploaded?.url) {
-          newDocs.push({
-            url: uploaded.url,
-            mimetype: file.type,
-            size: file.size,
-          });
+        // 1. Validate ID and fetch the existing document in a single step
+        if (!documentId || !mongoose.Types.ObjectId.isValid(documentId)) {
+            return sendResponse({ success: false, statusCode: 400, message: 'Invalid document ID.' });
         }
-      }
-    }
+        
+        const existingDoc = await ImportantDocument.findById(documentId).lean();
+        if (!existingDoc) {
+            return sendResponse({ success: false, statusCode: 404, message: 'Document not found.' });
+        }
 
-    // ✅ Merge fields
-    value.updatedBy = new Types.ObjectId(user.id);
-    value.documents = [...(existingDoc.documents || []), ...newDocs];
+        const formData = await req.formData();
+        const rawBody: any = {};
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'documents') {
+                rawBody[key] = value;
+            }
+        }
+        
+        // Joi validation on non-file fields
+        const { error, value } = updateImportantDocSchema.validate(rawBody, { abortEarly: false });
+        if (error) {
+            const formattedErrors = error.details.reduce((acc, curr) => {
+                acc[curr.path[0] as string] = curr.message;
+                return acc;
+            }, {} as Record<string, string>);
+            return sendResponse({ success: false, statusCode: 400, message: 'Validation failed', errors: formattedErrors });
+        }
+        
+        // 2. Upload new documents concurrently
+        const fileList = formData.getAll('documents') as File[];
+        let newDocs: { url: string; mimetype: string; size: number }[] = [];
 
-    const updatedDoc = await ImportantDocument.findByIdAndUpdate(documentId, value, {
-      new: true,
+        if (fileList.length > 0) {
+            try {
+                const uploadPromises = fileList.map(async (file) => {
+                    const buffer = Buffer.from(await file.arrayBuffer());
+                    const uploaded = await uploadBufferToS3(buffer, file.type, file.name, 'documents');
+                    if (!uploaded?.url) {
+                        return null; // Return null for failed uploads
+                    }
+                    return { url: uploaded.url, mimetype: file.type, size: file.size };
+                });
+                
+                const results = await Promise.all(uploadPromises);
+                newDocs = results.filter(Boolean) as any[]; // Filter out failed uploads
+            } catch (s3Error) {
+                console.error("S3 upload failed:", s3Error);
+                return sendResponse({ success: false, statusCode: 500, message: 'Failed to upload documents.' });
+            }
+        }
+        
+        // 3. Prepare the final update object
+        const updatedFields: any = {
+            ...value,
+            updatedBy: new Types.ObjectId(user.id),
+        };
+        
+        // Merge existing and new documents
+        const mergedDocuments = [...(existingDoc.documents || []), ...newDocs];
+        if (mergedDocuments.length > 0) {
+            updatedFields.documents = mergedDocuments;
+        }
+
+        // 4. Perform the atomic update and return the result
+        const updatedDoc = await ImportantDocument.findByIdAndUpdate(
+            documentId,
+            updatedFields,
+            { new: true, lean: true }
+        );
+        
+        if (!updatedDoc) {
+            return sendResponse({ success: false, statusCode: 404, message: 'Document not found after update.' });
+        }
+
+        return sendResponse({
+            success: true,
+            statusCode: 200,
+            message: 'Document updated successfully.',
+            data: updatedDoc,
+        });
     })
-      // .populate('createdBy updatedBy', 'name') // ✅ populate names
-      .lean();
-
-    return NextResponse.json({
-      success: true,
-      message: 'Document updated successfully',
-      data: updatedDoc,
-    });
-  })
 );

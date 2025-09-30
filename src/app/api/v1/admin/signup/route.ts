@@ -4,11 +4,14 @@ import { createUserSchema } from "@/lib/validations/user.schema";
 import { User } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { uploadBufferToS3 } from "@/lib/uploadToS3";
-
+import { getHr } from "@/utils/helper"
+import { createNotification } from "@/lib/createNotification";
 export const POST = async (req: NextRequest) => {
   try {
     await connectToDB();
-
+    const hrData = await getHr();
+    console.log("hrData", hrData)
+    const userId = hrData._id.toString()
     const form = await req.formData();
     const resume = form.get("resume") as File | null;
 
@@ -75,6 +78,18 @@ export const POST = async (req: NextRequest) => {
 
     const userObj = newUser.toObject();
     delete userObj.password;
+
+
+
+    await createNotification({
+      notificationType: "Followup",
+      title: `A new Lead has been registered`,
+      descriptions: `<b>Name</b>: ${jsonBody.name}<br><b>Email</b>: ${jsonBody.email}<br><b>Mobile</b>: ${jsonBody.mobile}`,
+      docs: [],
+      createdBy: userObj._id,
+      userId: [userId],
+    })
+
 
     return NextResponse.json(
       { success: true, message: "User Registered", data: userObj },

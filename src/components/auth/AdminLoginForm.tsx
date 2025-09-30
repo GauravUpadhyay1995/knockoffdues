@@ -64,7 +64,7 @@ export default function AdminLoginForm() {
   return (
     <>
 
-      <div className="mt-4 flex items-center justify-center min-h-screen   dark:bg-gray-900 p-4 sm:p-6">
+      <div className="mt-4 flex items-center justify-center    dark:bg-gray-900 p-4 sm:p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -95,7 +95,7 @@ export default function AdminLoginForm() {
               transition={{ duration: 0.3, delay: 0.2 }}
               className="mb-1.5 font-semibold text-gray-800 text-3xl sm:text-4xl lg:text-5xl dark:text-white/90"
             >
-             Login Panel
+              Login Panel
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -200,11 +200,11 @@ export default function AdminLoginForm() {
                   className="block p-2 rounded-lg transition-all duration-300 transform"
                   aria-label="Go to Home page"
                 >
-                   <Image   className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
+                  <Image className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
                 </Link>
               </div>
               <h2 className="font-bold text-3xl sm:text-4xl mb-4 leading-tight">
-                 Dashboard Access
+                Dashboard Access
               </h2>
               <p className="text-purple-100 text-lg mb-8 opacity-90">
                 Welcome to the dashboard. Please login to access the features.

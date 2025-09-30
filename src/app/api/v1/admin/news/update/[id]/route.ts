@@ -5,7 +5,7 @@ import { News } from '@/models/News';
 import { uploadBufferToS3 } from '@/lib/uploadToS3';
 import {verifyAdmin}  from '@/lib/verifyAdmin';
 // import { ApiError } from '@/lib/errorHandler';
-// import { withAuth } from '@/lib/withAuth';
+//  
 
 export const PATCH = verifyAdmin(
   asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {

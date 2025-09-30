@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createUserSchema } from '@/lib/validations/user.schema';
 import { asyncHandler } from '@/lib/asyncHandler';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { verifyAdmin } from '@/lib/verifyAdmin';
 import { connectToDB } from '@/config/mongo';
 import { User } from '@/models/User';

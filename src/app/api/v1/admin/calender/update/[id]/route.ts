@@ -1,178 +1,128 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { Calender } from "@/models/Calender";
+import { asyncHandler } from '@/lib/asyncHandler';
+import { verifyAdmin } from '@/lib/verifyAdmin';
+import { sendResponse } from '@/lib/sendResponse';
+
+// Utility function for validation
+const validateMeetingData = (body: any) => {
+    const { title, start, end, creator, attendees, category } = body;
+
+    if (!title || !start || !end || !creator) {
+        return 'Missing required fields: title, start, end, creator';
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+        return 'Invalid date or end date is not after start date';
+    }
+
+    const now = new Date();
+    if (startDate < now) {
+        return 'Cannot schedule events in the past';
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(creator)) {
+        return 'Invalid creator ID';
+    }
+
+    if (attendees && (!Array.isArray(attendees) || !attendees.every((id: string) => mongoose.Types.ObjectId.isValid(id)))) {
+        return 'Invalid attendee ID(s)';
+    }
+
+    const validCategories = ['Task', 'Meeting', 'Birthday', 'Event', 'Followup', 'Other'];
+    if (category && !validCategories.includes(category)) {
+        return 'Invalid category';
+    }
+
+    return null; // Return null if validation passes
+};
 
 // PUT: Update an existing meeting
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    try {
-        const body = await request.json();
+export const PUT = verifyAdmin(
+    asyncHandler(async (request: NextRequest, { params }: { params: { id: string } }) => {
         const { id } = params;
+        const body = await request.json();
+        const user = (request as any).user;
 
-        // Validate meeting ID
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid meeting ID' }, { status: 400 });
+            return sendResponse({ success: false, statusCode: 400, message: 'Invalid meeting ID' });
         }
 
-        // Check if meeting exists
-        const existingMeeting = await Calender.findById(id);
+        const validationError = validateMeetingData(body);
+        if (validationError) {
+            return sendResponse({ success: false, statusCode: 400, message: validationError });
+        }
+
+        const { creator, attendees, start, end } = body;
+
+        // Optimized single query to find and check ownership
+        const existingMeeting = await Calender.findOne({ _id: id, creator: user.id }).select('creator');
         if (!existingMeeting) {
-            return NextResponse.json({ error: 'Meeting not found' }, { status: 404 });
+            return sendResponse({ success: false, statusCode: 404, message: 'Meeting not found or you do not have permission to update it' });
         }
 
-        // Input validation - required fields
-        if (!body.title || !body.start || !body.end) {
-            return NextResponse.json({ error: 'Missing required fields: title, start, end' }, { status: 400 });
-        }
+        // Time conflict check (can be optimized with a single query)
+        const conflictCheck = await Calender.find({
+            _id: { $ne: id },
+            $and: [
+                {
+                    $or: [
+                        { creator: { $in: [...(attendees || []), creator] } },
+                        { attendees: { $in: [...(attendees || []), creator] } }
+                    ]
+                },
+                {
+                    $and: [{ start: { $lt: end } }, { end: { $gt: start } }]
+                }
+            ]
+        });
 
-        // Validate date fields
-        const startDate = new Date(body.start);
-        const endDate = new Date(body.end);
-        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-            return NextResponse.json({ error: 'Invalid date format' }, { status: 400 });
-        }
-
-        // Prevent updating to past dates
-        const now = new Date();
-        if (startDate < now) {
-            return NextResponse.json({ error: 'Cannot schedule events in the past' }, { status: 400 });
-        }
-
-        if (startDate >= endDate) {
-            return NextResponse.json({ error: 'End date must be after start date' }, { status: 400 });
-        }
-
-        // Validate creator and attendees
-        if (!mongoose.Types.ObjectId.isValid(body.creator)) {
-            return NextResponse.json({ error: 'Invalid creator ID' }, { status: 400 });
-        }
-
-        // Ensure creator has permission to update (security check)
-        if (existingMeeting.creator.toString() !== body.creator) {
-            return NextResponse.json({ error: 'Unauthorized: You can only update meetings you created' }, { status: 403 });
-        }
-
-        // Validate attendees
-        if (body.attendees && (!Array.isArray(body.attendees) || !body.attendees.every((attendeeId: string) => mongoose.Types.ObjectId.isValid(attendeeId)))) {
-            return NextResponse.json({ error: 'Invalid attendee ID(s)' }, { status: 400 });
-        }
-
-        // Validate category
-        const validCategories = ['Task', 'Meeting', 'Birthday', 'Event', 'Followup', 'Other'];
-        if (body.category && !validCategories.includes(body.category)) {
-            return NextResponse.json({ error: 'Invalid category' }, { status: 400 });
-        }
-
-        // Check for time conflicts with other meetings
-        if (body.attendees && body.attendees.length > 0) {
-            const conflictCheck = await Calender.find({
-                $and: [
-                    { _id: { $ne: id } }, // Exclude the current meeting
-                    {
-                        $or: [
-                            { creator: { $in: [body.creator, ...body.attendees] } },
-                            { attendees: { $in: [body.creator, ...body.attendees] } }
-                        ]
-                    },
-                    {
-                        $or: [
-                            {
-                                $and: [
-                                    { start: { $lt: endDate } },
-                                    { end: { $gt: startDate } }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+        if (conflictCheck.length > 0) {
+            return sendResponse({
+                success: false,
+                statusCode: 409,
+                message: 'Time conflict detected with another meeting',
+                data: conflictCheck
             });
-
-            if (conflictCheck.length > 0) {
-                const conflicts = conflictCheck.map(c => ({
-                    title: c.title,
-                    start: c.start,
-                    end: c.end,
-                    creator: c.creator,
-                    attendees: c.attendees
-                }));
-                return NextResponse.json({
-                    error: 'Time conflict detected',
-                    conflicts
-                }, { status: 409 });
-            }
         }
 
-        // Update the meeting
         const updatedMeeting = await Calender.findByIdAndUpdate(
             id,
-            {
-                title: body.title,
-                description: body.description || '',
-                start: startDate,
-                end: endDate,
-                creator: body.creator,
-                attendees: body.attendees || [],
-                category: body.category || 'Other',
-                updatedAt: new Date() // Add timestamp for when it was last updated
-            },
-            {
-                new: true, // Return the updated document
-                runValidators: true // Run validation on update
-            }
-        );
-
-        if (!updatedMeeting) {
-            return NextResponse.json({ error: 'Failed to update meeting' }, { status: 500 });
-        }
-
-        // Populate the response
-        const populatedMeeting = await Calender.findById(updatedMeeting._id)
+            { ...body, updatedAt: new Date() },
+            { new: true, runValidators: true }
+        )
             .populate('creator', 'name')
             .populate('attendees', 'name')
             .lean();
 
-        return NextResponse.json(populatedMeeting, { status: 200 });
+        if (!updatedMeeting) {
+            return sendResponse({ success: false, statusCode: 500, message: 'Failed to update meeting' });
+        }
 
-    } catch (error) {
-        console.error('Error updating meeting:', error);
-        return NextResponse.json({ error: 'Failed to update meeting' }, { status: 500 });
-    }
-}
+        return sendResponse({ success: true, statusCode: 200, message: 'Meeting updated successfully', data: updatedMeeting });
+    })
+);
 
 // DELETE: Delete a meeting
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    try {
+export const DELETE = verifyAdmin(
+    asyncHandler(async (request: NextRequest, { params }: { params: { id: string } }) => {
         const { id } = params;
+        const user = (request as any).user;
 
-        // Validate meeting ID
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: 'Invalid meeting ID' }, { status: 400 });
+            return sendResponse({ success: false, statusCode: 400, message: 'Invalid meeting ID' });
         }
 
-        // Check if meeting exists and get creator
-        const existingMeeting = await Calender.findById(id).select('creator');
-        if (!existingMeeting) {
-            return NextResponse.json({ error: 'Meeting not found' }, { status: 404 });
-        }
-
-        // You might want to add authentication here to verify the user is the creator
-        // For now, we'll assume the request is authenticated and includes the user ID
-        const authHeader = request.headers.get('authorization');
-        // TODO: Extract user ID from auth token and compare with existingMeeting.creator
-
-        // Delete the meeting
-        const deletedMeeting = await Calender.findByIdAndDelete(id);
+        // Optimized single query to find and delete, ensuring ownership
+        const deletedMeeting = await Calender.findOneAndDelete({ _id: id, creator: user.id });
 
         if (!deletedMeeting) {
-            return NextResponse.json({ error: 'Failed to delete meeting' }, { status: 500 });
+            return sendResponse({ success: false, statusCode: 404, message: 'Meeting not found or you do not have permission to delete it' });
         }
 
-        return NextResponse.json({
-            message: 'Meeting deleted successfully',
-            id: id
-        }, { status: 200 });
-
-    } catch (error) {
-        console.error('Error deleting meeting:', error);
-        return NextResponse.json({ error: 'Failed to delete meeting' }, { status: 500 });
-    }
-}
+        return sendResponse({ success: true, statusCode: 200, message: 'Meeting deleted successfully' });
+    })
+);

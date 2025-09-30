@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDB } from '@/config/mongo';
 import { Trl } from '@/models/Trl';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { asyncHandler } from '@/lib/asyncHandler';
 
 export const GET =   asyncHandler(async (_req: NextRequest, { params }: { params: { id: string } }) => {

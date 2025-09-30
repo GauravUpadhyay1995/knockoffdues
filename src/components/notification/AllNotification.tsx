@@ -129,6 +129,9 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
             Reminder: "⏰",
             Social: "👥",
             System: "💻",
+            User: "👤",
+            Followup:"👤",
+
         };
 
         return icons[type as keyof typeof icons] || icons.Other;
@@ -180,7 +183,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     return (
         <>
             {/* Backdrop - removed onClick handler */}
-            <div className="fixed inset-0 bg-black/5 backdrop-blur-xs z-40" />
+            <div className="fixed inset-0 bg-black/5 backdrop-blur-xs " />
 
             {/* Dropdown */}
             <div
@@ -191,7 +194,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                         e.stopPropagation();
                     }
                 }} // 🛑 Prevent closing when clicking inside
-                className="fixed top-16 right-4 w-96 max-w-sm dark:bg-gray-800 bg-white rounded-xl shadow-2xl border border-gray-200 animate-slideIn z-50"
+                className="fixed top-16 right-4 w-96 max-w-sm dark:bg-gray-800 bg-white rounded-xl shadow-2xl border border-gray-200 animate-slideIn"
             >
                 {/* Header */}
                 <div className="p-4 border-b border-gray-200 dark:bg-gray-800 rounded-t-xl">
@@ -251,15 +254,15 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-1">
-                                                <h4 className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100"  dangerouslySetInnerHTML={{ __html: notification.title }}>
-                                                   
+                                                <h4 className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100" dangerouslySetInnerHTML={{ __html: notification.title }}>
+
                                                 </h4>
                                                 {!notification.isSeen && (
                                                     <span className="dark:text-gray-100 flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2"  dangerouslySetInnerHTML={{ __html: notification?.description }}>
-                                               
+                                            <p className="text-sm text-gray-600 mb-2 line-clamp-2" dangerouslySetInnerHTML={{ __html: notification?.description }}>
+
                                             </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-300">

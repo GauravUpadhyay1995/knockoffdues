@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
   // BoxCubeIcon,
-  // CalenderIcon,
+   CalenderIcon,
   // ListIcon,
   // PageIcon,
   // PieChartIcon,
@@ -17,7 +17,8 @@ import {
   GridIcon,
   HorizontaLDots,
   UserCircleIcon,
-  DocsIcon
+  DocsIcon,
+  BankIcon
 
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
@@ -30,7 +31,7 @@ type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { name: string; path: string; pro?: boolean; new?: boolean, icon?: React.ReactNode }[];
 };
 
 const AppSidebar: React.FC = () => {
@@ -51,10 +52,19 @@ const AppSidebar: React.FC = () => {
       path: "/admin",
     },
     {
-      icon: <GridIcon />,
+      icon: <CalenderIcon />,
       name: "Calender",
       path: "/admin/calender",
+    }, {
+      name: "Account Management",
+      icon: <BankIcon  />,
+      path: "/admin/accounts",
+      subItems: [
+        { name: "Venders", path: "/admin/accounts/venders", pro: true  },
+       
+      ],
     },
+
     {
       name: "Employee Management",
       icon: <UserCircleIcon />,
@@ -267,8 +277,19 @@ const AppSidebar: React.FC = () => {
                             : "menu-dropdown-item-inactive"
                             }`}
                         >
+                          {subItem.icon && (
+                              <span
+                                className={`ml-auto ${isActive(subItem.path)
+                                  ? "menu-dropdown-badge-active"
+                                  : "menu-dropdown-badge-inactive"
+                                  } menu-dropdown-badge `}
+                              >
+                               {subItem.icon }
+                              </span>
+                            )}
                           {subItem.name}
                           <span className="flex items-center gap-1 ml-auto">
+                               
                             {subItem.new && (
                               <span
                                 className={`ml-auto ${isActive(subItem.path)
@@ -381,7 +402,7 @@ const AppSidebar: React.FC = () => {
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      
+
 
       <div className="flex mt-30 flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">

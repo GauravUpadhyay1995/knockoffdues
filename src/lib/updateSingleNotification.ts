@@ -7,9 +7,10 @@ import { collection, query, where, getDocs, updateDoc } from "firebase/firestore
  */
 export async function markAsRead(notificationStatusId: string) {
   try {
+    console.log("notificationStatusId", notificationStatusId)
     // Step 1: Update in MongoDB
-    const updated = await NotificationStatus.findByIdAndUpdate(
-      notificationStatusId, // filter by custom field
+    const updated = await NotificationStatus.findOneAndUpdate(
+      { notificationId: notificationStatusId }, // filter by custom field
       { isSeen: true },                          // fields to update
       { new: true }                              // return the updated document
     );

@@ -18,7 +18,7 @@ export const PATCH = verifyAdmin(
     }
 
     const hrData = await User.findOne({ role: "hr" }).lean();
-    console.log("hrData", hrData);
+
 
     const existing = await User.findById(userId).lean();
     if (!existing) {

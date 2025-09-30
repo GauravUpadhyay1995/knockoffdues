@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDB } from "@/config/mongo";
 import { NotificationStatus } from "@/models/NotificationStatus";
+import { Notification } from "@/models/Notification"; // This line is crucial!
+
+// Define a type for the populated Notification document for better type safety
+interface PopulatedNotificationStatus {
+    _id: string;
+    userId: string;
+    isSeen: boolean;
+    createdAt: Date;
+    notificationId: {
+        title: string;
+        notificationType: string;
+        descriptions: string;
+        docs: string[];
+    };
+}
 
 export async function GET(
     req: NextRequest,
@@ -17,26 +32,27 @@ export async function GET(
             );
         }
 
-        // Only last 1 month notifications
+        // A more reliable way to get the date one month ago
         const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
-        // Get all notification statuses for this user
+        // Get all notification statuses for this user, sorted by creation date
         const statuses = await NotificationStatus.find({
             userId: id,
             createdAt: { $gte: oneMonthAgo },
         })
-            .populate("notificationId") // populate Notification data
-            .sort({ createdAt: -1 });
+            .populate("notificationId")
+            .sort({ createdAt: -1 })
+            .lean(); // Use .lean() for faster query performance
 
-        // Map response into desired format
-        const notifications = statuses.map((status: any) => {
+        // Map the response into the desired format with a clear type
+        const notifications = (statuses as PopulatedNotificationStatus[]).map((status) => {
             const n = status.notificationId;
             return {
-                id: status._id.toString(), // notification status id
+                id: status._id.toString(),
                 message: n?.title || "New Notification",
                 type: n?.notificationType || "Other",
-                read: status.isSeen,
+                read: status.isSeen, // Matches the front-end component's prop
                 timestamp: status.createdAt?.toISOString(),
                 descriptions: n?.descriptions || "",
                 docs: n?.docs || [],

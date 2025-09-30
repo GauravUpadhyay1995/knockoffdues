@@ -36,10 +36,10 @@ const EventModal: React.FC<EventModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg p-4 sm:p-6 w-full max-w-4xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div className=" bg-white dark:bg-gray-800  rounded-lg p-4 sm:p-6 w-full max-w-4xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 dark:text-gray-400 dark:hover:text-white transition-colors"
         >
           <X size={24} />
         </button>
@@ -49,7 +49,7 @@ const EventModal: React.FC<EventModalProps> = ({
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <Label className="text-gray-100" htmlFor="title">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="title">
                 Title
               </Label>
               <input
@@ -57,12 +57,12 @@ const EventModal: React.FC<EventModalProps> = ({
                 type="text"
                 value={event.title}
                 onChange={(e) => onEventChange('title', e.target.value)}
-                className="mt-1 block w-full bg-gray-700 dark:text-gray-100 text-gray-700 border border-gray-600 rounded-md p-2 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                 required
               />
             </div>
             <div>
-              <Label className="text-gray-100" htmlFor="start">
+              <Label className="dark:text-gray-100 text-gray-900" htmlFor="start">
                 Start
               </Label>
               <input
@@ -70,12 +70,12 @@ const EventModal: React.FC<EventModalProps> = ({
                 type="datetime-local"
                 value={format(new Date(event.start), "yyyy-MM-dd'T'HH:mm")}
                 onChange={(e) => onEventChange('start', new Date(e.target.value))}
-                className="mt-1 block w-full bg-gray-700 dark:text-gray-100 text-gray-700 border border-gray-600 rounded-md p-2 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                 required
               />
             </div>
             <div>
-              <Label className="text-gray-100" htmlFor="end">
+              <Label className="dark:text-gray-100 text-gray-900" htmlFor="end">
                 End
               </Label>
               <input
@@ -84,20 +84,20 @@ const EventModal: React.FC<EventModalProps> = ({
                 value={format(new Date(event.end), "yyyy-MM-dd'T'HH:mm")}
                 min={format(new Date(event.start), "yyyy-MM-dd'T'HH:mm")}
                 onChange={(e) => onEventChange('end', new Date(e.target.value))}
-                className="mt-1 block w-full bg-gray-700 dark:text-gray-100 text-gray-700 border border-gray-600 rounded-md p-2 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                 required
               />
             </div>
 
             <div>
-              <Label className="text-gray-100" htmlFor="category">
+              <Label className="dark:text-gray-100 text-gray-900" htmlFor="category">
                 Category
               </Label>
               <select
                 id="category"
                 value={event.category}
                 onChange={(e) => onEventChange('category', e.target.value)}
-                className="mt-1 block w-full bg-gray-700 dark:text-gray-100 text-gray-700 border border-gray-600 rounded-md p-2 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -107,7 +107,7 @@ const EventModal: React.FC<EventModalProps> = ({
               </select>
             </div>
             <div>
-              <Label className="text-gray-100" htmlFor="attendees">
+              <Label className="dark:text-gray-100 text-gray-900" htmlFor="attendees">
                 Assign To
               </Label>
               <MultiSelectDropdown
@@ -119,21 +119,21 @@ const EventModal: React.FC<EventModalProps> = ({
             </div>
           </div>
           <div>
-            <Label className="text-gray-100" htmlFor="description">
+            <Label className="dark:text-gray-100 text-gray-900" htmlFor="description">
               Description
             </Label>
             <textarea
               id="description"
               value={event.description}
               onChange={(e) => onEventChange('description', e.target.value)}
-              className="mt-1 block w-full bg-gray-700 dark:text-gray-100 text-gray-700 border border-gray-600 rounded-md p-2 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+              className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
               rows={3}
             ></textarea>
           </div>
           <button
             disabled={isLoading}
             type="submit"
-            className={`bg-indigo-600 dark:text-gray-100 text-gray-700 p-3 rounded-lg hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${isLoading?"cursor-not-allowed":""}`}
+            className={`dark:bg-indigo-600 bg-orange-500 hover:bg-orange-600 text-white dark:text-gray-100 text-gray-700 p-3 rounded-lg dark:hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${isLoading?"cursor-not-allowed":""}`}
           >
             {(isEditing && !isLoading) ? 'Update Event' : isLoading ? 'Please Wait' : 'Save Event'}
           </button>

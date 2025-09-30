@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/withAuth';
+ 
 import { asyncHandler } from '@/lib/asyncHandler';
 import { connectToDB } from '@/config/mongo';
 import { Gallery } from '@/models/Gallery';
