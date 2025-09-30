@@ -5,7 +5,7 @@ import { connectToDB } from '@/config/mongo';
 import { Gallery } from '@/models/Gallery';
 import { Types } from 'mongoose';
 
-export const PATCH = withAuth(
+export const PATCH =
     asyncHandler(async (req: NextRequest, { params }: { params: { id: string, videoId: string } }) => {
         await connectToDB();
         const { id: galleryId, videoId } = params;
@@ -40,9 +40,9 @@ export const PATCH = withAuth(
             data: gallery.toObject(),
         });
     })
-);
 
-export const DELETE = withAuth(
+
+export const DELETE = 
     asyncHandler(async (req: NextRequest, { params }: { params: { id: string, videoId: string } }) => {
         await connectToDB();
         const { id: galleryId, videoId } = params;
@@ -71,4 +71,4 @@ export const DELETE = withAuth(
             data: gallery.toObject(),
         });
     })
-);
+
