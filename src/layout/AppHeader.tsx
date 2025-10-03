@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "@/context/ThemeContext";
 import NotificationBell from "@/components/common/FireBaseNotification";
+import ReminderBell from "@/components/common/FireBaseReminder";
 import React, { useState, useEffect, useRef } from "react";
 
 const AppHeader: React.FC = () => {
@@ -48,7 +49,7 @@ const AppHeader: React.FC = () => {
         {/* LEFT SECTION */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Sidebar toggle */}
-                    <Link href="/admin" className="flex items-center ">
+          <Link href="/admin" className="flex items-center ">
             <Image
               className="h-20 w-20 z-30 fixed rounded-full object-cover mt-10 ml-10"
               src="/images/logo/logo.png"
@@ -58,7 +59,7 @@ const AppHeader: React.FC = () => {
               priority
             />
           </Link>
-         
+
 
           {/* Logo (mobile only) */}
 
@@ -66,7 +67,7 @@ const AppHeader: React.FC = () => {
 
         {/* RIGHT SECTION (always visible) */}
         <div className="flex items-center gap-3 ml-auto">
-           <button
+          <button
             className="items-center justify-center ml-30 w-10 h-10 text-gray-500 border-gray-200 rounded-lg dark:border-gray-800 lg:flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
@@ -91,6 +92,7 @@ const AppHeader: React.FC = () => {
               </svg>
             )}
           </button>
+          <ReminderBell />
           <NotificationBell />
           <ThemeToggleButton />
           <UserDropdown />

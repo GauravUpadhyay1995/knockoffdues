@@ -99,6 +99,12 @@ const reminderSchema = new Schema(
       type: [paymentSchema],
       default: [],
     },
+    notificationCreated: {
+      type: Boolean,
+      default: false,
+      required: true
+
+    }
   },
   { timestamps: true }
 );

@@ -59,7 +59,7 @@ export const POST = verifyAdmin(
         buffer,
         agreementFile.type,
         agreementFile.name,
-          "reminders/agreements/"
+        "reminders/agreements/"
       );
       agreementUrl = uploadResult?.url;
     }
@@ -73,7 +73,7 @@ export const POST = verifyAdmin(
           buffer,
           file.type,
           file.name,
-           "reminders/agreements/"
+          "reminders/agreements/"
         );
         if (uploadResult?.url) paymentSlipUrls.push(uploadResult.url);
       }
@@ -82,11 +82,11 @@ export const POST = verifyAdmin(
     // Map slips into payment array
     const paymentArray = validatedBody.paymentMonth
       ? [
-          {
-            month: validatedBody.paymentMonth,
-            slip: paymentSlipUrls.map((url) => ({ url })),
-          },
-        ]
+        {
+          month: validatedBody.paymentMonth,
+          slip: paymentSlipUrls.map((url) => ({ url })),
+        },
+      ]
       : [];
 
     // Prepare final reminder data

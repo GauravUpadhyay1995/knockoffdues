@@ -10,6 +10,7 @@ import Photo from "./(frontend)/events/photo";
 import { motion } from "framer-motion";
 import ThematicAreas from "@/components/common/ThematicArea";
 import Events from "@/app/(frontend)/events/page";
+import "@/lib/cronScheduler"; // import it once to start cron
 
 
 export default function HomePage() {
