@@ -1148,7 +1148,7 @@ export default function UserEditForm() {
           </div> */}
 
           {/* Submit Button */}
-          <div className="flex justify-end mt-8 space-x-4">
+       
 
 
             <div className="flex justify-end mt-8 space-x-4">
@@ -1206,7 +1206,7 @@ export default function UserEditForm() {
               </motion.button>
 
             </div>
-          </div>
+       
         </form>
       </motion.div>
 

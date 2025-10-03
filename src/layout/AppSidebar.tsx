@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
 import {
   // BoxCubeIcon,
-   CalenderIcon,
+  CalenderIcon,
   // ListIcon,
   // PageIcon,
   // PieChartIcon,
@@ -57,11 +57,11 @@ const AppSidebar: React.FC = () => {
       path: "/admin/calender",
     }, {
       name: "Account Management",
-      icon: <BankIcon  />,
+      icon: <BankIcon />,
       path: "/admin/accounts",
       subItems: [
-        { name: "Venders", path: "/admin/accounts/venders", pro: true  },
-       
+        { name: "Venders", path: "/admin/accounts/venders", pro: true },
+
       ],
     },
 
@@ -75,11 +75,7 @@ const AppSidebar: React.FC = () => {
       icon: <FolderIcon />,
       path: "/admin/tasks",
     },
-    {
-      name: "Departments",
-      icon: <FolderIcon />,
-      path: "/admin/departments",
-    },
+
     {
       name: "Teams Management",
       icon: <GroupIcon />,
@@ -135,6 +131,19 @@ const AppSidebar: React.FC = () => {
         { name: "Add Gallery", path: "/admin/gallery/add", pro: false },
       ],
     },
+    {
+      name: "Settings",
+      icon: <FolderIcon />,
+      path: "/admin/settings",
+      subItems: [
+        { name: "Permissions", path: "/admin/settings/permissions", pro: false },
+        { name: "Branches", path: "/admin/settings/branches", pro: false },
+        { name: "Department", path: "/admin/departments", pro: false },
+        { name: "Roles", path: "/admin/settings/roles", pro: false },
+        { name: "Company Setup", path: "/admin/settings/config", pro: true },
+      ],
+    },
+
 
   ];
 
@@ -278,18 +287,18 @@ const AppSidebar: React.FC = () => {
                             }`}
                         >
                           {subItem.icon && (
-                              <span
-                                className={`ml-auto ${isActive(subItem.path)
-                                  ? "menu-dropdown-badge-active"
-                                  : "menu-dropdown-badge-inactive"
-                                  } menu-dropdown-badge `}
-                              >
-                               {subItem.icon }
-                              </span>
-                            )}
+                            <span
+                              className={`ml-auto ${isActive(subItem.path)
+                                ? "menu-dropdown-badge-active"
+                                : "menu-dropdown-badge-inactive"
+                                } menu-dropdown-badge `}
+                            >
+                              {subItem.icon}
+                            </span>
+                          )}
                           {subItem.name}
                           <span className="flex items-center gap-1 ml-auto">
-                               
+
                             {subItem.new && (
                               <span
                                 className={`ml-auto ${isActive(subItem.path)

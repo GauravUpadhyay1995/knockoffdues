@@ -38,7 +38,7 @@ type UserData = {
     name: string;
     email: string;
     mobile: string;
-    role: 'admin' | 'user';
+    role: string;
     isActive: boolean;
     position?: string;
     department?: string;
@@ -201,6 +201,7 @@ export default function UserEditForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [departments, setDepartments] = useState<Array<{ _id: string; name: string }>>([]);
+    const [roleList, setRoleList] = useState<Array<{ _id: string; role: string }>>([]);
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({
         personal: true,
         contact: false,
@@ -279,13 +280,17 @@ export default function UserEditForm() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [userRes, deptRes] = await Promise.all([
+                const [userRes, deptRes, roleListResp] = await Promise.all([
                     axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/${userId}`),
-                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/departments/list?perPage=all`,)
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/departments/list?perPage=all`),
+                    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/roles/active-list?perPage=all`)
                 ]);
 
                 setTimeout(() => {
                     const mockUser = userRes.data.data;
+                    const roleList = Array.isArray(roleListResp.data.data)
+                        ? roleListResp.data.data
+                        : roleListResp.data.data?.roles || [];
 
                     // Ensure array
                     const deptArray = Array.isArray(deptRes.data.data)
@@ -294,6 +299,7 @@ export default function UserEditForm() {
 
                     setUser(mockUser);
                     setDepartments(deptArray);
+                    setRoleList(roleList);
                     reset(mockUser);
                 }, 800);
             } catch (err) {
@@ -490,41 +496,30 @@ export default function UserEditForm() {
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
             >
 
-                <div className="dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-100 flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h2 className="text-2xl md:text-3xl font-bold">
-                            {user?.name}&apos;s Profile
-                        </h2>
-                        <p className="text-gray-900 dark:text-gray-100 mt-1">
-                            Update {user?.name}&apos;s information and preferences
-                        </p>
-                    </div>
-
-                    {user?.resume && (
-                        <a
-                            href={user.resume}      // S3 public URL
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            className="mt-4 md:mt-0 inline-flex items-center gap-2 rounded-lg bg-orange-500 hover:bg-orange-700 text-white px-4 py-2 text-sm font-medium transition"
-                        >
-                            Download Resume
-                            <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
-                                />
-                            </svg>
-                        </a>
-                    )}
-                </div>
+                 <div className="dark:bg-gray-900 p-6 text-gray-900 dark:text-gray-100">
+                         <div className="flex flex-wrap items-center justify-between gap-4">
+                           {/* Left Content */}
+                           <div>
+                             <h2 className="text-2xl md:text-3xl font-bold">{user?.name}`s Profile</h2>
+                             <p className="text-gray-900 dark:text-gray-100 mt-1">
+                               Update {user?.name}`s information and preferences
+                             </p>
+                           </div>
+               
+                           {/* Right Badges */}
+                           <div className="flex flex-wrap gap-2 ml-auto">
+                             <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isEmailVerified ? "green" : "red"}-100 text-${user?.isEmailVerified ? "green" : "red"}-800 dark:bg-${user?.isEmailVerified ? "green" : "red"}-900/30 dark:text-${user?.isEmailVerified ? "green" : "red"}-400`}>
+                               Email {user?.isEmailVerified ? "" : "Not"} Verified {user?.isEmailVerified ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+                             </span>
+                             <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isActive ? "green" : "red"}-100 text-${user?.isActive ? "green" : "red"}-800 dark:bg-${user?.isActive ? "green" : "red"}-900/30 dark:text-${user?.isActive ? "green" : "red"}-400`}>
+                               Account {user?.isActive ? "" : "Not"} Activated {user?.isActive ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+                             </span>
+                             <span className={`px-3 py-1 rounded-full text-sm font-medium bg-${user?.isVerified ? "green" : "red"}-100 text-${user?.isVerified ? "green" : "red"}-800 dark:bg-${user?.isVerified ? "green" : "red"}-900/30 dark:text-${user?.isVerified ? "green" : "red"}-400`}>
+                               Account {user?.isVerified ? "" : "Not"}Verified {user?.isVerified ? <FiCheck className="inline w-4 h-4" /> : <FiX className="inline w-4 h-4" />}
+                             </span>
+                           </div>
+                         </div>
+                       </div>
 
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 dark:bg-gray-900 dark:border-gray-700">
@@ -904,7 +899,7 @@ export default function UserEditForm() {
                                                 disabled={isSubmitting || user.isVerified || field?.isApproved == "approved"}
                                                 type="number"
                                                 {...register(`academics.${index}.passingYear` as const, { valueAsNumber: true })}
-                                                 className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
+                                                className={`w-full px-4 py-3 border rounded-lg  ${field?.isApproved == "approved" ? "cursor-not-allowed bg-gray-100 dark:bg-gray-900" : "bg-white"} dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500`}
                                                 placeholder="YYYY"
                                             />
                                         </div>
@@ -932,10 +927,10 @@ export default function UserEditForm() {
                                         <div>
                                             <label className="block text-sm font-medium   mb-1 text-gray-800 dark:text-gray-300 ">Document Status</label>
                                             <select  {...register(`academics.${index}.isApproved` as const)} className="input-field w-auto bg-white-300 text-gray-800 dark:bg-gray-800 dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
-                                                  <option value="pending">Pending</option>
+                                                <option value="pending">Pending</option>
                                                 <option value="approved">Approved</option>
                                                 <option value="rejected">Rejected</option>
-                                              
+
                                             </select>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
 
@@ -961,7 +956,7 @@ export default function UserEditForm() {
                                     <div className="flex justify-start">
                                         {field.documentUrl && (
                                             <>
-                                               <a
+                                                <a
                                                     href={field.documentUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
@@ -1118,12 +1113,12 @@ export default function UserEditForm() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium   mb-1 text-red-800 dark:text-red-300 ">Document Status</label>
-                                            <select  {...register(`documents.${index}.isApproved` as const)} className="input-field w-auto bg-red-300 text-red-800 dark:bg-red-800 dark:text-red-300" disabled={loggedInUserData?.id == user._id}>
-                                                  <option value="pending">Pending</option>
+                                            <label className="block text-sm font-medium   mb-1 text-gray-700 dark:text-gray-100 ">Document Status</label>
+                                            <select  {...register(`documents.${index}.isApproved` as const)} className="input-field w-auto bg-white-300 text-gray-800 dark:bg-gray-800 dark:text-gray-300" disabled={loggedInUserData?.id == user._id}>
+                                                <option value="pending">Pending</option>
                                                 <option value="approved">Approved</option>
                                                 <option value="rejected">Rejected</option>
-                                              
+
                                             </select>
                                             <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
 
@@ -1221,9 +1216,12 @@ export default function UserEditForm() {
                             <div>
                                 <label className="block text-sm font-medium   mb-1 text-red-800 dark:text-red-300 "> Role</label>
                                 <select {...register('role')} className="input-field w-auto bg-red-300 text-red-800 dark:bg-red-800 dark:text-red-300" disabled={loggedInUserData?.id == user._id}>
-                                    <option value="lead">Lead</option>
-                                    <option value="user">Employee</option>
-                                    <option value="admin">Admin</option>
+                                    {roleList.map((roll) => (
+                                        <option key={roll._id} value={roll.role}>
+                                            {roll.role.charAt(0).toUpperCase() + roll.role.slice(1)}
+                                        </option>
+                                    ))}
+
                                 </select>
                             </div>
                             {
