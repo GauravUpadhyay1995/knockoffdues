@@ -25,7 +25,7 @@ const LabeledInput = ({ id, label, icon: Icon, error, ...props }) => (
     <div className="space-y-1">
         <label
             htmlFor={id}
-            className="text-sm font-semibold text-gray-700 flex items-center"
+            className="text-sm font-semibold text-gray-700 flex items-center dark:text-gray-100"
         >
             {Icon && <Icon className="w-4 h-4 mr-2 text-indigo-500" />}
             {label}
@@ -180,24 +180,24 @@ const SettingsForm = () => {
     }
 
     return (
-        <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden p-8 sm:p-10">
-            <header className="mb-8 border-b pb-4">
-                <h2 className="text-3xl font-extrabold text-gray-900 flex items-center">
+        <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden p-8 sm:p-10  dark:bg-gray-800">
+            <header className="mb-8 border-b pb-4 ">
+                <h2 className="text-3xl font-extrabold dark:text-gray-100 text-gray-900 flex items-center">
                     <Sparkles className="w-7 h-7 mr-3 text-indigo-600" />
                     System Configuration
                 </h2>
-                <p className="text-gray-500 mt-1">
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
                     Manage core application settings, branding, and default parameters.
                 </p>
             </header>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
                 {/* --- 1. Company Details Section --- */}
-                <section className="p-6 border border-gray-100 rounded-xl bg-gray-50 shadow-inner">
-                    <h3 className="text-xl font-bold mb-5 text-gray-800 border-b pb-2">
+                <section className="p-6 border border-gray-100 rounded-xl bg-gray-50 shadow-inner dark:border-gray-600  dark:bg-gray-800">
+                    <h3 className="text-xl font-bold mb-5 dark:text-gray-100 text-gray-800 border-b pb-2">
                         Company Information
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 dark:text-gray-400">
                         <LabeledInput
                             id="companyName"
                             label="Company Name"
@@ -244,14 +244,14 @@ const SettingsForm = () => {
                 </section>
 
                 {/* --- 3. File Uploads Section --- */}
-                <section className="p-8 rounded-3xl bg-gradient-to-br from-white via-indigo-25 to-purple-50 shadow-2xl border border-white/60 backdrop-blur-sm relative overflow-hidden">
+                <section className="p-8 rounded-3xl  shadow-2xl border border-white/60 backdrop-blur-sm relative overflow-hidden dark:bg-gray-800  ">
                     {/* Animated background elements */}
                     <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-indigo-200/40 to-purple-300/30 rounded-full -translate-y-20 translate-x-20 animate-pulse-slow"></div>
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-100/50 to-cyan-200/40 rounded-full -translate-x-16 translate-y-16 animate-float"></div>
 
-                    <div className="relative z-10">
+                    <div className="relative z-10 ">
                         {/* Enhanced header */}
-                        <div className="flex items-center group mb-8">
+                        <div className="flex items-center group mb-8 ">
                             <div className="p-3 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-2xl mr-4 transform group-hover:scale-110 transition-all duration-300 shadow-lg">
                                 <ImageIcon className="w-7 h-7 text-white" />
                             </div>
@@ -265,15 +265,15 @@ const SettingsForm = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 ">
                             {/* Logo Card */}
                             <Controller
                                 name="companyLogo"
                                 control={control}
                                 render={({ field: { onChange } }) => (
                                     <div className="group relative">
-                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                                        <div className="relative bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 p-6 shadow-2xl hover:shadow-3xl transition-all duration-500">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500 "></div>
+                                        <div className="relative bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 p-6 shadow-2xl hover:shadow-3xl transition-all duration-500  dark:bg-gray-800">
                                             {/* Card Header */}
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center">
@@ -281,11 +281,11 @@ const SettingsForm = () => {
                                                         <span className="text-lg">🎨</span>
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-gray-900 text-lg">Primary Logo</h4>
-                                                        <p className="text-xs text-gray-500">Recommended: 512×512px PNG</p>
+                                                        <h4 className="font-bold text-gray-900  dark:text-gray-400  text-lg">Primary Logo</h4>
+                                                        <p className="text-xs text-gray-500  dark:text-gray-300 ">Recommended: 512×512px PNG</p>
                                                     </div>
                                                 </div>
-                                                <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-200">
+                                                <div className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium border border-green-200 dark:bg-green-300">
                                                     Required
                                                 </div>
                                             </div>
@@ -295,7 +295,7 @@ const SettingsForm = () => {
                                                 <div className="flex items-center justify-between">
                                                     <label
                                                         htmlFor="companyLogo"
-                                                        className="text-sm font-semibold text-gray-700"
+                                                        className="text-sm font-semibold text-gray-700  dark:text-gray-400 "
                                                     >
                                                         Company Logo (PNG, JPG, JPEG)
                                                     </label>
@@ -333,9 +333,9 @@ const SettingsForm = () => {
 
                                             {/* Enhanced Preview Section */}
                                             {logoPreview && (
-                                                <div className="mt-6 animate-fade-in">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <p className="text-sm font-semibold text-gray-700">Logo Preview</p>
+                                                <div className="mt-6 animate-fade-in ">
+                                                    <div className="flex items-center justify-between mb-4 ">
+                                                        <p className="text-sm font-semibold text-gray-700  dark:text-gray-400 ">Logo Preview</p>
                                                         <div className="flex space-x-2">
                                                             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                                             <span className="text-xs text-green-600 font-medium">Uploaded</span>
@@ -354,7 +354,7 @@ const SettingsForm = () => {
                                                                     <div className="h-2 bg-gray-700 rounded w-3/4"></div>
                                                                 </div>
                                                             </div>
-                                                            <p className="text-xs text-gray-400 text-center mt-3">Mobile App</p>
+                                                            <p className="text-xs dark:text-gray-400 text-gray-400 text-center mt-3">Mobile App</p>
                                                         </div>
 
                                                         {/* Website Header Preview */}
@@ -376,7 +376,7 @@ const SettingsForm = () => {
                                                     </div>
 
                                                     {/* Large Preview */}
-                                                    <div className="p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200">
+                                                    <div className="p-4 rounded-xl border border-gray-200  dark:bg-gray-800">
                                                         <img
                                                             src={logoPreview}
                                                             alt="Logo Preview"
@@ -397,7 +397,7 @@ const SettingsForm = () => {
                                 render={({ field: { onChange } }) => (
                                     <div className="group relative">
                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-                                        <div className="relative bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 p-6 shadow-2xl hover:shadow-3xl transition-all duration-500">
+                                        <div className="relative bg-white/90 backdrop-blur-md rounded-2xl border border-white/70 p-6 shadow-2xl hover:shadow-3xl transition-all duration-500  dark:bg-gray-800">
                                             {/* Card Header */}
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center">
@@ -405,11 +405,11 @@ const SettingsForm = () => {
                                                         <span className="text-lg">🔍</span>
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-gray-900 text-lg">Browser Favicon</h4>
-                                                        <p className="text-xs text-gray-500">Recommended: 32×32px ICO/PNG</p>
+                                                        <h4 className="font-bold text-gray-900 text-lg dark:text-gray-400">Browser Favicon</h4>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-300">Recommended: 32×32px ICO/PNG</p>
                                                     </div>
                                                 </div>
-                                                <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200">
+                                                <div className="bg-blue-50 dark:bg-blue-300 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-200">
                                                     Recommended
                                                 </div>
                                             </div>
@@ -419,7 +419,7 @@ const SettingsForm = () => {
                                                 <div className="flex items-center justify-between">
                                                     <label
                                                         htmlFor="companyFavicon"
-                                                        className="text-sm font-semibold text-gray-700"
+                                                        className="text-sm font-semibold text-gray-700 dark:text-gray-400"
                                                     >
                                                         Company Favicon (ICO, PNG)
                                                     </label>
@@ -459,7 +459,7 @@ const SettingsForm = () => {
                                             {faviconPreview && (
                                                 <div className="mt-6 animate-fade-in">
                                                     <div className="flex items-center justify-between mb-4">
-                                                        <p className="text-sm font-semibold text-gray-700">Favicon Preview</p>
+                                                        <p className="text-sm font-semibold text-gray-700 dark:text-gray-400">Favicon Preview</p>
                                                         <div className="flex space-x-2">
                                                             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                                             <span className="text-xs text-green-600 font-medium">Uploaded</span>
@@ -468,7 +468,7 @@ const SettingsForm = () => {
 
                                                     <div className="grid grid-cols-2 gap-4 mb-4">
                                                         {/* Browser Tab Preview */}
-                                                        <div className="bg-gray-800 rounded-xl p-4 shadow-2xl">
+                                                        <div className="bg-gray-900 rounded-xl p-4 shadow-2xl">
                                                             <div className="flex items-center space-x-3 mb-3">
                                                                 <div className="flex space-x-1">
                                                                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -497,11 +497,11 @@ const SettingsForm = () => {
                                                     </div>
 
                                                     {/* Size Variations */}
-                                                    <div className="p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200">
+                                                    <div className="p-4  rounded-xl border border-gray-200  dark:bg-gray-800">
                                                         <div className="flex items-center justify-center space-x-6">
                                                             {[16, 32, 48].map((size) => (
                                                                 <div key={size} className="text-center">
-                                                                    <div className="bg-white p-3 rounded-2xl shadow-lg border border-gray-200 mb-2">
+                                                                    <div className="bg-white  dark:bg-gray-800 p-3 rounded-2xl shadow-lg border border-gray-200 mb-2">
                                                                         <img
                                                                             src={faviconPreview}
                                                                             alt={`Favicon ${size}px`}
@@ -509,7 +509,7 @@ const SettingsForm = () => {
                                                                             style={{ width: size, height: size }}
                                                                         />
                                                                     </div>
-                                                                    <p className="text-xs text-gray-500">{size}px</p>
+                                                                    <p className="text-xs text-gray-500 dark:text-gray-100">{size}px</p>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -523,14 +523,14 @@ const SettingsForm = () => {
                         </div>
 
                         {/* Best Practices Section */}
-                        <div className="mt-8 p-6 bg-gradient-to-r from-white to-indigo-50/50 rounded-2xl border border-indigo-100/50 shadow-lg">
+                        <div className="mt-8 p-6 dark:bg-gray-800 rounded-2xl border border-indigo-100/50 shadow-lg ">
                             <div className="flex items-start space-x-4">
                                 <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg">
                                     <span className="text-white text-lg">💡</span>
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="font-bold text-gray-900 mb-2">Best Practices</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                                    <h4 className="font-bold text-gray-900 mb-2 dark:text-gray-100">Best Practices</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
                                         <div className="flex items-center space-x-2">
                                             <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                                             <span>Click the upload icon to select files</span>

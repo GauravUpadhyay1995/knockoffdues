@@ -40,7 +40,7 @@ export default function NotificationBell() {
             return;
         }
 
-        console.log("🕒 Setting up listener with time:", currentTime.toDate());
+        // console.log("🕒 Setting up listener with time:", currentTime.toDate());
 
         const q = query(
             billingReminderRef,
@@ -50,32 +50,30 @@ export default function NotificationBell() {
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            console.log("📊 Snapshot received, documents:", snapshot.size);
+            // console.log("📊 Snapshot received, documents:", snapshot.size);
 
             let unreadCount = 0;
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                console.log("📋 Reminder found:", {
-                    id: doc.id,
-                    title: data.title,
-                    reminderTime: data.reminderTime?.toDate?.(),
-                    isSeen: data.isSeen
-                });
+                // console.log("📋 Reminder found:", {
+                //     id: doc.id,
+                //     title: data.title,
+                //     reminderTime: data.reminderTime?.toDate?.(),
+                //     isSeen: data.isSeen
+                // });
 
                 if (data.isSeen === false) {
                     unreadCount++;
                 }
             });
 
-            console.log("🔢 Final unread count:", unreadCount);
             setUnreadCount(unreadCount);
         }, (error) => {
             console.error("❌ Firebase error:", error);
         });
 
         return () => {
-            console.log("🧹 Cleaning up listener");
             unsubscribe();
         };
     }, [userId, currentTime]); // Add currentTime as dependency

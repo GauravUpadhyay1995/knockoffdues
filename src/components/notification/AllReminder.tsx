@@ -77,7 +77,7 @@ export default function ReminderDropdown({ isOpen, onClose }: NotificationDropdo
     const markAsRead = async (notificationId: string) => {
         try {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/notifications/${notificationId}/read`,
+                `${process.env.NEXT_PUBLIC_API_URL}/reminders/read-all/${notificationId}`,
                 {
                     method: "PATCH",
                 }
@@ -96,7 +96,7 @@ export default function ReminderDropdown({ isOpen, onClose }: NotificationDropdo
                 unreadNotifications.map(async (notif, idx) => {
 
                     const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/notifications/read-all/${userId}`,
+                        `${process.env.NEXT_PUBLIC_API_URL}/reminders/read-all/${notif.id}`,
                         {
                             method: "PATCH",
                         }
@@ -123,7 +123,7 @@ export default function ReminderDropdown({ isOpen, onClose }: NotificationDropdo
             Warning: "⚠️",
             Info: "ℹ️",
             Error: "❌",
-            Other: "🔔",
+            Other: "⏰",
             Meeting: "📅",
             Update: "🔄",
             Promotion: "🎉",
@@ -291,11 +291,11 @@ export default function ReminderDropdown({ isOpen, onClose }: NotificationDropdo
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl dark:bg-gray-800">
+                {/* <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl dark:bg-gray-800">
                     <button id="viewAllBtn" onClick={viewAllNotification} className="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium py-2 rounded-md hover:bg-blue-100 transition-colors dark:text-gray-100 dark:hover:bg-gray-500">
                         View all reminders
                     </button>
-                </div>
+                </div> */}
             </div>
 
             {/* Animation Styles */}

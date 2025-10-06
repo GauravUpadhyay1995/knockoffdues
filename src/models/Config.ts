@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 
 const configSchema = new mongoose.Schema({
 
-    comanyName: {
+    companyName: {
         type: String,
         required: true,
 
@@ -19,12 +19,12 @@ const configSchema = new mongoose.Schema({
         required: false,
 
     },
-    comapnyLogo: {
+    companyLogo: {
         type: String,
         required: false,
     }
     ,
-    comapnyFavicon: {
+    companyFavicon: {
         type: String,
         required: false,
     }

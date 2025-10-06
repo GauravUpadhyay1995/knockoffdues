@@ -15,13 +15,13 @@ export const PATCH = verifyAdmin(
         const formData = await req.formData();
 
         // Get files
-        const logo = formData.get("comapnyLogo") as File | null;
-        const favicon = formData.get("comapnyFavicon") as File | null;
+        const logo = formData.get("companyLogo") as File | null;
+        const favicon = formData.get("companyFavicon") as File | null;
 
         // Extract other fields (exclude files)
         const rawBody = Object.fromEntries(
             [...formData.entries()].filter(
-                ([key]) => key !== "comapnyLogo" && key !== "comapnyFavicon"
+                ([key]) => key !== "companyLogo" && key !== "companyFavicon"
             )
         );
 
@@ -53,7 +53,7 @@ export const PATCH = verifyAdmin(
 
         // Prepare settings data - FIXED: Correct field names according to schema
         const settingsData: any = {
-            comanyName: rawBody.comanyName,
+            companyName: rawBody.companyName,
             companyEmail: rawBody.companyEmail || undefined,
             companyWhatsapp: rawBody.companyWhatsapp || undefined,
             creator: user.id,
@@ -61,11 +61,12 @@ export const PATCH = verifyAdmin(
 
         // Only add logo/favicon if they were uploaded - FIXED: Correct field names
         if (logoUrl) {
-            settingsData.comapnyLogo = logoUrl;
+            settingsData.companyLogo = logoUrl;
         }
         if (faviconUrl) {
-            settingsData.comapnyFavicon = faviconUrl;
+            settingsData.companyFavicon = faviconUrl;
         }
+        console.log("settingsData",settingsData)
 
         // FIXED: Use findOneAndUpdate for settings (usually only one settings document)
         const existingSetting = await Config.findOne();
@@ -101,8 +102,9 @@ export const GET = asyncHandler(async (req: NextRequest) => {
     if (!settings) {
         const defaultSettings = await Config.create({
 
-            comanyName: "Dummy Company Name",
-            companyEmail: "dummy@gmail.com"
+            companyName: "Dummy Company Name",
+            companyEmail: "dummy@gmail.com",
+            companyWhatsapp:"1234567890",
         });
         return NextResponse.json({
             success: true,
