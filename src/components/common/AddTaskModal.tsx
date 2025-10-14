@@ -286,6 +286,7 @@ export default function AddTaskModal({ isOpen, onClose, onTaskAdded }: AddTaskMo
       // Append assignedTo as array
       formData.assignedTo.forEach((id) => submitData.append("assignedTo[]", id));
 
+
       // Append files
       files.forEach((file) => submitData.append("docs", file));
 

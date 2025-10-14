@@ -57,6 +57,7 @@ export const PATCH = verifyAdmin(
             companyEmail: rawBody.companyEmail || undefined,
             companyWhatsapp: rawBody.companyWhatsapp || undefined,
             creator: user.id,
+            companyAddress: rawBody.companyAddress || '',
         };
 
         // Only add logo/favicon if they were uploaded - FIXED: Correct field names
@@ -66,7 +67,6 @@ export const PATCH = verifyAdmin(
         if (faviconUrl) {
             settingsData.companyFavicon = faviconUrl;
         }
-        console.log("settingsData",settingsData)
 
         // FIXED: Use findOneAndUpdate for settings (usually only one settings document)
         const existingSetting = await Config.findOne();
@@ -104,7 +104,8 @@ export const GET = asyncHandler(async (req: NextRequest) => {
 
             companyName: "Dummy Company Name",
             companyEmail: "dummy@gmail.com",
-            companyWhatsapp:"1234567890",
+            companyWhatsapp: "1234567890",
+            companyAddress: "123, Dummy Street, Dummy City, Country",
         });
         return NextResponse.json({
             success: true,

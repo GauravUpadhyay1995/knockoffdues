@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Edit, Trash2, Eye, Download } from "lucide-react";
+import TableActions from "./TableAction";
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -49,6 +51,8 @@ interface User {
   department?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  resume?: string;
+  avatar?: string;
 }
 
 interface Filters {
@@ -84,11 +88,11 @@ const PermissionToggle = memo(
         permissions.map(perm =>
           perm.module === module
             ? {
-                module,
-                actions: perm.actions.includes(action)
-                  ? perm.actions.filter(a => a !== action)
-                  : [...perm.actions, action],
-              }
+              module,
+              actions: perm.actions.includes(action)
+                ? perm.actions.filter(a => a !== action)
+                : [...perm.actions, action],
+            }
             : perm
         )
       );
@@ -361,6 +365,29 @@ export default function UsersListTable({ initialData }: Props) {
   if (!isAuthorized) {
     return <UnauthorizedComponent />;
   }
+  const handleDownload = (url: string | undefined) => {
+    if (!url) {
+      alert("Resume not found!");
+      return;
+    }
+
+    try {
+      // Create an invisible <a> tag and trigger the browser download
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Optional: extract filename from URL
+      const fileName = url.split("/").pop() || "download";
+
+      link.setAttribute("download", fileName);
+      link.setAttribute("target", "_blank");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
@@ -534,67 +561,99 @@ export default function UsersListTable({ initialData }: Props) {
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
             {users.length > 0 ? (
-              users.map((user, index) => (
-                <TableRow key={user._id}>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">{(currentPage - 1) * pageSize + index + 1}</TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A'}<br />
-                    {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : 'N/A'}
-                  </TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">{user.name}</TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 capitalize">
-                      {user.department || 'N/A'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">{user.email}</TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    <span
-                      className={`${
-                        user.role === 'user'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                      } px-2 py-1 text-xs font-medium rounded-full capitalize`}
-                    >
-                      {user.role || 'user'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={user.isActive}
-                        onChange={() => changeStatus(user)}
-                        disabled={user.role === 'super admin' || isSubmitting}
-                      />
-                      <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600" />
-                    </label>
-                  </TableCell>
-                  <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    <UserPermissionGuard action="update">
-                      <Button
-                        onClick={() => handleEditClick(user)}
-                        variant="ghost"
-                        size="sm"
-                        title="Edit user"
-                        disabled={user.role === 'super admin' || isSubmitting}
+              users.map((user, index) => {
+                // ✅ define menus properly outside JSX
+                const menus = [
+                  {
+                    label: "Edit",
+                    icon: Edit,
+                    onClick: () => handleEditClick(user),
+                    disabled: user.role === "super admin" || isSubmitting,
+                  },
+                ];
+
+                if (user?.resume) {
+                  menus.push({
+                    label: "Download Resume",
+                    icon: Download,
+                    onClick: () => handleDownload(user.resume),
+                  });
+                }
+
+                if (user?.avatar) {
+                  menus.push({
+                    label: "Download Photo",
+                    icon: Download,
+                    onClick: () => handleDownload(user.avatar),
+                  });
+                }
+
+                return (
+                  <TableRow key={user._id}>
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      {(currentPage - 1) * pageSize + index + 1}
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      {user.createdAt ? new Date(user.createdAt).toLocaleString() : "N/A"} <br />
+                      {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : "N/A"}
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      {user.name}
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 capitalize">
+                        {user.department || "N/A"}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      {user.email}
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      <span
+                        className={`${user.role === "user"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          } px-2 py-1 text-xs font-medium rounded-full capitalize`}
                       >
-                        <PencilSquareIcon className="w-4 h-4" />
-                        Edit
-                      </Button>
-                    </UserPermissionGuard>
-                  </TableCell>
-                </TableRow>
-              ))
+                        {user.role || "user"}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
+                      <label className="inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={user.isActive}
+                          onChange={() => changeStatus(user)}
+                          disabled={user.role === "super admin" || isSubmitting}
+                        />
+                        <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600" />
+                      </label>
+                    </TableCell>
+
+                    {/* ✅ Pass the dynamically built menus here */}
+                    <TableActions menuItems={menus} />
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  {loading ? 'Loading users...' : 'No users found'}
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-8 text-gray-500 dark:text-gray-400"
+                >
+                  {loading ? "Loading users..." : "No users found"}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
+
         </Table>
       </div>
 

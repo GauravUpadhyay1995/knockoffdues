@@ -203,6 +203,8 @@ const AppSidebar: React.FC = () => {
           if (nav.name === "Dashboard" && !canAccess("Dashboard", "read")) return null;
           if (nav.name === "Tasks Management" && !canAccess("Task", "read")) return null;
           if (nav.name === "Departments" && !canAccess("Department", "read")) return null;
+          if (nav.name === "Account Management" && !canAccess("Account", "create")) return null;
+            if (nav.name === "Settings" && !canAccess("Setting", "create")) return null;
 
 
           // Filter subItems for Upload Customers permission

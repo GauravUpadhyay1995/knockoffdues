@@ -302,11 +302,11 @@ const RightSideDrawer = () => {
         )}
       </AnimatePresence>
       <QRModal isOpen={isRegisterQrOpen} onClose={() => setIsRegisterQrOpen(false)}>
-        <h1 className="text-xl font-bold mb-4 text-center">Scan QR to Register</h1>
+        <h1 className="text-xl font-bold mb-4 text-center dark:text-gray-300">Scan QR to Register</h1>
         <QRGenerator type="Register" />
       </QRModal>
       <QRModal isOpen={isLoginQrOpen} onClose={() => setIsLoginQrOpen(false)}>
-        <h1 className="text-xl font-bold mb-4 text-center">Scan QR to Login</h1>
+        <h1 className="text-xl font-bold mb-4 text-center  dark:text-gray-300">Scan QR to Login</h1>
         <QRGenerator type="Login" />
       </QRModal>
 

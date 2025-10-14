@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema({
     index: true,
 
   },
+  jod: {
+    type: String,
+
+  },
   password: {
     type: String,
     required: true,

@@ -149,7 +149,7 @@ export default function QRGenerator({ type }: QRGeneratorProps) {
             </div>
 
             <p className="mt-3 text-gray-800 font-semibold">KnockOff Dues</p>
-            <small className="text-gray-900">Scan this QR code to {type}</small>
+            <small className="text-gray-900 dark:text-gray-300">Scan this QR code to {type}</small>
             <button
                 onClick={handleDownload}
                 className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-600 transition"

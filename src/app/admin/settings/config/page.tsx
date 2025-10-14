@@ -18,6 +18,7 @@ const defaultValues = {
     companyEmail: '',
     companyWhatsapp: '',
     companyLogo: null,
+    companyAddress: "",
     companyFavicon: null,
 };
 
@@ -99,6 +100,7 @@ const SettingsForm = () => {
         formData.append('companyName', data.companyName);
         formData.append('companyEmail', data.companyEmail);
         formData.append('companyWhatsapp', data.companyWhatsapp);
+        formData.append('companyAddress', data.companyAddress);
 
         if (data.companyLogo && data.companyLogo[0]) {
             formData.append('companyLogo', data.companyLogo[0]);
@@ -132,6 +134,7 @@ const SettingsForm = () => {
                 companyName: result.data.companyName || '',
                 companyEmail: result.data.companyEmail || '',
                 companyWhatsapp: result.data.companyWhatsapp || '',
+                companyAddress: result.data.companyAddress || '',
                 companyLogo: null,
                 companyFavicon: null,
             });
@@ -239,6 +242,18 @@ const SettingsForm = () => {
                                 },
                             })}
                             error={errors.companyWhatsapp}
+                        />
+
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 dark:text-gray-400 mt-3">
+                        <LabeledInput
+                            id="companyAddress"
+                            label="Company Address"
+                            icon={Phone}
+                            type="text"
+                            placeholder="Company Address"
+                            {...register('companyAddress')}
+                            error={errors.companyAddress}
                         />
                     </div>
                 </section>

@@ -60,7 +60,15 @@ export const POST = asyncHandler(async (req: NextRequest) => {
       message: 'Invalid credentials',
     });
   }
-  const permissions = (user.role == "super admin" || user.role == "hr") ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermissions() : getUserPermission();
+  const permissions =
+    user.role == "super admin"
+      ? getSuperAdminPermissions()
+      : user.role == "admin"
+        ? getAdminPermissions()  // ✅ correct
+        : user.role == "hr"
+          ? getHrPermissions()
+          : getUserPermission();
+
 
   // ✅ JWT creation
   const token = generateToken({
@@ -126,7 +134,14 @@ export const GET = asyncHandler(async () => {
 
   const user = await User.findById(decodedToken.id);
 
-  const permissions = user.role == "super admin" ? getSuperAdminPermissions() : user.role == "admin" ? getAdminPermission() : getUserPermission();
+  const permissions =
+    user.role == "super admin"
+      ? getSuperAdminPermissions()
+      : user.role == "admin"
+        ? getAdminPermissions()  // ✅ correct
+        : user.role == "hr"
+          ? getHrPermissions()
+          : getUserPermission();
   return sendResponse({
     message: 'Admin info fetched successfully',
     token,
@@ -147,6 +162,23 @@ const generateToken = (payload: object) => {
 const getSuperAdminPermissions = () => [
   { module: 'User', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Account', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Setting', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Department', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Project', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'News', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Trl', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Event', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Gallery', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Docs & Links', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Dashboard', actions: ['create', 'read', 'update', 'delete'] },
+  { module: 'Team', actions: ['create', 'read', 'update', 'delete'] },
+
+
+
+];
+const getHrPermissions = () => [
+  { module: 'User', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Setting', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Department', actions: ['create', 'read', 'update', 'delete'] },
   { module: 'Task', actions: ['create', 'read', 'update', 'delete'] },

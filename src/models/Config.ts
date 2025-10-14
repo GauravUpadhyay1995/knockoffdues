@@ -27,7 +27,12 @@ const configSchema = new mongoose.Schema({
     companyFavicon: {
         type: String,
         required: false,
-    }
+    },
+    companyAddress: {
+        type: String,
+        required: false,
+
+    },
 
 
 }, { timestamps: true });

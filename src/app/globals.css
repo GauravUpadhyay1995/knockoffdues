@@ -1420,3 +1420,70 @@ body.modal-open {
 .animate-pulse-once {
   animation: pulse-once 0.5s ease-in-out ;
 }
+
+/* styles/globals.css */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Smooth connector lines */
+.connector-line {
+  position: relative;
+}
+
+.connector-line::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background: #9CA3AF;
+  transform: translateX(-50%);
+}
+
+.connector-line::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background: #9CA3AF;
+  transform: translateX(-50%);
+}
+
+/* Custom scrollbar for the chart container */
+.chart-container {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.chart-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chart-container::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 3px;
+}
+
+.chart-container::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.chart-container::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
