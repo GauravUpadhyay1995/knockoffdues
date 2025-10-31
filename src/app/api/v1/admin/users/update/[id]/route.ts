@@ -173,7 +173,7 @@ export const PATCH = verifyAdmin(
       { $set: updateFields },
       { new: true, runValidators: true }
     );
-    let profileName ="your" ;
+    let profileName = "your";
     if (admin.role !== "hr" && admin.role !== "super admin") {
       userId = hrData?._id.toString() || userId;
       profileName = admin.name;
@@ -186,7 +186,7 @@ export const PATCH = verifyAdmin(
     // Notifications for DELETED documents
     if (deletedDocuments.length > 0) {
       deletedDocuments.forEach((deletedDoc) => {
-        const title = "Document Deleted";
+        const title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Document Deleted (${updated.name})</a>` : `<a href="/admin/profile">Document Deleted (${updated.name})</a>`;
         const descriptions = `Document '${deletedDoc?.documentName}' has been removed from ${profileName} profile`;
 
         notificationPromises.push(
@@ -205,7 +205,7 @@ export const PATCH = verifyAdmin(
     // Notifications for DELETED academic records
     if (deletedAcademics.length > 0) {
       deletedAcademics.forEach((deletedAcademic) => {
-        const title = "Academic Record Deleted";
+        const title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Academic Record Deleted (${updated.name}) </a>` : `<a href="/admin/profile">Academic Record Deleted (${updated.name}) </a>`;
         const descriptions = `Academic record for '${deletedAcademic?.className}' has been removed from ${profileName} profile`;
 
         notificationPromises.push(
@@ -224,7 +224,7 @@ export const PATCH = verifyAdmin(
     // Notifications for DELETED work experiences
     if (deletedWorkExperiences.length > 0) {
       deletedWorkExperiences.forEach((deletedExp) => {
-        const title = "Work Experience Deleted";
+        const title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Work Experience Deleted (${updated.name})</a>` : `<a href="/admin/profile">Work Experience Deleted (${updated.name})</a>`;
         const descriptions = `Work experience at '${deletedExp?.companyName}' as '${deletedExp?.designation}' has been removed from ${profileName} profile`;
 
         notificationPromises.push(
@@ -247,11 +247,11 @@ export const PATCH = verifyAdmin(
         const newStatus = doc?.isApproved;
 
         if ((oldStatus !== newStatus) || (oldStatus === undefined && newStatus === undefined)) {
-          let title = "Document Status Changed";
+          let title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Document Status Changed (${updated.name}) </a>` : `<a href="/admin/profile">Document Status Changed (${updated.name}) </a>`;
           let descriptions = `Document '${doc?.documentName}' changed from "${oldStatus}" to "${newStatus}"`;
 
           if (oldStatus == undefined) {
-            title = `New Document has been added for '${doc?.documentName}'`;
+            title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Doc added for '${doc?.documentName}' (${updated.name}) </a>` : `<a href="/admin/profile">Doc added for '${doc?.documentName}' (${updated.name}) </a>`;
             descriptions = `New Document has been added for '${doc?.documentName}' and current status is "${newStatus === undefined ? 'Pending' : newStatus}"`;
           }
 
@@ -276,11 +276,11 @@ export const PATCH = verifyAdmin(
         const newStatus = academy?.isApproved;
 
         if ((oldStatus !== newStatus) || (oldStatus === undefined && newStatus === undefined)) {
-          let title = "Academic Document Status Changed";
+          let title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Academic Document Status Changed (${updated.name}) </a>` : `<a href="/admin/profile">Academic Document Status Changed (${updated.name}) </a>`;
           let descriptions = `Academic document for '${academy.className}' changed from "${oldStatus}" to "${newStatus}"`;
 
           if (oldStatus == undefined) {
-            title = "New Academic Document has been added.";
+            title = (admin.role != "hr" && admin.role != "super admin") ? `<a href="/admin/users/update/${updated._id}">Academic Doc added (${updated.name}) </a>` : `<a href="/admin/profile">Academic Doc added (${updated.name}) </a>`;
             descriptions = `New Academic Document has been added for '${academy.className}' and current status is "${newStatus === undefined ? 'Pending' : newStatus}"`;
           }
 

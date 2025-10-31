@@ -39,7 +39,7 @@ export const POST = verifyAdmin(
             }
 
             // Validate IDs and category using a single-pass approach
-            if (!mongoose.Types.ObjectId.isValid(body.creator) || 
+            if (!mongoose.Types.ObjectId.isValid(body.creator) ||
                 (body.attendees && !body.attendees.every((id: string) => mongoose.Types.ObjectId.isValid(id)))) {
                 return NextResponse.json({ error: 'Invalid creator or attendee ID(s)' }, { status: 400 });
             }

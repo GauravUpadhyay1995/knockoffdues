@@ -61,13 +61,19 @@ export const uploadBufferToS3 = async (
 
 export const deleteFromS3 = async (url: string, folder: string): Promise<void> => {
   try {
-    // Extract key from URL, ensuring it matches the folder prefix
-    if (!url.startsWith(`https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${folder}/`)) {
-      throw new Error(`Invalid URL or folder mismatch: expected ${folder} prefix`);
+    const expectedPrefix = `https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/`;
+
+    if (!url.startsWith(expectedPrefix)) {
+      throw new Error("Invalid S3 URL format");
     }
 
-    const key = url.split(`/${folder}/`)[1]; // e.g., "688a3cd3f9e5af11002ac909/image1.jpg"
-    if (!key) throw new Error('Unable to extract S3 key from URL');
+    // Extract full key (including folder)
+    const key = url.replace(expectedPrefix, ""); // e.g., "letters/1730264180000-file.pdf"
+
+    // Optional validation: check folder match
+    if (!key.startsWith(`${folder}/`)) {
+      throw new Error(`Invalid folder: expected prefix '${folder}/' but got '${key}'`);
+    }
 
     const command = new DeleteObjectCommand({
       Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME!,
@@ -75,11 +81,13 @@ export const deleteFromS3 = async (url: string, folder: string): Promise<void> =
     });
 
     await s3.send(command);
+    console.log(`✅ Deleted from S3: ${key}`);
   } catch (error) {
     if (error instanceof S3ServiceException) {
-      console.error('S3 Delete Error:', error.$metadata);
+      console.error("S3 Delete Error:", error.$metadata);
       throw new Error(`Delete failed: ${error.message}`);
     }
+    console.error("Delete Error:", error);
     throw error;
   }
 };

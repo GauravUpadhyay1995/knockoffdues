@@ -1,4 +1,6 @@
 
+import { timeStamp } from 'console';
+import { boolean } from 'joi';
 import mongoose, { Schema } from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -229,6 +231,35 @@ const userSchema = new mongoose.Schema({
       }
     },
   ],
+
+  letters: [
+    {
+      letterType: {
+        type: String,
+        enum: ["joining", "experience", "promotion", "termination"], // example
+        required: true,
+      },
+      url: {
+        type: String,
+        default: "",
+      },
+      isSent: {
+        type: Boolean,
+        default: false,
+      },
+      issueDate: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+  otp: {
+    type: String,
+  },
+  otpExpiry: {
+    type: Date,
+  },
+
 }, { timestamps: true });
 
 // Optional: compound index for frequent filter + search

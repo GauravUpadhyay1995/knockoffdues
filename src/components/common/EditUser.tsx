@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams } from 'next/navigation';
-import { FiCheck, FiX } from 'react-icons/fi';
 import ProfileDrawer from "./ProfileDrawer";
 import AccordionSection from '@/components/users/AccordionSection';
 import StatusBadges from '@/components/users/StatusBadges';
@@ -63,7 +62,6 @@ export default function UserEditForm() {
 
 
     const onSubmit = async (data: UserData) => {
-        console.log("✅ Form data from React Hook Form:", data);
         await handleFormSubmit(data); // send real data to your custom hook
         refresh(); // refresh user data automatically
 
@@ -79,6 +77,7 @@ export default function UserEditForm() {
     if (loading) return <LoadingSpinner />;
     if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
     if (!user) return <div className="p-8 text-center">User not found</div>;
+
 
     return (
         <motion.div
@@ -170,10 +169,11 @@ export default function UserEditForm() {
                         </form>
                     )}
 
-                    {activeTab === 'letters' && (
-                        <Letters user={user} department={
-                            departments?.find((dept) => dept._id === user?.department)?.department || ""
-                        } />
+                    {
+                     
+                    
+                    activeTab === 'letters' && (
+                    <Letters userData={user}  />
 
                     )}
                 </div>

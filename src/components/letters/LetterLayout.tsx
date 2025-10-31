@@ -1,6 +1,6 @@
 // components/letters/LetterLayout.tsx
-import { CompanyData } from '@/types/letter.types';
 import React, { useState, useEffect } from 'react';
+import { CompanyData } from '@/types/letter.types';
 
 interface LetterLayoutProps {
   title: string;
@@ -8,23 +8,24 @@ interface LetterLayoutProps {
 }
 
 const LetterLayout: React.FC<LetterLayoutProps> = ({ title, children }) => {
-  const [companyInfo, setCompanyInfo] = useState(null);
+  const [companyInfo, setCompanyInfo] = useState<CompanyData | null>(null);
 
   useEffect(() => {
     if (!companyInfo) {
       fetch('/api/v1/admin/settings/config')
         .then(res => res.json())
-        .then(data => setCompanyInfo(data.data));
+        .then(data => setCompanyInfo(data.data))
+        .catch(() => setCompanyInfo(null));
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden relative">
-        
+
         {/* Watermark */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          <div 
+          <div
             className="absolute -bottom-40 -left-20 w-[800px] h-[200px] opacity-10"
             style={{
               transform: 'rotate(45deg)',
@@ -42,18 +43,25 @@ const LetterLayout: React.FC<LetterLayoutProps> = ({ title, children }) => {
         {/* Letter Header */}
         <div className="border-b-2 border-blue-600 p-8 relative z-10">
           <div className="flex justify-between items-start">
-            <div>
-              <img
-                src={companyInfo?.companyLogo || '/default-logo.png'}
-                alt={`${companyInfo?.name} Logo`}
-                className="h-16 w-auto mb-4"
-              />
-              <h1 className="text-3xl font-bold text-gray-800">{companyInfo?.companyName}</h1>
+            <div className="flex flex-col items-start space-y-3">
+              {/* ✅ Circular Logo */}
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-blue-600 shadow-md flex items-center justify-center bg-white">
+                <img
+                  src={companyInfo?.companyLogo || '/default-logo.png'}
+                  alt={`${companyInfo?.companyName || 'Company'} Logo`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <h1 className="text-3xl font-bold text-gray-800">
+                {companyInfo?.companyName || 'Company Name'}
+              </h1>
             </div>
-            <div className="text-right text-gray-600">
-              <p><strong>Phone:</strong> {companyInfo?.companyWhatsapp}</p>
-              <p><strong>Address:</strong> {companyInfo?.companyAddress}</p>
-              <p><strong>Email:</strong> {companyInfo?.companyEmail}</p>
+
+            <div className="text-right text-gray-600 text-sm leading-relaxed">
+              <p><strong>Phone:</strong> {companyInfo?.companyWhatsapp || 'N/A'}</p>
+              <p><strong>Address:</strong> {companyInfo?.companyAddress || 'N/A'}</p>
+              <p><strong>Email:</strong> {companyInfo?.companyEmail || 'N/A'}</p>
             </div>
           </div>
         </div>

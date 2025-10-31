@@ -4,6 +4,13 @@ import { LetterBaseProps } from '@/types/letter.types';
 import LetterLayout from './LetterLayout';
 
 const JoiningLetter = ({ employeeData }: { employeeData: any }) => {
+  const currentDate = new Date().toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+  const id = employeeData._id.toString();
+  const EMPID = id.slice(-5);
   return (
     <LetterLayout title="Joining Letter">
       <div className="space-y-6 text-gray-800 font-serif">
@@ -17,13 +24,9 @@ const JoiningLetter = ({ employeeData }: { employeeData: any }) => {
           </div>
           <div className="text-right max-w-md">
             <p className="text-sm text-gray-600">
-              Issue Date: {new Date().toLocaleDateString('en-IN', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-              })}
+              Issue Date: {currentDate}
             </p>
-            <p className="text-sm text-gray-600">Ref: EMP/{employeeData?._id?.slice(-6).toUpperCase()}</p>
+            <p className="text-sm text-gray-600">Ref: EMP/{EMPID}</p>
             {/* <p className="font-semibold">{employeeData?.name}</p>
             <p className="text-sm">{employeeData?.currentAddress}</p> */}
           </div>
@@ -37,7 +40,7 @@ const JoiningLetter = ({ employeeData }: { employeeData: any }) => {
         {/* Salutation */}
         <div className="mb-4">
           <p className="font-semibold">
-            Dear {employeeData?.name?.charAt(0).toUpperCase() + employeeData?.name?.slice(1)},
+            Dear {employeeData?.name},
           </p>
 
         </div>
@@ -45,15 +48,15 @@ const JoiningLetter = ({ employeeData }: { employeeData: any }) => {
         {/* Main Content */}
         <div className="space-y-4 text-justify leading-relaxed">
           <p>
-            With reference to your application and subsequent interviews, we are pleased to appoint you as <strong>{employeeData?.position}</strong> in the <strong>{employeeData?.department}</strong> department of our organization.
+            With reference to your application and subsequent interviews, we are pleased to appoint you as <strong>{employeeData.position}</strong> in our organization.
           </p>
 
           <p>
-            Your appointment will be effective from <strong>{employeeData?.jod}</strong>. You are required to report for duty at 9:00 AM on your joining date at our office premises.
+            Your appointment will be effective from <strong>{employeeData.jod}</strong>. You are required to report for duty at 9:00 AM on your joining date at our office premises.
           </p>
 
           <p>
-            Your Employee ID is: <strong>{employeeData?._id?.slice(-6).toUpperCase()}</strong>
+            Your Employee ID is: <strong>{EMPID}</strong>
           </p>
 
           {/* Terms and Conditions */}
