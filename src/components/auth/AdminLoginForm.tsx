@@ -180,6 +180,16 @@ export default function AdminLoginForm() {
                         'Login'
                       )}
                     </Button>
+                    <div className="flex justify-end mt-2">
+                      <Link
+                        href="/reset"
+                        className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-purple-600 dark:text-gray-400 dark:hover:gradient-text"
+                      >
+                       
+                        Reset Password ?
+                      </Link>
+                   
+                    </div>
                   </motion.div>
                 </div>
               </form>
