@@ -31,16 +31,20 @@ export const POST = async (req: NextRequest) => {
     const { error, value } = createUserSchema.validate(jsonBody, {
       abortEarly: false,
     });
-    if (error) {
-      const errors = error.details.reduce((acc, curr) => {
-        acc[curr.path[0] as string] = curr.message;
-        return acc;
-      }, {} as Record<string, string>);
-      return NextResponse.json(
-        { success: false, message: "Validation failed", errors },
-        { status: 400 }
-      );
-    }
+   if (error) {
+  const errors = error.details.reduce((acc, curr) => {
+    acc[curr.path[0] as string] = curr.message;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const message = error.details[0]?.message || "Validation failed";
+
+  return NextResponse.json(
+    { success: false, message, errors },
+    { status: 400 }
+  );
+}
+
 
     // ✅ Check existing user
     const existing = await User.findOne({

@@ -10,6 +10,7 @@ interface User {
   name: string;
   email: string;
   role?: string;
+  emp_id: string;
 }
 
 interface Attachment {
@@ -254,11 +255,10 @@ const TaskDetailPage = () => {
               <StatusBadge status={task.stage} />
               <PriorityBadge priority={task.priority} />
               <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  task.isActive
+                className={`px-3 py-1 rounded-full text-sm font-medium ${task.isActive
                     ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                }`}
+                  }`}
               >
                 {task.isActive ? 'Active' : 'Inactive'}
               </span>
@@ -290,11 +290,10 @@ const TaskDetailPage = () => {
             {(['details', 'attachments', 'comments'] as const).map(tab => (
               <button
                 key={tab}
-                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab
+                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
                     ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -329,7 +328,7 @@ const TaskDetailPage = () => {
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Last Update</p>
                       <p className="text-gray-900 dark:text-white">
-                        {new Date(task.updatedAt).toLocaleDateString()} - <small>{task.updatedBy.name} ({task.updatedBy.email})</small>
+                        {new Date(task.updatedAt).toLocaleDateString()} - <small>{task.updatedBy.name} ({task.updatedBy.emp_id})</small>
                       </p>
                     </div>
                   </div>
@@ -347,7 +346,7 @@ const TaskDetailPage = () => {
                               {user.name.charAt(0)}
                             </div>
                             <span className="text-gray-900 dark:text-white">
-                              {user.name} <small>({user.email})</small>
+                              {user.name} <small>({user.emp_id})</small>
                             </span>
                           </div>
                         ))
@@ -365,7 +364,7 @@ const TaskDetailPage = () => {
                         {task.createdBy.name.charAt(0)}
                       </div>
                       <span className="text-gray-900 dark:text-white">
-                        {task.createdBy.name} <small>({task.createdBy.email})</small>
+                        {task.createdBy.name} <small>({task.createdBy.emp_id})</small>
                       </span>
                     </div>
                   </div>
@@ -408,11 +407,10 @@ const TaskDetailPage = () => {
                   {(['history', 'submit'] as const).map(tab => (
                     <button
                       key={tab}
-                      className={`pb-2 text-sm font-medium border-b-2 transition-colors ${
-                        commentTab === tab
+                      className={`pb-2 text-sm font-medium border-b-2 transition-colors ${commentTab === tab
                           ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
                           : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
+                        }`}
                       onClick={() => setCommentTab(tab)}
                     >
                       {tab === 'submit' ? 'Add Comment' : 'History'}
@@ -487,7 +485,7 @@ const TaskDetailPage = () => {
                           <div className="flex-1 min-w-0 bg-white dark:bg-gray-800/50 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 group-hover:shadow-md transition-all duration-200">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center space-x-3">
-                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{comment.createdBy.name}</h4>
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{comment.createdBy.name} ({comment.createdBy.emp_id})</h4>
                                 <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
                                   {comment.createdBy.role || 'User'}
                                 </span>

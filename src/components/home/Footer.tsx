@@ -4,18 +4,21 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSettings } from '@/context/AuthContext';
+
 // Assuming MOBILE_WHATSAPP is correctly configured in your .env
-const MOBILE_WHATSAPP = process.env.NEXT_PUBLIC_COMPANY_MOBILE_WHATSAPP;
+let MOBILE_WHATSAPP = process.env.NEXT_PUBLIC_COMPANY_MOBILE_WHATSAPP;
 
 import { useTheme } from '@/context/ThemeContext'; // Ensure this path is correct
 
 const Footer = () => {
   const { theme } = useTheme();
+  const { settings, isLoadingSettings } = useSettings();
 
   const [isVisible, setIsVisible] = useState(false);
   const [isPulsing, setIsPulsing] = useState(false);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-
+MOBILE_WHATSAPP=settings?.companyWhatsapp || MOBILE_WHATSAPP;
   // Animate footer on load and set up WhatsApp pulse effect
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -150,7 +153,8 @@ const Footer = () => {
                 whileTap={{ scale: 0.97 }}
               >
                 <div className="flex items-center gap-2 sm:gap-3">
-                   <Image   className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
+                   <Image   className="h-24 w-24 rounded-full object-cover mt-4"  src={settings?.companyLogo || "/images/logo/logo.png"}   alt="Knock Off Dues Logo" width={100} height={50} priority />
+                   
                 </div>
               </motion.span>
             </Link>
@@ -161,7 +165,7 @@ const Footer = () => {
                 visible: { opacity: 1, transition: { delay: 0.3 } },
               }}
             >
-              Fostering innovation and community, Knock Off Dues at IIT Delhi is your hub for groundbreaking events, research, and collaborative initiatives. Join us in shaping the future!
+              Fostering innovation and community, {settings?.companyName || "Example Company"} is your hub for groundbreaking events, research, and collaborative initiatives. Join us in shaping the future!
             </motion.p>
             {/* Social Media Icons */}
             <div className="flex space-x-4 mt-6">
@@ -172,7 +176,7 @@ const Footer = () => {
 
                 <Image src="/images/twitter.svg" alt="Twitter" width={24} height={24} className="filter  hover:grayscale-0 transition-all duration-300" />
               </motion.a> */}
-              <motion.a href="https://www.linkedin.com/company/wadhwanifoundation/" target="_blank" rel="noopener noreferrer" aria-label="Knock Off Dues on LinkedIn" variants={iconLinkVariants} initial="rest" whileHover="hover">
+              <motion.a href="#" target="_blank" rel="noopener noreferrer" aria-label="Knock Off Dues on LinkedIn" variants={iconLinkVariants} initial="rest" whileHover="hover">
                 <Image src="/images/linkedIn.svg" alt="LinkedIn" width={24} height={24} className="filter  hover:grayscale-0 transition-all duration-300" />
               </motion.a>
               {/* <motion.a href="#" target="_blank" rel="noopener noreferrer" aria-label="Knock Off Dues on Instagram" variants={iconLinkVariants} initial="rest" whileHover="hover">
@@ -248,8 +252,8 @@ const Footer = () => {
               {[
                 {
                   icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z',
-                  text: `${process.env.NEXT_PUBLIC_COMPANY_MOBILE_HELPLINE}`,
-                  href: `tel:${process.env.NEXT_PUBLIC_COMPANY_MOBILE_HELPLINE}`,
+                  text: `${settings?.companyWhatsapp}`,
+                  href: `tel:${settings?.companyWhatsapp}`,
                 },
                 {
                   icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
@@ -257,8 +261,8 @@ const Footer = () => {
                 },
                 {
                   icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-                  text: `${process.env.NEXT_PUBLIC_COMPANY_EMAIL}`, // Changed to a more generic info email
-                  href:`mailto:${process.env.NEXT_PUBLIC_COMPANY_EMAIL}`,
+                  text: `${settings?.companyEmail}`, // Changed to a more generic info email
+                  href:`mailto:${settings?.companyEmail}`,
                 },
               ].map((item, index) => (
                 <motion.li key={index} variants={itemVariants} whileHover={{ x: 5 }}>
@@ -297,12 +301,11 @@ const Footer = () => {
               className="not-italic text-base text-gray-700 dark:text-gray-300 space-y-2 flex flex-col items-center md:items-start"
               whileHover={{ x: 5 }}
             >
-              <span>Knock Off Dues               
+              <span>{settings?.companyAddress}              
               </span>
-               <span>B-56</span>
-              <span>South Ganesh Nagar</span>
              
-              <span>East Delhi</span> {/* Added "India" for clarity */}
+             
+           
             </motion.address>
             <motion.div className="mt-4" variants={itemVariants}>
               <Link
@@ -332,7 +335,7 @@ const Footer = () => {
             className="text-sm text-gray-600 dark:text-gray-400"
             whileHover={{ scale: 1.01 }} // Subtle hover for copyright
           >
-            © {new Date().getFullYear()} Knock Off Dues Foundation. All rights reserved. Developed with ❤️ by Codelabs India.
+            © {new Date().getFullYear()} {settings?.companyName}       . All rights reserved. Developed with ❤️ by Codelabs India.
           </motion.p>
         </motion.div>
       </div>

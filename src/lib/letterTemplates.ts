@@ -7,8 +7,8 @@ export const getLetterTemplate = (
   letterUrl: string
 ): { subject: string; html: string } => {
 
-  const id = userData._id.toString();
-  const EMPID = id.slice(-5) || "XXXX";
+ 
+  const EMPID = userData.emp_id.toString();
   const currentDate = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',

@@ -53,6 +53,7 @@ interface User {
   updatedAt?: string | Date;
   resume?: string;
   avatar?: string;
+  emp_id?: string;
 }
 
 interface Filters {
@@ -551,7 +552,7 @@ export default function UsersListTable({ initialData }: Props) {
             <TableRow>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Sr. No.</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Created/Updated</TableCell>
-              <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Name</TableCell>
+              <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Name (USER-ID)</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Department</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Email</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Role</TableCell>
@@ -600,7 +601,8 @@ export default function UsersListTable({ initialData }: Props) {
                     </TableCell>
 
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                      {user.name}
+                      {user.name} <br></br>
+                     {user.emp_id}
                     </TableCell>
 
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">

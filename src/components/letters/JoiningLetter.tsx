@@ -9,8 +9,7 @@ const JoiningLetter = ({ employeeData }: { employeeData: any }) => {
     month: 'short',
     year: 'numeric',
   });
-  const id = employeeData._id.toString();
-  const EMPID = id.slice(-5);
+  const EMPID = employeeData.emp_id.toString();
   return (
     <LetterLayout title="Joining Letter">
       <div className="space-y-6 text-gray-800 font-serif">

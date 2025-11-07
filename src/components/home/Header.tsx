@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { useTheme } from '@/context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-
+import { useSettings } from '@/context/AuthContext';
 const Header = () => {
-
+  const { settings, isLoadingSettings } = useSettings();
   const desktopNavRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLElement>(null);
   const submenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -160,7 +160,15 @@ const Header = () => {
               onClick={closeAllSubmenus}
             >
               <div className="flex items-center gap-2 sm:gap-3">
-                <Image   className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
+                <Image
+                  className="h-24 w-24 rounded-full object-cover mt-4"
+                  src={settings?.companyLogo || "/images/logo/logo.png"}
+                  alt="Knock Off Dues Logo"
+                  width={100}
+                  height={50}
+                  priority
+                />
+
 
               </div>
             </Link>

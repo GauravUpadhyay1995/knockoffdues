@@ -32,6 +32,18 @@ interface Admin {
   avatar?: string;
   permissions: Permission[];
 }
+// Settings Interfaces
+interface Setting {
+  companyName: string;
+  comapnyFavicon: string;
+  comapnyLogo: string;
+  companyEmail: string;
+  companyWhatsapp: string;
+  welcome_balance: {
+    allowed: boolean;
+    welcome_amount: number;
+  };
+}
 
 interface AuthContextType {
   admin: Admin | null;
@@ -43,8 +55,94 @@ interface AuthContextType {
   updateAdmin: (updates: Partial<Admin>) => void; // ✅ new
 }
 
+interface SettingsContextType {
+  settings: Setting | null;
+  isLoadingSettings: boolean;
+  error: string | null;
+  refreshSettings: () => Promise<void>;
+}
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+// Settings Provider Component (Standalone)
+export function SettingsProvider({ children }: { children: React.ReactNode }) {
+  const [settings, setSettings] = useState<Setting | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  const fetchSettings = useCallback(async () => {
+    try {
+      setIsLoadingSettings(true);
+      setError(null);
+
+      const response = await fetch('/api/v1/admin/settings/config', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch settings: ${response.status}`);
+      }
+
+      const settingsData = await response.json();
+      setSettings(settingsData.data);
+
+      // Store in localStorage for persistence across page refreshes
+      if (settingsData.data) {
+        localStorage.setItem('appSettings', JSON.stringify(settingsData.data));
+      }
+    } catch (err) {
+      console.error('Error fetching settings:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch settings');
+
+      // Fallback to localStorage if available
+      const cachedSettings = localStorage.getItem('appSettings');
+      if (cachedSettings) {
+        setSettings(JSON.parse(cachedSettings));
+      }
+    } finally {
+      setIsLoadingSettings(false);
+    }
+  }, []);
+
+  const refreshSettings = useCallback(async () => {
+    await fetchSettings();
+  }, [fetchSettings]);
+
+  useEffect(() => {
+    // Check if settings are already in localStorage to show immediately
+    const cachedSettings = localStorage.getItem('appSettings');
+    if (cachedSettings) {
+      setSettings(JSON.parse(cachedSettings));
+      setIsLoadingSettings(false);
+    }
+
+    // Then fetch fresh settings
+    fetchSettings();
+  }, [fetchSettings]);
+
+  return (
+    <SettingsContext.Provider
+      value={{
+        settings,
+        isLoadingSettings,
+        error,
+        refreshSettings,
+      }}
+    >
+      {children}
+    </SettingsContext.Provider>
+  );
+}
+// Hook for using Settings
+export function useSettings() {
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+}
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [admin, setAdmin] = useState<Admin | null>(null);
@@ -202,4 +300,8 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+}
+// Optional: Safe hooks that don't throw errors (return undefined if provider not found)
+export function useSettingsSafe() {
+  return useContext(SettingsContext);
 }

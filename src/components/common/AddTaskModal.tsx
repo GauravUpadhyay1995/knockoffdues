@@ -18,6 +18,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  emp_id:string;
 }
 
 // Custom multi-select dropdown component
@@ -86,7 +87,7 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder = "Selec
                   {selected.includes(user._id) && <FiCheck className="w-3 h-3 text-white" />}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name} ({user.emp_id})</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">{user.email}</div>
                 </div>
               </div>

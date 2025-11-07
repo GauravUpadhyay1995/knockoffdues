@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 import { useEffect, useState } from 'react';
 import Carousel from '@/components/carousel/carousel';
-
+import { useSettings } from '@/context/AuthContext';
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0 },
@@ -43,6 +43,8 @@ type Particle = {
 };
 
 export default function About() {
+    const { settings, isLoadingSettings } = useSettings();
+  
   const images = [
 
     // {
@@ -162,7 +164,7 @@ export default function About() {
                 className="text-xl text-gray-700 mb-6 leading-relaxed"
                 whileHover={{ scale: 1.01 }}
               >
-                The <strong className="text-orange-600">{process.env.NEXT_PUBLIC_COMPANY_NAME} – Innovation & Development</strong> we combine smart IT solutions with professional debt collection services to help businesses recover outstanding payments quickly, securely, and ethically.
+                The <strong className="text-orange-600">{settings?.companyName} – Innovation & Development</strong> we combine smart IT solutions with professional debt collection services to help businesses recover outstanding payments quickly, securely, and ethically.
               </motion.p>
             </motion.div>
 
@@ -180,7 +182,7 @@ export default function About() {
                   <h3 className="text-xl font-semibold text-gray-800">Strategic Partnership</h3>
                 </div>
                 <p className="text-gray-700">
-                  Established via a strategic partnership between the <strong>Banks</strong> and <strong>{process.env.NEXT_PUBLIC_COMPANY_NAME}</strong> ,{process.env.NEXT_PUBLIC_COMPANY_NAME} don’t just collect debts — we build reliable financial recovery systems that drive growth.
+                  Established via a strategic partnership between the <strong>Banks</strong> and <strong>{settings?.companyName} </strong> ,{settings?.companyName}  don’t just collect debts — we build reliable financial recovery systems that drive growth.
                 </p>
               </motion.div>
 
@@ -197,7 +199,7 @@ export default function About() {
                   <h3 className="text-xl font-semibold text-gray-800">Collaborative Ecosystem</h3>
                 </div>
                 <p className="text-gray-700">
-                  At {process.env.NEXT_PUBLIC_COMPANY_NAME}, believe that sustainable debt recovery and digital transformation are only possible through collaboration. Our collaborative ecosystem brings together clients, financial institutions, technology partners, and customers on a single integrated platform.
+                  At {settings?.companyName} , believe that sustainable debt recovery and digital transformation are only possible through collaboration. Our collaborative ecosystem brings together clients, financial institutions, technology partners, and customers on a single integrated platform.
                 </p>
               </motion.div>
             </motion.div>
@@ -207,7 +209,7 @@ export default function About() {
                 className="text-xl text-gray-700 mb-6 leading-relaxed bg-gradient-to-r from-gray-50 to-white p-8 rounded-xl border-l-4 border-orange-500"
                 whileHover={{ scale: 1.005 }}
               >
-                By fostering strong partnerships and leveraging advanced IT capabilities, we create a win–win environment where businesses achieve higher recovery rates, customers experience fairness and convenience, and industries benefit from a more resilient financial system.{process.env.NEXT_PUBLIC_COMPANY_NAME} fuels innovation and promotes the commercialization of life-changing  technologies.
+                By fostering strong partnerships and leveraging advanced IT capabilities, we create a win–win environment where businesses achieve higher recovery rates, customers experience fairness and convenience, and industries benefit from a more resilient financial system.{settings?.companyName}  fuels innovation and promotes the commercialization of life-changing  technologies.
               </motion.p>
             </motion.div>
           </motion.div>

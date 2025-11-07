@@ -34,8 +34,8 @@ interface Task {
   startDate: string | Date;
   endDate: string | Date;
   assignedTo?: string;
-  assignedBy?: { _id: string; name: string; email: string };
-  updatedBy?: { _id: string; name: string; email: string };
+  assignedBy?: { _id: string; name: string; email: string,emp_id:string; };
+  updatedBy?: { _id: string; name: string; email: string ,emp_id:string;};
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -71,7 +71,7 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [tasks, setTasks] = useState<Task[]>(initialData);
   const [loading, setLoading] = useState(false);
-  const [assignedByUserList, setAssignedByUserList] = useState<{ _id: string; name: string; email: string }[]>([]);
+  const [assignedByUserList, setAssignedByUserList] = useState<{ _id: string; name: string; email: string,emp_id:string }[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -440,7 +440,7 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                       <option value="">All Users</option>
                       {assignedByUserList.map(user => (
                         <option key={user._id} value={user._id}>
-                          {user.name} ({user.email})
+                          {user.name} ({user.emp_id})
                         </option>
                       ))}
                     </select>
@@ -457,7 +457,7 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                       <option value="">All Users</option>
                       {assignedByUserList.map(user => (
                         <option key={user._id} value={user._id}>
-                          {user.name} ({user.email})
+                          {user.name} ({user.emp_id})
                         </option>
                       ))}
                     </select>
@@ -584,9 +584,12 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     {task.assignedBy?.name || 'N/A'}
+                    <br></br>
+                     {task.assignedBy?.emp_id}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    {task.updatedBy?.name || 'N/A'}
+                    {task.updatedBy?.name  || 'N/A'} <br></br>
+                    {task.updatedBy?.emp_id}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     {task.updatedAt ? new Date(task.updatedAt).toLocaleString() : 'N/A'}

@@ -26,9 +26,9 @@ export const GET = asyncHandler(
 
     // ✅ Populate assignedBy, createdBy, updatedBy and subTasks with sorting
     const task = await Task.findById(id)
-      .populate("assignedBy", "name email")
-      .populate("createdBy", "name email")
-      .populate("updatedBy", "name email")
+      .populate("assignedBy", "name email emp_id")
+      .populate("createdBy", "name email emp_id")
+      .populate("updatedBy", "name email emp_id")
       .populate({
         path: "subTasks",
         model: SubTask,
@@ -38,7 +38,7 @@ export const GET = asyncHandler(
         populate: {
           path: "createdBy",
           model: User,
-          select: "name email role",
+          select: "name email role emp_id",
         },
       });
 
@@ -58,7 +58,7 @@ export const GET = asyncHandler(
       if (validIds.length > 0) {
         assignedUsers = await User.find(
           { _id: { $in: validIds } },
-          "name email"
+          "name email emp_id"
         );
       }
     }

@@ -64,8 +64,8 @@ function generateHTML(letterType: string, userData: any): string {
     month: 'short',
     year: 'numeric'
   });
-  const id = userData._id.toString();
-  const EMPID = id.slice(-5);
+
+  const EMPID = userData.emp_id.toString();
 
   if (letterType === 'joining') {
     html = `

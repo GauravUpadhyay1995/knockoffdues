@@ -259,8 +259,28 @@ const userSchema = new mongoose.Schema({
   otpExpiry: {
     type: Date,
   },
+  emp_id: { type: String, unique: true }, // auto-generated
 
 }, { timestamps: true });
+
+// --- Pre-save hook to auto-generate emp_id ---
+userSchema.pre("save", async function (next) {
+  if (this.emp_id) return next(); // already has one → skip
+
+  const User = mongoose.model("User", userSchema);
+
+  // Get latest user (sort by emp_id descending)
+  const lastUser = await User.findOne().sort({ createdAt: -1 });
+
+  let newIdNum = 1;
+  if (lastUser && lastUser.emp_id) {
+    const lastNum = parseInt(lastUser.emp_id.replace("TBM", ""), 10);
+    newIdNum = lastNum + 1;
+  }
+
+  this.emp_id = `TBM${String(newIdNum).padStart(4, "0")}`;
+  next();
+});
 
 // Optional: compound index for frequent filter + search
 // userSchema.index({ name: 1, isActive: 1 });

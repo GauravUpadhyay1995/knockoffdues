@@ -53,9 +53,9 @@ export const GET = verifyAdmin(asyncHandler(async (req: NextRequest) => {
     try {
         // Query with population
         let query = Task.find(filter)
-            .populate('assignedBy', 'name email')   // populate assignedBy user
-            .populate('createdBy', 'name email')
-            .populate('updatedBy', 'name email')
+            .populate('assignedBy', 'name email emp_id')   // populate assignedBy user
+            .populate('createdBy', 'name email emp_id')
+            .populate('updatedBy', 'name email emp_id')
             .sort({ updatedAt: -1 });
 
         if (!showAll) {

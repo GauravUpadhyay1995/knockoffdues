@@ -8,7 +8,7 @@ import TopLoadingBar from "@/components/common/TopLoadingBar";
 import { Suspense } from 'react';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, SettingsProvider } from '@/context/AuthContext';
 import Drawer from '@/components/home/Drawer';
 
 const outfit = Outfit({
@@ -38,6 +38,7 @@ export default function RootLayout({
          
         </Suspense>
         <AuthProvider>
+           <SettingsProvider>
             <Drawer />
           <ThemeProvider>
             <SidebarProvider>
@@ -47,6 +48,7 @@ export default function RootLayout({
               </LoadingProvider>
             </SidebarProvider>
           </ThemeProvider>
+          </SettingsProvider>
         </AuthProvider>
         <Toaster
           position="bottom-right"

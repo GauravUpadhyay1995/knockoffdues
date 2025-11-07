@@ -100,7 +100,7 @@ export default function UserEditForm() {
                 <div className="p-6 text-gray-900 dark:text-gray-100">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">{user.name}'s Profile</h2>
+                            <h2 className="text-2xl md:text-3xl font-bold">{user.name}'s Profile <small>-{user.emp_id}</small> </h2>
                             <p className="text-gray-900 dark:text-gray-100 mt-1">
                                 Update {user.name}'s information and preferences
                             </p>

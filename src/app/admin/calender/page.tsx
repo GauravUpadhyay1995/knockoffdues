@@ -45,7 +45,7 @@ interface Meeting {
 
 const Calendar: React.FC = () => {
   const { admin } = useAuth();
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1));
+const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [view, setView] = useState('Month');
   const [isModalOpen, setIsModalOpen] = useState(false);
