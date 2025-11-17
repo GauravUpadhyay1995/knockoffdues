@@ -136,6 +136,7 @@ const AppSidebar: React.FC = () => {
       icon: <FolderIcon />,
       path: "/admin/settings",
       subItems: [
+         { name: "Mail Setup", path: "/admin/settings/emails", pro: true },
         { name: "Permissions", path: "/admin/settings/permissions", pro: false },
         { name: "Branches", path: "/admin/settings/branches", pro: false },
         { name: "Department", path: "/admin/departments", pro: false },

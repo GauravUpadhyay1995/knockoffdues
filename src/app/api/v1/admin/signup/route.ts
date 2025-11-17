@@ -6,11 +6,12 @@ import bcrypt from "bcryptjs";
 import { uploadBufferToS3 } from "@/lib/uploadToS3";
 import { getHr } from "@/utils/helper"
 import { createNotification } from "@/lib/createNotification";
+import { MailConfig } from "@/models/MailConfig";
+import { sendBulkEmail } from "@/lib/sendMail";
 export const POST = async (req: NextRequest) => {
   try {
     await connectToDB();
     const hrData = await getHr();
-    console.log("hrData", hrData)
     const userId = hrData._id.toString()
     const form = await req.formData();
     const resume = form.get("resume") as File | null;
@@ -31,19 +32,19 @@ export const POST = async (req: NextRequest) => {
     const { error, value } = createUserSchema.validate(jsonBody, {
       abortEarly: false,
     });
-   if (error) {
-  const errors = error.details.reduce((acc, curr) => {
-    acc[curr.path[0] as string] = curr.message;
-    return acc;
-  }, {} as Record<string, string>);
+    if (error) {
+      const errors = error.details.reduce((acc, curr) => {
+        acc[curr.path[0] as string] = curr.message;
+        return acc;
+      }, {} as Record<string, string>);
 
-  const message = error.details[0]?.message || "Validation failed";
+      const message = error.details[0]?.message || "Validation failed";
 
-  return NextResponse.json(
-    { success: false, message, errors },
-    { status: 400 }
-  );
-}
+      return NextResponse.json(
+        { success: false, message, errors },
+        { status: 400 }
+      );
+    }
 
 
     // ✅ Check existing user
@@ -84,6 +85,19 @@ export const POST = async (req: NextRequest) => {
     delete userObj.password;
 
 
+    //Sending Email to verify customer
+    const settings = await MailConfig.findOne().sort({ createdAt: -1 }).lean();
+    if (!settings) {
+      return NextResponse.json({ success: false, message: 'No Mail Settings Found' });
+    }
+    if (settings?.registration_email_template.allowed) {
+
+      let body = settings?.registration_email_template.body;
+      let subject = settings?.registration_email_template.subject;
+      let employeeData = [userObj];
+      const result = await sendBulkEmail({ employeeData, subject, body });
+
+    }
 
     await createNotification({
       notificationType: "Followup",

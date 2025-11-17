@@ -11,8 +11,11 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTheme } from "@/context/ThemeContext";
+import { useSettings } from '@/context/AuthContext';
 
 export default function AdminLoginForm() {
+          const { settings, isLoadingSettings } = useSettings();
+  
   const { theme } = useTheme();
   const router = useRouter();
   const { login } = useAuth();
@@ -219,14 +222,7 @@ export default function AdminLoginForm() {
         <div className="hidden lg:flex w-1/2 p-6 sm:p-10 bg-gradient-to-br from-cyan-500 to-orange-500 dark:from-cyan-500 dark:to-purple-900 text-white flex-col items-center justify-center text-center">
           <div className="mb-6 flex justify-center">
             <Link href="/" aria-label="Go to Home page">
-              <Image
-                className="h-24 w-24 rounded-full object-cover mt-4"
-                src="/images/logo/logo.png"
-                alt="Logo"
-                width={100}
-                height={50}
-                priority
-              />
+               <Image className="h-24 w-24 rounded-full object-cover mt-4"    src={settings?.companyLogo || "/images/logo/logo.png"} alt="Knock Off Dues Logo" width={100} height={50} priority />
             </Link>
           </div>
           <h2 className="font-bold text-3xl sm:text-4xl mb-4 leading-tight">

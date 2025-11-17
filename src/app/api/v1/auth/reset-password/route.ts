@@ -5,11 +5,16 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from "@/models/User"; // assuming you store letter records in MongoDB
 import { sendLetterEmail } from '@/lib/sendMail';
-
+import { RESET_TEMPLATE } from '@/email-templates/resetPassword';
+import { sendBulkEmail } from "@/lib/sendMail";
+import { MailConfig } from "@/models/MailConfig";
+import { data } from 'jquery';
 export const POST = asyncHandler(async (req: NextRequest) => {
     await connectToDB();
     const { email, action, otp, newPassword } = await req.json();
-
+    const settings = await MailConfig.findOne().sort({ createdAt: -1 }).lean();
+    let subject = '';
+    let body = '';
     if (!email || !action) {
         return NextResponse.json(
             { success: false, message: "Email ID and action  are required" },
@@ -28,24 +33,30 @@ export const POST = asyncHandler(async (req: NextRequest) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes    
 
-        await User.updateOne(
+        const updatedUser = await User.findOneAndUpdate(
             { email },
             {
                 $set: {
                     otp,
                     otpExpiry
                 }
-            }
+            },
+            { new: true }   // <-- return updated document
         );
 
+        let employeeData = [updatedUser];
 
-        await sendLetterEmail({
-            to: userData.email,
-            letterType: "password_reset_otp",
-            userData,
-            letterUrl: otp,
-        });
-        return NextResponse.json({ success: true, message: 'Link sent successfully!' });
+        if (!settings) {
+            return NextResponse.json({ success: false, message: 'No Mail Settings Found' });
+        }
+        if (!settings?.reset_password_email_template.allowed) {
+            return NextResponse.json({ success: false, message: 'Mail Configuration is Off' });
+        }
+        body = settings?.reset_password_email_template.body;
+        subject = settings?.reset_password_email_template.subject;
+
+        const result = await sendBulkEmail({ employeeData, subject, body });
+        return NextResponse.json({ success: true, message: 'Link sent successfully!', data: result });
 
     }
     else if (action == 'verify_otp') {

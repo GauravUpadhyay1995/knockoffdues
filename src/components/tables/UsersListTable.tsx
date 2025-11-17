@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Edit, Trash2, Eye, Download } from "lucide-react";
+import Swal from "sweetalert2";
 import TableActions from "./TableAction";
 import { useRouter } from 'next/navigation';
 import {
@@ -390,6 +391,40 @@ export default function UsersListTable({ initialData }: Props) {
     }
   };
 
+  const sendBulkMail = async () => {
+
+    const confirm = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will send mail to each employee.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, send!",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/send-bulk`, {
+          method: "POST",
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          toast.success("Mail Sending in Background successfully!");
+        } else {
+          toast.error(result.message || "Failed to send mail");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Error in Bulk mail");
+      }
+    }
+
+  }
+
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
       {loading && <LoadingScreen />}
@@ -424,6 +459,15 @@ export default function UsersListTable({ initialData }: Props) {
                 <FiFilter className="w-4 h-4" />
                 {showFilterPanel ? 'Hide Filters' : 'Show Filters'}
                 {showFilterPanel ? <FiChevronUp className="w-4 h-4" /> : <FiChevronDown className="w-4 h-4" />}
+              </Button>
+
+
+              <Button
+                onClick={sendBulkMail}
+                variant="outline"
+                size="sm"
+              >
+                Send Bulk Mail
               </Button>
             </div>
           </div>
@@ -602,7 +646,7 @@ export default function UsersListTable({ initialData }: Props) {
 
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                       {user.name} <br></br>
-                     {user.emp_id}
+                      {user.emp_id}
                     </TableCell>
 
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
@@ -618,8 +662,8 @@ export default function UsersListTable({ initialData }: Props) {
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                       <span
                         className={`${user.role === "user"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                          : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
                           } px-2 py-1 text-xs font-medium rounded-full capitalize`}
                       >
                         {user.role || "user"}

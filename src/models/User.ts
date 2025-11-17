@@ -2,7 +2,7 @@
 import { timeStamp } from 'console';
 import { boolean } from 'joi';
 import mongoose, { Schema } from 'mongoose';
-
+import crypto from "crypto";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -259,28 +259,74 @@ const userSchema = new mongoose.Schema({
   otpExpiry: {
     type: Date,
   },
+
+  emailVerificationLink: {
+    type: String,
+    default: null,
+
+  },
+  emailVerificationLinkExpiry: {
+    type: Date,
+    default: null,
+  },
   emp_id: { type: String, unique: true }, // auto-generated
 
 }, { timestamps: true });
 
 // --- Pre-save hook to auto-generate emp_id ---
+// userSchema.pre("save", async function (next) {
+//   if (this.emp_id) return next(); // already has one → skip
+
+//   const User = mongoose.model("User", userSchema);
+
+//   // Get latest user (sort by emp_id descending)
+//   const lastUser = await User.findOne().sort({ createdAt: -1 });
+
+//   let newIdNum = 1;
+//   if (lastUser && lastUser.emp_id) {
+//     const lastNum = parseInt(lastUser.emp_id.replace("TBM", ""), 10);
+//     newIdNum = lastNum + 1;
+//   }
+
+//   this.emp_id = `TBM${String(newIdNum).padStart(4, "0")}`;
+//   next();
+// });
+
+
 userSchema.pre("save", async function (next) {
-  if (this.emp_id) return next(); // already has one → skip
+  // If emp_id exists, skip generating it again
+  if (!this.emp_id) {
+    const User = mongoose.model("User", userSchema);
 
-  const User = mongoose.model("User", userSchema);
+    // Get last saved user
+    const lastUser = await User.findOne().sort({ createdAt: -1 });
 
-  // Get latest user (sort by emp_id descending)
-  const lastUser = await User.findOne().sort({ createdAt: -1 });
+    let newIdNum = 1;
+    if (lastUser && lastUser.emp_id) {
+      const lastNum = parseInt(lastUser.emp_id.replace("TBM", ""), 10);
+      newIdNum = lastNum + 1;
+    }
 
-  let newIdNum = 1;
-  if (lastUser && lastUser.emp_id) {
-    const lastNum = parseInt(lastUser.emp_id.replace("TBM", ""), 10);
-    newIdNum = lastNum + 1;
+    this.emp_id = `TBM${String(newIdNum).padStart(4, "0")}`;
   }
 
-  this.emp_id = `TBM${String(newIdNum).padStart(4, "0")}`;
+  // ================================
+  // 📧 Email Verification Link & Expiry
+  // ================================
+  if (!this.emailVerificationLink) {
+    // Generate random token
+    const token = crypto.randomBytes(32).toString("hex");
+
+    // Store token (you will append domain while sending mail)
+    this.emailVerificationLink = token;
+
+    // Set expiry (for example: valid for 24 hours)
+    this.emailVerificationLinkExpiry = Date.now() + 1 * 60 * 1000;
+  }
+
   next();
 });
+
 
 // Optional: compound index for frequent filter + search
 // userSchema.index({ name: 1, isActive: 1 });

@@ -142,7 +142,7 @@ const LettersManagement = ({ userData }) => {
 
     // 📥 Download
     const handleDownload = (url) => {
-        if (!url) return toast.error("Download link not available");
+        if (!url) return toast.error("etterink not available");
         const link = document.createElement("a");
         link.href = url;
         link.download = url.split("/").pop();

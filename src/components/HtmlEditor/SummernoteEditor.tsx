@@ -10,6 +10,7 @@ interface SummernoteEditorProps {
   onChange: (value: string) => void;
   height?: number;
   fullWidth?: boolean;
+  placeholder?: string;
 }
 
 export default function SummernoteEditor({
@@ -17,6 +18,7 @@ export default function SummernoteEditor({
   onChange,
   height = 500,
   fullWidth = false,
+  placeholder
 }: SummernoteEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +26,7 @@ export default function SummernoteEditor({
     const $editor = $(editorRef.current!);
 
     $editor.summernote({
-      placeholder: 'Write description...',
+      placeholder: placeholder||'Write description...',
       tabsize: 2,
       height,
       width: fullWidth ? '100%' : undefined,

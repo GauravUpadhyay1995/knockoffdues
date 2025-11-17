@@ -11,8 +11,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTheme } from '@/context/ThemeContext';
-
+import { useSettings } from '@/context/AuthContext';
 export default function ResetPasswordForm() {
+      const { settings, isLoadingSettings } = useSettings();
+    
     const { theme } = useTheme();
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -488,7 +490,7 @@ export default function ResetPasswordForm() {
                                     className="block p-2 rounded-lg transition-all duration-300 transform"
                                     aria-label="Go to Home page"
                                 >
-                                    <Image className="h-24 w-24 rounded-full object-cover mt-4" src="/images/logo/logo.png" alt="Knock Off Dues Logo" width={100} height={50} priority />
+                                    <Image className="h-24 w-24 rounded-full object-cover mt-4"    src={settings?.companyLogo || "/images/logo/logo.png"} alt="Knock Off Dues Logo" width={100} height={50} priority />
                                 </Link>
                             </div>
                             <h2 className="font-bold text-3xl sm:text-4xl mb-4 leading-tight">
