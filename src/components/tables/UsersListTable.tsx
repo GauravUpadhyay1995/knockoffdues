@@ -186,6 +186,9 @@ export default function UsersListTable({ initialData }: Props) {
   const [departments, setDepartments] = useState<Array<{ _id: string; name: string }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+
 
   const [filters, setFilters] = useState<Filters>({
     name: '',
@@ -363,6 +366,14 @@ export default function UsersListTable({ initialData }: Props) {
     setFilters(prev => ({ ...prev, [name]: value }));
     setCurrentPage(1);
   }, []);
+  useEffect(() => {
+    const eligibleIds = users.filter(isUserEligible).map(u => u._id);
+
+    setSelectAll(
+      eligibleIds.length > 0 && eligibleIds.every(id => selectedUsers.includes(id))
+    );
+  }, [users, selectedUsers]);
+
 
   if (!isAuthorized) {
     return <UnauthorizedComponent />;
@@ -391,11 +402,14 @@ export default function UsersListTable({ initialData }: Props) {
     }
   };
 
-  const sendBulkMail = async () => {
-
+  const sendBulkMail = async (type: string) => {
+    if (!type) return;
+    if (selectedUsers.length === 0) {
+      return toast.error("No users selected");
+    }
     const confirm = await Swal.fire({
       title: "Are you sure?",
-      text: "This will send mail to each employee.",
+      text: `Send ${type} email to ${selectedUsers.length} selected users?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc2626",
@@ -408,6 +422,7 @@ export default function UsersListTable({ initialData }: Props) {
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/send-bulk`, {
           method: "POST",
+          body: JSON.stringify({ userIds: selectedUsers ,type:type}),
         });
         const result = await response.json();
 
@@ -423,6 +438,29 @@ export default function UsersListTable({ initialData }: Props) {
     }
 
   }
+  const handleSelectUser = (id: string, checked: boolean) => {
+    setSelectedUsers((prev) =>
+      checked ? [...prev, id] : prev.filter((uid) => uid !== id)
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+
+    if (checked) {
+      const eligibleIds = users
+        .filter((u) => isUserEligible(u))
+        .map((u) => u._id);
+
+      setSelectedUsers(eligibleIds);
+    } else {
+      setSelectedUsers([]);
+    }
+  };
+
+  const isUserEligible = (user: User) => {
+    return user.isActive === true && user.isVerified === true && user.isEmailVerified === true;
+  };
 
 
   return (
@@ -462,13 +500,22 @@ export default function UsersListTable({ initialData }: Props) {
               </Button>
 
 
-              <Button
-                onClick={sendBulkMail}
-                variant="outline"
-                size="sm"
-              >
-                Send Bulk Mail
-              </Button>
+
+              <div>
+
+                <select
+                  className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 dark:text-gray-400 text-sm  "
+                  disabled={selectedUsers.length === 0}
+                  value=""
+                  onChange={(e) => sendBulkMail(e.target.value)}
+                >
+                  <option value="">Send Mail to Selected ({selectedUsers.length})</option>
+                  <option value="bulk_email_template">Broadcast</option>
+                  <option value="warning_email_template">Warning</option>
+                  <option value="registration_email_template">Registration Confirmation Email</option>
+                </select>
+
+              </div>
             </div>
           </div>
 
@@ -594,6 +641,13 @@ export default function UsersListTable({ initialData }: Props) {
         <Table>
           <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
             <TableRow>
+              <TableCell isHeader className="px-5 py-3">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                />
+              </TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Sr. No.</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Created/Updated</TableCell>
               <TableCell isHeader className="px-5 py-3 font-medium text-start text-theme-xs text-gray-500">Name (USER-ID)</TableCell>
@@ -635,6 +689,17 @@ export default function UsersListTable({ initialData }: Props) {
 
                 return (
                   <TableRow key={user._id}>
+                    <TableCell className="px-5 py-1">
+                      <input
+                        type="checkbox"
+                        disabled={!isUserEligible(user)}
+                        checked={selectedUsers.includes(user._id)}
+                        onChange={(e) => handleSelectUser(user._id, e.target.checked)}
+                        className={`${!isUserEligible(user) ? "opacity-30 cursor-not-allowed" : ""}`}
+                      />
+
+                    </TableCell>
+
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                       {(currentPage - 1) * pageSize + index + 1}
                     </TableCell>

@@ -45,6 +45,7 @@ export const sendBulkEmail = async ({
   body,
 }) => {
   try {
+    console.log("Preparing to send bulk emails to:", employeeData);
     const companyData = await Config.findOne().sort({ createdAt: -1 }).lean();
 
     if (!companyData) throw new Error("Company config missing");
@@ -58,7 +59,6 @@ export const sendBulkEmail = async ({
           if (!emp.email) return null;
 
           const dynamicBody = safeReplace(body, emp, companyData);
-          console.log("dynaic body",dynamicBody)
 
           const params = {
             QueueUrl: process.env.AWS_SQS_QUEUE_URL!,
@@ -129,7 +129,7 @@ function safeReplace(template = "", emp = {}, company = {}) {
     '{#companyLogo}': safe(company.companyLogo),
     '{#companyAddress}': safe(company.companyAddress),
 
-    
+
     '{#currentDate}': safe(today),
     '{#OTPCode}': safe(emp.otp),
     '{#emailVerificationLink}': safe(emp.emailVerificationLink),

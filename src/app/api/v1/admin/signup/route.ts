@@ -96,6 +96,7 @@ export const POST = async (req: NextRequest) => {
       let subject = settings?.registration_email_template.subject;
       let employeeData = [userObj];
       const result = await sendBulkEmail({ employeeData, subject, body });
+      console.log("Bulk email result:", result);
 
     }
 

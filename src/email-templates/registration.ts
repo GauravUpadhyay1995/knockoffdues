@@ -1,4 +1,4 @@
-const VerificationLink = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "localhost:3000"
+const VerificationLink = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "http://localhost:3000"
   : process.env.NEXT_PUBLIC_LIVE_DOMAIN;
 
 export const REG_TEMPLATE = `<div style="font-family: 'Segoe UI', Tahoma, sans-serif; color: #333; line-height: 1.6; margin: auto; border: 1px solid #ddd; border-radius: 10px; overflow: hidden;">
@@ -19,8 +19,8 @@ export const REG_TEMPLATE = `<div style="font-family: 'Segoe UI', Tahoma, sans-s
     <p>Your account has been successfully registered. Please verify your email by clicking below verify button to access your dashboard:</p>
 
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${VerificationLink}/api/v1/admin/verify-email/{#emailVerificationLink}" target="_blank" style="background-color: #e60076; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: 500;">
-        Click to Verify
+      <a href="${VerificationLink}/api/v1/admin/verify-email/{#emailVerificationLink}" target="_blank" style="background-color: #004aad; color: white; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: 500;">
+        Click to Verify Email
       </a>
     </div>
 

@@ -321,7 +321,7 @@ userSchema.pre("save", async function (next) {
     this.emailVerificationLink = token;
 
     // Set expiry (for example: valid for 24 hours)
-    this.emailVerificationLinkExpiry = Date.now() + 1 * 60 * 1000;
+    this.emailVerificationLinkExpiry = Date.now() + 24 * 60 * 60 * 1000;
   }
 
   next();
