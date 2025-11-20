@@ -4,7 +4,7 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon } from "@/icons";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -14,8 +14,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { useSettings } from '@/context/AuthContext';
 
 export default function AdminLoginForm() {
-          const { settings, isLoadingSettings } = useSettings();
-  
+  const { settings, isLoadingSettings } = useSettings();
+  const resumeRef = useRef<HTMLInputElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+
   const { theme } = useTheme();
   const router = useRouter();
   const { login } = useAuth();
@@ -28,11 +30,153 @@ export default function AdminLoginForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [verificationMessage, setVerificationMessage] = useState<boolean>(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    mobile?: string;
+    password?: string;
+    resume?: string;
+  }>({});
+
+  // Validation functions
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) return "Email is required";
+    if (!emailRegex.test(email)) return "Please enter a valid email address";
+    return null;
+  };
+
+  const validateMobile = (mobile: string) => {
+    const mobileRegex = /^[0-9]{10}$/;
+    if (!mobile) return "Mobile number is required";
+    if (!mobileRegex.test(mobile)) return "Please enter a valid 10-digit mobile number";
+    return null;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) return "Password is required";
+    if (password.length < 6) return "Password must be at least 6 characters long";
+    return null;
+  };
+
+  const validateName = (name: string) => {
+    if (!name) return "Full name is required";
+    if (name.length < 2) return "Name must be at least 2 characters long";
+    return null;
+  };
+
+  const validateResume = (file: File | null) => {
+    if (!file) return "Resume is required";
+    
+    // Check file type
+    const allowedTypes = ['application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      return "Only PDF files are allowed for resume";
+    }
+    
+    // Check file size (1MB = 1048576 bytes)
+    if (file.size > 1048576) {
+      return "Resume file size must be less than 1MB";
+    }
+    
+    return null;
+  };
+
+  // Real-time validation
+  useEffect(() => {
+    const errors: typeof fieldErrors = {};
+    
+    const nameError = validateName(name);
+    const emailError = validateEmail(email);
+    const mobileError = validateMobile(mobile);
+    const passwordError = validatePassword(password);
+    const resumeError = validateResume(resume);
+
+    if (nameError) errors.name = nameError;
+    if (emailError) errors.email = emailError;
+    if (mobileError) errors.mobile = mobileError;
+    if (passwordError) errors.password = passwordError;
+    if (resumeError) errors.resume = resumeError;
+
+    setFieldErrors(errors);
+  }, [name, email, mobile, password, resume]);
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setMobile("");
+    setPassword("");
+    setResume(null);
+    setError(null);
+    setFieldErrors({});
+    
+    if (resumeRef.current) {
+      resumeRef.current.value = "";
+    }
+    
+    if (formRef.current) {
+      formRef.current.reset();
+    }
+  };
+
+  const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    
+    if (file) {
+      const resumeError = validateResume(file);
+      if (resumeError) {
+        setFieldErrors(prev => ({ ...prev, resume: resumeError }));
+        setResume(null);
+        if (resumeRef.current) {
+          resumeRef.current.value = "";
+        }
+        toast.error(resumeError);
+        return;
+      }
+    }
+    
+    setResume(file);
+  };
+
+  const isFormValid = () => {
+    return (
+      name &&
+      email &&
+      mobile &&
+      password &&
+      resume &&
+      Object.keys(fieldErrors).length === 0
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setVerificationMessage(false);
+
+    // Final validation before submit
+    const finalErrors: typeof fieldErrors = {};
+    
+    const nameError = validateName(name);
+    const emailError = validateEmail(email);
+    const mobileError = validateMobile(mobile);
+    const passwordError = validatePassword(password);
+    const resumeError = validateResume(resume);
+
+    if (nameError) finalErrors.name = nameError;
+    if (emailError) finalErrors.email = emailError;
+    if (mobileError) finalErrors.mobile = mobileError;
+    if (passwordError) finalErrors.password = passwordError;
+    if (resumeError) finalErrors.resume = resumeError;
+
+    if (Object.keys(finalErrors).length > 0) {
+      setFieldErrors(finalErrors);
+      setLoading(false);
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -44,7 +188,6 @@ export default function AdminLoginForm() {
 
       const response = await fetch(`/api/v1/admin/signup`, {
         method: "POST",
-        // ❌ Do NOT set Content-Type when using FormData
         body: formData,
         credentials: "include",
       });
@@ -52,16 +195,16 @@ export default function AdminLoginForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        setVerificationMessage(true);
         toast.success("Registration successful!");
-        setTimeout(() => router.push("/login"), 2000);
+        resetForm();
       } else {
         const msg = data.message || "Registration failed. Please try again.";
         setError(msg);
         toast.error(msg);
       }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Registration failed. Please try again.";
+      const msg = err instanceof Error ? err.message : "Registration failed. Please try again.";
       setError(msg);
       toast.error(msg);
       console.error("Registration error:", err);
@@ -71,15 +214,25 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <div className="mt-4 flex items-center justify-center  dark:bg-gray-900 p-4 sm:p-6">
+    <div className="mt-4 flex items-center justify-center dark:bg-gray-900">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="flex flex-col lg:flex-row w-full max-w-4xl bg-gradient-to-br from-orange-50/70 via-cyan-50/70 to-blue-50/70 dark:from-gray-900 dark:via-gray-950 dark:to-black border-t border-orange-200/50 dark:border-gray-800/50 rounded-3xl shadow-2xl overflow-hidden"
+        className="flex flex-col lg:flex-row w-full max-w-6xl bg-gradient-to-br from-orange-50/70 via-cyan-50/70 to-blue-50/70 dark:from-gray-900 dark:via-gray-950 dark:to-black border-t border-orange-200/50 dark:border-gray-800/50 rounded-3xl shadow-2xl overflow-hidden"
       >
         {/* Left Panel */}
         <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-center">
+          {verificationMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-sm text-green-500 dark:text-green-400 bg-green-50 dark:bg-green-900/30 p-4 rounded-xl mb-2"
+            >
+              Registration successful! Please check your email to verify your account.
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -116,7 +269,7 @@ export default function AdminLoginForm() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.3 }}
           >
-            <form onSubmit={handleSubmit}>
+            <form ref={formRef} onSubmit={handleSubmit}>
               <AnimatePresence>
                 {error && (
                   <motion.div
@@ -141,7 +294,17 @@ export default function AdminLoginForm() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="mt-1"
+                    required
                   />
+                  {fieldErrors.name && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-red-500 text-xs mt-1"
+                    >
+                      {fieldErrors.name}
+                    </motion.p>
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -149,12 +312,34 @@ export default function AdminLoginForm() {
                     Resume <span className="text-red-500">*</span>
                   </Label>
                   <Input
+                    ref={resumeRef}
                     type="file"
                     className="mt-1"
-                    onChange={(e) =>
-                      setResume(e.target.files ? e.target.files[0] : null)
-                    }
+                    onChange={handleResumeChange}
+                    accept=".pdf"
+                    required
                   />
+                  {fieldErrors.resume && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-red-500 text-xs mt-1"
+                    >
+                      {fieldErrors.resume}
+                    </motion.p>
+                  )}
+                  {resume && !fieldErrors.resume && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-green-500 text-xs mt-1"
+                    >
+                      ✓ Resume selected: {resume.name} ({(resume.size / 1024 / 1024).toFixed(2)} MB)
+                    </motion.p>
+                  )}
+                  <p className="text-gray-500 text-xs mt-1">
+                    Only PDF files are allowed. Maximum file size: 1MB
+                  </p>
                 </div>
               </div>
 
@@ -168,7 +353,17 @@ export default function AdminLoginForm() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1"
+                  required
                 />
+                {fieldErrors.email && (
+                  <motion.p
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="text-red-500 text-xs mt-1"
+                  >
+                    {fieldErrors.email}
+                  </motion.p>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
@@ -182,7 +377,17 @@ export default function AdminLoginForm() {
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     className="mt-1"
+                    required
                   />
+                  {fieldErrors.mobile && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-red-500 text-xs mt-1"
+                    >
+                      {fieldErrors.mobile}
+                    </motion.p>
+                  )}
                 </div>
 
                 <div className="flex-1">
@@ -195,7 +400,17 @@ export default function AdminLoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="mt-1"
+                    required
                   />
+                  {fieldErrors.password && (
+                    <motion.p
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="text-red-500 text-xs mt-1"
+                    >
+                      {fieldErrors.password}
+                    </motion.p>
+                  )}
                 </div>
               </div>
 
@@ -205,15 +420,23 @@ export default function AdminLoginForm() {
                 className="mt-6"
               >
                 <Button
-                  disabled={
-                    loading || !name || !email || !mobile || !password || !resume
-                  }
-                  className="w-full gradient-bg hover:bg-purple-700 text-white rounded-xl py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  disabled={loading || !isFormValid()}
+                  className="w-full gradient-bg hover:bg-purple-700 text-white rounded-xl py-3 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   variant="primary"
+                  type="submit"
                 >
                   {loading ? "Registering..." : "Register"}
                 </Button>
               </motion.div>
+
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Already have an account?{" "}
+                  <Link href="/admin/login" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+                    Sign in here
+                  </Link>
+                </p>
+              </div>
             </form>
           </motion.div>
         </div>
@@ -222,15 +445,43 @@ export default function AdminLoginForm() {
         <div className="hidden lg:flex w-1/2 p-6 sm:p-10 bg-gradient-to-br from-cyan-500 to-orange-500 dark:from-cyan-500 dark:to-purple-900 text-white flex-col items-center justify-center text-center">
           <div className="mb-6 flex justify-center">
             <Link href="/" aria-label="Go to Home page">
-               <Image className="h-24 w-24 rounded-full object-cover mt-4"    src={settings?.companyLogo || "/images/logo/logo.png"} alt="Knock Off Dues Logo" width={100} height={50} priority />
+              <Image 
+                className="h-24 w-24 rounded-full object-cover mt-4" 
+                src={settings?.companyLogo || "/images/logo/logo.png"} 
+                alt="Knock Off Dues Logo" 
+                width={100} 
+                height={50} 
+                priority 
+              />
             </Link>
           </div>
           <h2 className="font-bold text-3xl sm:text-4xl mb-4 leading-tight">
-            Signup Yourself
+            Join Our Team
           </h2>
           <p className="text-purple-100 text-lg mb-8 opacity-90">
-            Welcome to the Registration Panel. Please enter details to access the features.
+            Create your account to access the admin dashboard and manage your organization efficiently.
           </p>
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 max-w-md">
+            <h3 className="font-semibold text-xl mb-3">Why Register?</h3>
+            <ul className="text-left space-y-2 text-purple-100">
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                Access powerful admin tools
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                Manage users and permissions
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                Track analytics and reports
+              </li>
+              <li className="flex items-center">
+                <span className="mr-2">✓</span>
+                Secure and reliable platform
+              </li>
+            </ul>
+          </div>
         </div>
       </motion.div>
     </div>

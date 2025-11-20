@@ -12,10 +12,13 @@ import ThematicAreas from "@/components/common/ThematicArea";
 import Events from "@/app/(frontend)/events/page";
 import "@/lib/cronScheduler"; // import it once to start cron
 
-
+import { useAuth } from '@/context/AuthContext';
 export default function HomePage() {
 
-
+    const { checkAuth } = useAuth();
+    useEffect(() => {
+        checkAuth();
+    }, [checkAuth]);
     const images = [
         {
             title: "Smart Debt Recovery Solutions",

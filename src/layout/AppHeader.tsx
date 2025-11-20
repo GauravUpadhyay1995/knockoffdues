@@ -8,8 +8,10 @@ import { useTheme } from "@/context/ThemeContext";
 import NotificationBell from "@/components/common/FireBaseNotification";
 import ReminderBell from "@/components/common/FireBaseReminder";
 import React, { useState, useEffect, useRef } from "react";
-
+import { useSettings } from '@/context/AuthContext';
 const AppHeader: React.FC = () => {
+  const { settings, isLoadingSettings } = useSettings();
+
   const { theme } = useTheme();
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -52,7 +54,7 @@ const AppHeader: React.FC = () => {
           <Link href="/admin" className="flex items-center ">
             <Image
               className="h-20 w-20 z-30 fixed rounded-full object-cover mt-10 ml-10"
-              src="/images/logo/logo.png"
+              src={settings?.companyLogo || "/images/logo/logo.png"}
               alt="Knock Off Dues Logo"
               width={80}
               height={80}

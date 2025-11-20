@@ -214,6 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticatedAdmin(true);
         localStorage.setItem('adminToken', token);
         localStorage.setItem('admin', JSON.stringify(adminData));
+     
       } catch (error) {
         console.error('Login failed: Invalid token', error);
         clearAuthData();
@@ -228,7 +229,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = useCallback(() => {
     setIsLoading(true);
-
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) {
@@ -255,6 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAdmin(adminData);
       setIsAuthenticatedAdmin(true);
       localStorage.setItem('admin', JSON.stringify(adminData));
+        const a= window.location.pathname.includes('/admin') ? router.push('/admin') : router.push('/login');
     } catch (error) {
       console.error('Invalid or modified token. Logging out.', error);
       clearAuthData();
