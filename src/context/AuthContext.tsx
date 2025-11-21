@@ -255,7 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAdmin(adminData);
       setIsAuthenticatedAdmin(true);
       localStorage.setItem('admin', JSON.stringify(adminData));
-        const a= window.location.pathname.includes('/admin') ? router.push('/admin') : router.push('/login');
+        // const a= window.location.pathname.includes('/admin') ? router.push('/admin') : router.push('/login');
     } catch (error) {
       console.error('Invalid or modified token. Logging out.', error);
       clearAuthData();
