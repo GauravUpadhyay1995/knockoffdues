@@ -1,6 +1,7 @@
 import { NotificationStatus } from "@/models/NotificationStatus";
 import { db } from "./firebase";
 import { collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+        const FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "notification_local" : "notifications";
 
 /**
  * Mark all notifications for a user as read (MongoDB + Firestore)
@@ -14,7 +15,7 @@ export async function markAllAsRead(userId: string) {
     );
 
     // Step 2: Update in Firestore
-    const q = query(collection(db, "notifications"), where("userId", "==", userId));
+    const q = query(collection(db, FIREBASE_DATABASE_NAME), where("userId", "==", userId));
     const snap = await getDocs(q);
     const updates = snap.docs.map((doc) => updateDoc(doc.ref, { isSeen: true }));
     await Promise.all(updates);

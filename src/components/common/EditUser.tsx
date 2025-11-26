@@ -24,7 +24,7 @@ export default function UserEditForm() {
     const userId = params.id as string;
     const loggedInUserData = JSON.parse(localStorage.getItem('admin') || '{}');
 
-    const { user, departments, roleList, loading, error, refresh } = useUserData(userId);
+    const { user, departments, roleList, referenceList, loading, error, refresh } = useUserData(userId);
 
     // rename handleSubmit from custom hook
     const { isSubmitting, submitSuccess, handleSubmit: handleFormSubmit } = useFormSubmission(userId, user);
@@ -100,7 +100,8 @@ export default function UserEditForm() {
                 <div className="p-6 text-gray-900 dark:text-gray-100">
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">{user.name}'s Profile <small>-{user.emp_id}</small> </h2>
+                            <h2 className="text-2xl md:text-3xl font-bold">{user.name}'s Profile </h2>
+                            <small className="text-sm text-gray-500 dark:text-gray-400">Emp ID : {user.emp_id} ,&nbsp; Role : {user?.role.toUpperCase()}</small>
                             <p className="text-gray-900 dark:text-gray-100 mt-1">
                                 Update {user.name}'s information and preferences
                             </p>
@@ -144,6 +145,7 @@ export default function UserEditForm() {
                                     errors={errors}
                                     departments={departments}
                                     roleList={roleList}
+                                    referenceList={referenceList}
                                     academicFields={academicFields}
                                     experienceFields={experienceFields}
                                     documentFields={documentFields}
@@ -170,12 +172,12 @@ export default function UserEditForm() {
                     )}
 
                     {
-                     
-                    
-                    activeTab === 'letters' && (
-                    <Letters userData={user}  />
 
-                    )}
+
+                        activeTab === 'letters' && (
+                            <Letters userData={user} />
+
+                        )}
                 </div>
             </motion.div>
 

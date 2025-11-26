@@ -422,7 +422,7 @@ export default function UsersListTable({ initialData }: Props) {
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/email/send-bulk`, {
           method: "POST",
-          body: JSON.stringify({ userIds: selectedUsers ,type:type}),
+          body: JSON.stringify({ userIds: selectedUsers, type: type }),
         });
         const result = await response.json();
 
@@ -667,7 +667,7 @@ export default function UsersListTable({ initialData }: Props) {
                     label: "Edit",
                     icon: Edit,
                     onClick: () => handleEditClick(user),
-                    disabled: user.role === "super admin" || isSubmitting,
+                    disabled: (user.role === "super admin" || user.role === "hr") || isSubmitting,
                   },
                 ];
 
@@ -709,9 +709,22 @@ export default function UsersListTable({ initialData }: Props) {
                       {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : "N/A"}
                     </TableCell>
 
-                    <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                      {user.name} <br></br>
-                      {user.emp_id}
+                    <TableCell className={`px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400 ${user.role === "super admin" ? "cursor-not-allowed opacity-60" : ""
+                      }`} >
+
+                      <div
+                        onClick={() => {
+                          if (user.role !== "super admin") {
+                            handleEditClick(user);
+                          }
+                        }}
+
+                        className={`${user.role === "super admin" ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:text-blue-900"
+                      }`} 
+                      >
+                        {user.name} <br />
+                        {user.emp_id}
+                      </div>
                     </TableCell>
 
                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">

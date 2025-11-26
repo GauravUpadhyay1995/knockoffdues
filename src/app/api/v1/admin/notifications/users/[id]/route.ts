@@ -50,6 +50,7 @@ export async function GET(
             const n = status.notificationId;
             return {
                 id: status._id.toString(),
+                notificationId: n ? (n as any)._id.toString() : null,
                 message: n?.title || "New Notification",
                 type: n?.notificationType || "Other",
                 read: status.isSeen, // Matches the front-end component's prop

@@ -85,7 +85,7 @@ export const accordionSectionsConfig = [
   },
   {
     id: 'recruiter',
-    title: 'Recruiter Information',
+    title: 'Recruiter & Reference Person Information',
     icon: <RecruiterIcon />,
   },
   {

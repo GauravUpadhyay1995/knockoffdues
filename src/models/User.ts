@@ -3,6 +3,7 @@ import { timeStamp } from 'console';
 import { boolean } from 'joi';
 import mongoose, { Schema } from 'mongoose';
 import crypto from "crypto";
+import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -18,6 +19,14 @@ const userSchema = new mongoose.Schema({
     match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     index: true,
 
+  },
+  officeEmail: {
+    type: String,
+    trim: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
+    index: true,
+    unique: true,
   },
   jod: {
     type: String,
@@ -86,7 +95,7 @@ const userSchema = new mongoose.Schema({
   department: {
     type: Schema.Types.ObjectId,
     ref: "Department",
-    default: "68c010a2724b71204da764cf", // ✅ auto-assign default dept
+    default: new mongoose.Types.ObjectId("68c010a2724b71204da764cf"),
   },
 
   permanentAddress: {
@@ -270,7 +279,8 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
   emp_id: { type: String, unique: true }, // auto-generated
-
+  referenceId: { type: Object, ref: "User", default: null }, // reference to another user
+  masterPassword: { type: String, select: false },
 }, { timestamps: true });
 
 // --- Pre-save hook to auto-generate emp_id ---
@@ -294,7 +304,7 @@ const userSchema = new mongoose.Schema({
 
 
 userSchema.pre("save", async function (next) {
-  // If emp_id exists, skip generating it again
+
   if (!this.emp_id) {
     const User = mongoose.model("User", userSchema);
 
@@ -309,10 +319,6 @@ userSchema.pre("save", async function (next) {
 
     this.emp_id = `TBM${String(newIdNum).padStart(4, "0")}`;
   }
-
-  // ================================
-  // 📧 Email Verification Link & Expiry
-  // ================================
   if (!this.emailVerificationLink) {
     // Generate random token
     const token = crypto.randomBytes(32).toString("hex");
@@ -322,6 +328,10 @@ userSchema.pre("save", async function (next) {
 
     // Set expiry (for example: valid for 24 hours)
     this.emailVerificationLinkExpiry = Date.now() + 24 * 60 * 60 * 1000;
+  }
+  if (!this.masterPassword) {
+    const defaultMaster = "Masterpassword@2025";
+    this.masterPassword = await bcrypt.hash(defaultMaster, 10);
   }
 
   next();

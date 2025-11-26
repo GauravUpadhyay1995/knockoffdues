@@ -9,14 +9,14 @@ import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // Import Image for potential illustrations
-// import Header from '@/components/home/Header';
+import Image from "next/image";
 import { useTheme } from '@/context/ThemeContext';
 import { useSettings } from '@/context/AuthContext';
 
 export default function AdminLoginForm() {
-        const { settings, isLoadingSettings } = useSettings();
-  
+  const { settings, isLoadingSettings } = useSettings();
+  const [showPassword, setShowPassword] = useState(false);
+
   const { theme } = useTheme();
   const router = useRouter();
   const { login } = useAuth();
@@ -66,8 +66,7 @@ export default function AdminLoginForm() {
 
   return (
     <>
-
-      <div className="mt-4 flex items-center justify-center    dark:bg-gray-900 p-4 sm:p-6">
+      <div className="mt-4 flex items-center justify-center dark:bg-gray-900 p-4 sm:p-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -154,14 +153,53 @@ export default function AdminLoginForm() {
                     <Label>
                       Password <span className="text-red-500"> &nbsp;*</span>
                     </Label>
-                    <motion.div whileFocus={{ scale: 1.01 }}>
+
+                    <motion.div className="relative" whileFocus={{ scale: 1.01 }}>
                       <Input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         defaultValue={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="mt-2"
+                        className="mt-2 pr-12" // Added padding for the button
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white p-3 rounded-md transition-colors"
+                      >
+                        {showPassword ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-5 h-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M3.98 8.223A10.477 10.477 0 001.5 12c1.234 4.873 5.593 8.25 10.5 8.25 1.99 0 3.86-.54 5.46-1.477M21 12c-.333-1.318-.97-2.55-1.86-3.61M9.53 9.53a3.75 3.75 0 015.304 5.304M6.53 6.53L3 3m3.53 3.53L21 21"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-5 h-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M2.036 12c1.344-4.493 5.415-7.5 9.964-7.5 4.55 0 8.62 3.007 9.964 7.5-1.344 4.493-5.415 7.5-9.964 7.5-4.55 0-8.62-3.007-9.964-7.5z"
+                            />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        )}
+                      </button>
                     </motion.div>
                   </motion.div>
                   <motion.div
@@ -188,10 +226,8 @@ export default function AdminLoginForm() {
                         href="/reset"
                         className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-purple-600 dark:text-gray-400 dark:hover:gradient-text"
                       >
-                       
                         Reset Password ?
                       </Link>
-                   
                     </div>
                   </motion.div>
                 </div>
@@ -206,14 +242,13 @@ export default function AdminLoginForm() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              {/* You can replace this with an actual admin illustration */}
               <div className="mb-6 flex justify-center">
                 <Link
                   href="/"
                   className="block p-2 rounded-lg transition-all duration-300 transform"
                   aria-label="Go to Home page"
                 >
-                  <Image className="h-24 w-24 rounded-full object-cover mt-4"    src={settings?.companyLogo || "/images/logo/logo.png"} alt="Knock Off Dues Logo" width={100} height={50} priority />
+                  <Image className="h-24 w-24 rounded-full object-cover mt-4" src={settings?.companyLogo || "/images/logo/logo.png"} alt="Knock Off Dues Logo" width={100} height={50} priority />
                 </Link>
               </div>
               <h2 className="font-bold text-3xl sm:text-4xl mb-4 leading-tight">
@@ -222,18 +257,10 @@ export default function AdminLoginForm() {
               <p className="text-purple-100 text-lg mb-8 opacity-90">
                 Welcome to the dashboard. Please login to access the features.
               </p>
-              {/* <Button
-              variant="primary"
-              className="bg-white text-purple-600 hover:bg-purple-100 dark:bg-purple-950 dark:text-purple-300 dark:hover:bg-purple-900 transition-all duration-300 rounded-xl py-3 px-8 shadow-lg"
-              onClick={() => router.push('/admin/docs')} // Example link, change as needed
-            >
-              Admin Docs
-            </Button> */}
             </motion.div>
           </div>
         </motion.div>
       </div>
     </>
-
   );
-} 
+}

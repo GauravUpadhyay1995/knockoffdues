@@ -38,19 +38,22 @@ const ContactInfoFields: React.FC<ContactInfoFieldsProps> = ({
         />
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
       </div>
-      
-      <label className="flex items-center">
-        <label className="inline-flex items-center">
-          <input
-            type="checkbox"
-            {...register('isEmailVerified')}
-            disabled={loggedInUserData?.id === user._id}
-            className={`appearance-none h-4 w-4 border rounded border-gray-300 checked:bg-green-600 checked:border-green-600 disabled:checked:bg-green-600 disabled:checked:border-green-600 relative cursor-pointer after:content-[''] after:absolute after:top-0.5 after:left-1 after:w-1.5 after:h-2 after:border-r-2 after:border-b-2 after:border-white after:rotate-45 checked:after:block after:hidden`}
-          />
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+          Email Verified
         </label>
-        <span className="ml-2 text-red-800 dark:text-red-300">Email Verified</span>
-      </label>
-      
+        <input
+          type="checkbox"
+          {...register('isEmailVerified')}
+          disabled={loggedInUserData?.id === user._id}
+          placeholder="Mobile Number"
+          className="border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+
+        />
+        {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile.message}</p>}
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Mobile Number
@@ -63,7 +66,7 @@ const ContactInfoFields: React.FC<ContactInfoFieldsProps> = ({
         />
         {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile.message}</p>}
       </div>
-      
+
       <div className="md:col-span-3">
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Permanent Address
@@ -74,7 +77,7 @@ const ContactInfoFields: React.FC<ContactInfoFieldsProps> = ({
           className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
         />
       </div>
-      
+
       <div className="md:col-span-3">
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Current Address

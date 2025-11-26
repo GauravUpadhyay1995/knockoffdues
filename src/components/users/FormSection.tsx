@@ -46,6 +46,7 @@ const FormSection: React.FC<FormSectionProps> = ({
   errors,
   departments,
   roleList,
+  referenceList,
   academicFields,
   experienceFields,
   documentFields,
@@ -59,7 +60,7 @@ const FormSection: React.FC<FormSectionProps> = ({
 }) => {
   const renderSectionContent = () => {
     const commonProps = { register, control, errors, user, isSubmitting };
-    
+
     switch (section.id) {
       case 'personal':
         return <PersonalInfoFields {...commonProps} />;
@@ -72,7 +73,7 @@ const FormSection: React.FC<FormSectionProps> = ({
       case 'health':
         return <HealthInfoFields {...commonProps} />;
       case 'recruiter':
-        return <RecruiterInfoFields {...commonProps} />;
+        return <RecruiterInfoFields {...commonProps} referenceList={referenceList} />;
       case 'academics':
         return (
           <AcademicFields

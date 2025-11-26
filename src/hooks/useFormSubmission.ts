@@ -10,7 +10,6 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
   const handleSubmit = async (data: UserData) => {
     try {
       setIsSubmitting(true);
-      console.log("Submitting data:", data);
       const formData = new FormData();
 
       // Helper → append only if value is not empty/undefined/null
@@ -18,11 +17,12 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
         if (
           value !== undefined &&
           value !== null &&
-          value !== "" &&
+         
           !(typeof value === "number" && isNaN(value))
         ) {
           formData.append(key, value.toString());
         }
+
       };
 
       // ------------------ Personal Information ------------------
@@ -34,6 +34,8 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
 
       // ------------------ Contact Information ------------------
       appendIfValue("email", data.email);
+      appendIfValue("officeEmail", data.officeEmail);
+
       appendIfValue("mobile", data.mobile);
       appendIfValue("permanentAddress", data.permanentAddress);
       appendIfValue("currentAddress", data.currentAddress);
@@ -61,54 +63,56 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
 
       // ------------------ Recruiter Information ------------------
       appendIfValue("recruiterName", data.recruiterName);
+      appendIfValue("referenceId", data.referenceId);
+
       appendIfValue("joiningDate", data.joiningDate);
       appendIfValue("recruiterComment", data.recruiterComment);
 
       // ------------------ Academic Qualifications ------------------
       if (Array.isArray(data.academics)) {
-      data.academics.forEach((academic, index) => {
-        appendIfValue(`academics[${index}][className]`, academic.className);
-        appendIfValue(`academics[${index}][university]`, academic.university);
-        appendIfValue(`academics[${index}][passingYear]`, academic.passingYear?.toString());
-        appendIfValue(`academics[${index}][percentage]`, academic.percentage?.toString());
-        formData.append(`academics[${index}][isRegular]`, String(academic.isRegular || false));
-        appendIfValue(`academics[${index}][isApproved]`, academic.isApproved);
+        data.academics.forEach((academic, index) => {
+          appendIfValue(`academics[${index}][className]`, academic.className);
+          appendIfValue(`academics[${index}][university]`, academic.university);
+          appendIfValue(`academics[${index}][passingYear]`, academic.passingYear?.toString());
+          appendIfValue(`academics[${index}][percentage]`, academic.percentage?.toString());
+          formData.append(`academics[${index}][isRegular]`, String(academic.isRegular || false));
+          appendIfValue(`academics[${index}][isApproved]`, academic.isApproved);
 
-        if (academic.documentFile?.[0]) {
-          // new file uploaded
-          formData.append(`academics[${index}][documentFile]`, academic.documentFile[0]);
-        } else if (academic.documentUrl) {
-          // keep old file if exists
-          formData.append(`academics[${index}][documentUrl]`, academic.documentUrl);
-        }
-      });
-    }
+          if (academic.documentFile?.[0]) {
+            // new file uploaded
+            formData.append(`academics[${index}][documentFile]`, academic.documentFile[0]);
+          } else if (academic.documentUrl) {
+            // keep old file if exists
+            formData.append(`academics[${index}][documentUrl]`, academic.documentUrl);
+          }
+        });
+      }
 
       // ------------------ Work Experience ------------------
       if (Array.isArray(data.workExperience)) {
-      data.workExperience.forEach((exp, index) => {
-        appendIfValue(`workExperience[${index}][designation]`, exp.designation);
-        appendIfValue(`workExperience[${index}][companyName]`, exp.companyName);
-        appendIfValue(`workExperience[${index}][joiningDate]`, exp.joiningDate);
-        appendIfValue(`workExperience[${index}][relievingDate]`, exp.relievingDate);
-      });
-    }
+        data.workExperience.forEach((exp, index) => {
+          appendIfValue(`workExperience[${index}][designation]`, exp.designation);
+          appendIfValue(`workExperience[${index}][companyName]`, exp.companyName);
+          appendIfValue(`workExperience[${index}][joiningDate]`, exp.joiningDate);
+          appendIfValue(`workExperience[${index}][relievingDate]`, exp.relievingDate);
+        });
+      }
 
       // ------------------ Documents ------------------
-            if (Array.isArray(data.documents)) {
+      if (Array.isArray(data.documents)) {
 
-      data.documents.forEach((doc, index) => {
-        appendIfValue(`documents[${index}][documentName]`, doc.documentName);
-        appendIfValue(`documents[${index}][isApproved]`, doc.isApproved);
-        if (doc.documentFile?.[0]) {
-          // new file uploaded
-          formData.append(`documents[${index}][documentFile]`, doc.documentFile[0]);
-        } else if (doc.documentUrl) {
-          // keep old file
-          formData.append(`documents[${index}][documentUrl]`, doc.documentUrl);
-        }
-      });
-    }
+        data.documents.forEach((doc, index) => {
+          appendIfValue(`documents[${index}][documentName]`, doc.documentName);
+          appendIfValue(`documents[${index}][isApproved]`, doc.isApproved);
+          if (doc.documentFile?.[0]) {
+            // new file uploaded
+            formData.append(`documents[${index}][documentFile]`, doc.documentFile[0]);
+          } else if (doc.documentUrl) {
+            // keep old file
+            formData.append(`documents[${index}][documentUrl]`, doc.documentUrl);
+          }
+        });
+      }
 
       // ------------------ Status & Role & Verification ------------------
       formData.append("isActive", String(data.isActive || false));
@@ -119,7 +123,7 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
 
       // -------------------- Profile Image -----------------
       if (data?.avatar?.[0] && typeof data.avatar[0] === 'object' &&
-          'name' in data.avatar[0] && 'size' in data.avatar[0] && 'type' in data.avatar[0]) {
+        'name' in data.avatar[0] && 'size' in data.avatar[0] && 'type' in data.avatar[0]) {
         formData.append("avatar", data.avatar[0]);
       } else if (user?.avatar && typeof user.avatar === "string") {
         formData.append("avatarUrl", user.avatar);
@@ -133,11 +137,11 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
           body: formData,
         }
       );
-      
+
       const result = await response.json();
-      
+
       if (result?.success) {
-        
+
         toast.success('Profile updated successfully!');
         setSubmitSuccess(true);
         setTimeout(() => setSubmitSuccess(false), 3000);

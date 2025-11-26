@@ -4,6 +4,7 @@ import { connectToDB } from '@/config/mongo';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { User } from '@/models/User';
+import { Department } from "@/models/Department";
 import { loginUserSchema } from '@/lib/validations/user.schema';
 import { sendResponse } from '@/lib/sendResponse';
 import { cookies } from 'next/headers';
@@ -33,7 +34,12 @@ export const POST = asyncHandler(async (req: NextRequest) => {
   await connectToDB();
 
   // ⛔ Must include password field manually due to select: false
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({
+    $or: [
+      { email },
+      { officeEmail: email }
+    ]
+  }).select('+password');
 
 
 
@@ -132,22 +138,40 @@ export const GET = asyncHandler(async () => {
 
   await connectToDB();
 
-  const user = await User.findById(decodedToken.id);
+  // Fixed populate syntax
+  const user = await User.findById(decodedToken.id)
+    .populate({
+      path: 'department',
+      select: 'department'  // Fields you want from Department
+    })
+    .lean();
+
+
+  if (!user) {
+    return sendResponse({
+      success: false,
+      statusCode: 404,
+      message: 'User not found',
+    });
+  }
+
+  // Debug: check what department contains
+  console.log('User:', user);
 
   const permissions =
     user.role == "super admin"
       ? getSuperAdminPermissions()
       : user.role == "admin"
-        ? getAdminPermissions()  // ✅ correct
+        ? getAdminPermissions()
         : user.role == "hr"
           ? getHrPermissions()
           : getUserPermission();
+
   return sendResponse({
     message: 'Admin info fetched successfully',
     token,
     data: user,
     permissions
-
   });
 });
 

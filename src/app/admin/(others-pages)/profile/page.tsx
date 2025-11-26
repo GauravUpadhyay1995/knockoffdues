@@ -291,6 +291,7 @@ export default function UserEditForm() {
   }, [reset]);
 
   const onSubmit = async (data: UserData) => {
+    
     try {
       setIsSubmitting(true);
       const formData = new FormData();
@@ -322,7 +323,7 @@ export default function UserEditForm() {
       appendIfValue("currentAddress", data.currentAddress);
 
       // ------------------ Professional Information ------------------
-      appendIfValue("department", data.department);
+  
       appendIfValue("totalExperience", data.totalExperience?.toString());
       appendIfValue("currentSalary", data.currentSalary?.toString());
       appendIfValue("expectedSalary", data.expectedSalary?.toString());
@@ -657,8 +658,8 @@ export default function UserEditForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Department</label>
-                <input disabled={isSubmitting || user.isVerified}
-                  {...register('department')}
+                <input disabled={true}
+                  {...register('department.department')}
                   placeholder="Department"
                   className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
                 />

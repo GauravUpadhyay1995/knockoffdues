@@ -30,6 +30,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     const { admin } = useAuth();
     const userId = admin?.id || "";
     const router = useRouter();
+ const FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "notification_local" : "notifications";
 
 
 
@@ -45,7 +46,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
         }
 
         const q = query(
-            collection(db, "notifications"),
+            collection(db, FIREBASE_DATABASE_NAME),
             where("userId", "==", userId),
             orderBy("timestamp", "desc")
         );

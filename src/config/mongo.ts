@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import "@/models/Department";
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABSENAME = process.env.MONGODB_DB;
 
@@ -8,7 +8,7 @@ if (!MONGODB_URI) {
 }
 
 let isConnected = false;
-
+console.log("Models available:", mongoose.modelNames());
 export const connectToDB = async () => {
   if (isConnected) return;
 

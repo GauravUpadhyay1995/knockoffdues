@@ -30,6 +30,7 @@ interface Notification {
     read: boolean;
     timestamp: string;
     descriptions?: string;
+    notificationId?: string | null;
 }
 
 const App = () => {
@@ -44,14 +45,22 @@ const App = () => {
     const uniqueTypes = ["All", ...new Set(notifications.map((n) => n.type))];
 
     const markAsRead = async (id: string) => {
+        setLoading(true);
         try {
             const res = await fetch(`/api/v1/admin/notifications/${id}/read`, { method: "PATCH" });
             if (res.ok) {
                 setNotifications((prev) =>
                     prev.map((n) => (n.id === id ? { ...n, read: true } : n))
                 );
+
             }
+            setLoading(false);
+
+            fetchNotifications()
+
         } catch (err) {
+            setLoading(false);
+
             console.error("Failed to mark as read", err);
         }
     };
@@ -226,8 +235,8 @@ const App = () => {
                                 onClick={markAllAsRead}
                                 disabled={unreadCount === 0}
                                 className={`text-gray-100 flex items-center px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-xl ${unreadCount === 0
-                                        ? "dark:bg-gray-500/30 bg-gray-900/90 cursor-not-allowed"
-                                        : "dark:bg-green-600 dark:hover:bg-green-700 bg-green-500 hover:bg-green-600"
+                                    ? "dark:bg-gray-500/30 bg-gray-900/90 cursor-not-allowed"
+                                    : "dark:bg-green-600 dark:hover:bg-green-700 bg-green-500 hover:bg-green-600"
                                     }`}
                             >
                                 <BellOff className="h-5 w-5 mr-2" /> Mark All Read
@@ -236,8 +245,8 @@ const App = () => {
                                 onClick={clearAllNotifications}
                                 disabled={notifications.length === 0}
                                 className={` text-gray-100 flex items-center px-3 py-2 rounded-lg transition-all duration-300 shadow-md hover:shadow-xl ${notifications.length === 0
-                                        ? "dark:bg-gray-500/30 bg-gray-900/90 cursor-not-allowed"
-                                        : "dark:bg-red-600 dark:hover:bg-red-700 bg-red-500 hover:bg-red-600"
+                                    ? "dark:bg-gray-500/30 bg-gray-900/90 cursor-not-allowed"
+                                    : "dark:bg-red-600 dark:hover:bg-red-700 bg-red-500 hover:bg-red-600"
                                     }`}
                             >
                                 <X className="h-5 w-5 mr-2" /> Clear All
@@ -324,8 +333,8 @@ const App = () => {
                                                             exit={{ opacity: 0, height: 0 }}
                                                             transition={{ duration: 0.3 }}
                                                             className={`bg-opacity-20 backdrop-blur-md rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-start sm:space-x-4 shadow-md border transition-all duration-300 hover:shadow-2xl ${notification.read
-                                                                    ? "dark:border-indigo-500/20 border-blue-300/20"
-                                                                    : "dark:border-violet-500/50 border-blue-500/50"
+                                                                ? "dark:border-indigo-500/20 border-blue-300/20"
+                                                                : "dark:border-violet-500/50 border-blue-500/50"
                                                                 }`}
                                                         >
                                                             <div className="flex-shrink-0 relative mb-3 sm:mb-0">
@@ -337,8 +346,8 @@ const App = () => {
                                                             <div className="flex-grow">
                                                                 <p
                                                                     className={`font-semibold text-base sm:text-lg ${notification.read
-                                                                            ? "dark:text-gray-400 text-gray-600"
-                                                                            : "dark:text-gray-100 text-gray-900"
+                                                                        ? "dark:text-gray-400 text-gray-600"
+                                                                        : "dark:text-gray-100 text-gray-900"
                                                                         }`}
                                                                     dangerouslySetInnerHTML={{
                                                                         __html: notification.message,
@@ -347,8 +356,8 @@ const App = () => {
                                                                 {notification.descriptions && (
                                                                     <p
                                                                         className={`mt-2 text-sm ${notification.read
-                                                                                ? "text-gray-500"
-                                                                                : "dark:text-gray-300 text-gray-700"
+                                                                            ? "text-gray-500"
+                                                                            : "dark:text-gray-300 text-gray-700"
                                                                             }`}
                                                                         dangerouslySetInnerHTML={{
                                                                             __html: notification.descriptions,
@@ -364,7 +373,7 @@ const App = () => {
                                                             <div className="flex flex-row sm:flex-col gap-2 mt-3 sm:mt-0 sm:ml-auto">
                                                                 {!notification.read && (
                                                                     <button
-                                                                        onClick={() => markAsRead(notification.id)}
+                                                                        onClick={() => markAsRead(notification.notificationId)}
                                                                         className="px-3 py-1 text-sm rounded-md transition-all duration-300 shadow-sm hover:shadow-md dark:bg-green-600 dark:hover:bg-green-700 bg-green-500 hover:bg-green-600 text-green-900 dark:text-gray-100"
                                                                     >
                                                                         Read

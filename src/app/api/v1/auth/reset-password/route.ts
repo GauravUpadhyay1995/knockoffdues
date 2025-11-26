@@ -22,7 +22,12 @@ export const POST = asyncHandler(async (req: NextRequest) => {
         );
     }
 
-    const userData = await User.findOne({ email });
+    const userData = await User.findOne({
+        $or: [
+            { email },
+            { officeEmail: email }
+        ]
+    });
     if (!userData) {
         return NextResponse.json(
             { success: false, message: "User not found" },
@@ -32,17 +37,23 @@ export const POST = asyncHandler(async (req: NextRequest) => {
     if (action == 'send_otp') {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes    
-
-        const updatedUser = await User.findOneAndUpdate(
-            { email },
+        console.log("email", email);
+        let updatedUser = await User.findOneAndUpdate(
+            {
+                $or: [
+                    { email },
+                    { officeEmail: email }
+                ]
+            },
             {
                 $set: {
                     otp,
                     otpExpiry
                 }
             },
-            { new: true }   // <-- return updated document
+            { new: true } // return updated document
         );
+        updatedUser.email = email;
 
         let employeeData = [updatedUser];
 

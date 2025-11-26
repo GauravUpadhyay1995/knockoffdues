@@ -6,12 +6,12 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useAuth } from "@/context/AuthContext";
 import { FiUser } from 'react-icons/fi';
+import { updatePolarOptions } from "recharts/types/state/polarOptionsSlice";
 
 
 export default function UserDropdown() {
   const { admin, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
   function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.stopPropagation();
     setIsOpen((prev) => !prev);
@@ -56,7 +56,7 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {admin?.name}
+            {admin?.name}- {admin?.role.toUpperCase()}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
             {admin?.email}

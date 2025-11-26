@@ -164,6 +164,7 @@ const AcademicFields: React.FC<AcademicFieldsProps> = ({
       ))}
       
       <button
+      disabled={isSubmitting || user.isVerified}
         type="button"
         onClick={onAppend}
         className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"

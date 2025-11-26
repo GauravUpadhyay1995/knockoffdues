@@ -27,6 +27,7 @@ export type UserData = {
   _id?: string;
   name: string;
   email: string;
+  officeEmail?: string;
   mobile: string;
   role: string;
   jod?: string;
@@ -45,6 +46,7 @@ export type UserData = {
   recruiterName?: string;
   joiningDate?: string;
   recruiterComment?: string;
+  referenceId?: string;
   totalExperience?: number;
   currentSalary?: number;
   expectedSalary?: number;

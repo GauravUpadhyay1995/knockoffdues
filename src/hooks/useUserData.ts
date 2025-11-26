@@ -6,16 +6,18 @@ export const useUserData = (userId: string) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [departments, setDepartments] = useState<Array<{ _id: string; name: string }>>([]);
   const [roleList, setRoleList] = useState<Array<{ _id: string; role: string }>>([]);
+  const [referenceList, setReferenceList] = useState<Array<{ _id: string; name: string, emp_id: string, email: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [userRes, deptRes, roleListResp] = await Promise.all([
+      const [userRes, deptRes, roleListResp, referenceListResp] = await Promise.all([
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/profile/${userId}`),
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/departments/list?perPage=all`),
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/roles/active-list?perPage=all`)
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/roles/active-list?perPage=all`),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/list?perPage=All`)
       ]);
 
       const mockUser = userRes.data.data;
@@ -27,9 +29,15 @@ export const useUserData = (userId: string) => {
         ? deptRes.data.data
         : deptRes.data.data?.departments || [];
 
+      const referenceList1 = Array.isArray(referenceListResp.data.data)
+        ? referenceListResp.data.data
+        : referenceListResp.data.data?.customers || [];
+    
+
       setUser(mockUser);
       setDepartments(deptArray);
       setRoleList(roleList);
+      setReferenceList(referenceList1);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch data:", err);
@@ -43,5 +51,5 @@ export const useUserData = (userId: string) => {
     fetchData();
   }, [fetchData]);
 
-  return { user, departments, roleList, loading, error, refresh: fetchData };
+  return { user, departments, roleList,referenceList, loading, error, refresh: fetchData };
 };

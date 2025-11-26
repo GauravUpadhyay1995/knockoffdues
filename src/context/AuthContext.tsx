@@ -31,6 +31,7 @@ interface Admin {
   name: string;
   avatar?: string;
   permissions: Permission[];
+  role: string;
 }
 // Settings Interfaces
 interface Setting {
@@ -194,6 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const decoded: DecodedToken = jwtDecode(token);
+        console.log("decoded token:", decoded);
         const currentTime = Date.now() / 1000;
 
         if (decoded.exp < currentTime) {
@@ -208,13 +210,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: decoded.name,
           avatar: decoded?.avatar || '/images/logo/logo.png',
           permissions: decoded.permissions,
+          role: decoded.role,
+
         };
 
         setAdmin(adminData);
         setIsAuthenticatedAdmin(true);
         localStorage.setItem('adminToken', token);
         localStorage.setItem('admin', JSON.stringify(adminData));
-     
+
       } catch (error) {
         console.error('Login failed: Invalid token', error);
         clearAuthData();
@@ -238,6 +242,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const decoded: DecodedToken = jwtDecode(token);
       const currentTime = Date.now() / 1000;
+      console.log("decoded token:", decoded);
 
       if (decoded.exp < currentTime) {
         console.warn('Token expired. Logging out.');
@@ -251,11 +256,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: decoded.name,
         avatar: decoded?.avatar || '/images/logo/logo.png',
         permissions: decoded.permissions,
+        role: decoded.role,
       };
       setAdmin(adminData);
       setIsAuthenticatedAdmin(true);
       localStorage.setItem('admin', JSON.stringify(adminData));
-        // const a= window.location.pathname.includes('/admin') ? router.push('/admin') : router.push('/login');
+      // const a= window.location.pathname.includes('/admin') ? router.push('/admin') : router.push('/login');
     } catch (error) {
       console.error('Invalid or modified token. Logging out.', error);
       clearAuthData();

@@ -17,6 +17,7 @@ export default function AdminLoginForm() {
   const { settings, isLoadingSettings } = useSettings();
   const resumeRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { theme } = useTheme();
   const router = useRouter();
@@ -68,25 +69,25 @@ export default function AdminLoginForm() {
 
   const validateResume = (file: File | null) => {
     if (!file) return "Resume is required";
-    
+
     // Check file type
     const allowedTypes = ['application/pdf'];
     if (!allowedTypes.includes(file.type)) {
       return "Only PDF files are allowed for resume";
     }
-    
+
     // Check file size (1MB = 1048576 bytes)
     if (file.size > 1048576) {
       return "Resume file size must be less than 1MB";
     }
-    
+
     return null;
   };
 
   // Real-time validation
   useEffect(() => {
     const errors: typeof fieldErrors = {};
-    
+
     const nameError = validateName(name);
     const emailError = validateEmail(email);
     const mobileError = validateMobile(mobile);
@@ -110,11 +111,11 @@ export default function AdminLoginForm() {
     setResume(null);
     setError(null);
     setFieldErrors({});
-    
+
     if (resumeRef.current) {
       resumeRef.current.value = "";
     }
-    
+
     if (formRef.current) {
       formRef.current.reset();
     }
@@ -122,7 +123,7 @@ export default function AdminLoginForm() {
 
   const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
-    
+
     if (file) {
       const resumeError = validateResume(file);
       if (resumeError) {
@@ -135,7 +136,7 @@ export default function AdminLoginForm() {
         return;
       }
     }
-    
+
     setResume(file);
   };
 
@@ -158,7 +159,7 @@ export default function AdminLoginForm() {
 
     // Final validation before submit
     const finalErrors: typeof fieldErrors = {};
-    
+
     const nameError = validateName(name);
     const emailError = validateEmail(email);
     const mobileError = validateMobile(mobile);
@@ -390,18 +391,58 @@ export default function AdminLoginForm() {
                   )}
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <Label>
                     Password <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="mt-1 pr-10" // Added right padding for the button
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white p-1 rounded-md transition-colors"
+                    >
+                      {showPassword ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.98 8.223A10.477 10.477 0 001.5 12c1.234 4.873 5.593 8.25 10.5 8.25 1.99 0 3.86-.54 5.46-1.477M21 12c-.333-1.318-.97-2.55-1.86-3.61M9.53 9.53a3.75 3.75 0 015.304 5.304M6.53 6.53L3 3m3.53 3.53L21 21"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.036 12c1.344-4.493 5.415-7.5 9.964-7.5 4.55 0 8.62 3.007 9.964 7.5-1.344 4.493-5.415 7.5-9.964 7.5-4.55 0-8.62-3.007-9.964-7.5z"
+                          />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   {fieldErrors.password && (
                     <motion.p
                       initial={{ opacity: 0, height: 0 }}
@@ -445,13 +486,13 @@ export default function AdminLoginForm() {
         <div className="hidden lg:flex w-1/2 p-6 sm:p-10 bg-gradient-to-br from-cyan-500 to-orange-500 dark:from-cyan-500 dark:to-purple-900 text-white flex-col items-center justify-center text-center">
           <div className="mb-6 flex justify-center">
             <Link href="/" aria-label="Go to Home page">
-              <Image 
-                className="h-24 w-24 rounded-full object-cover mt-4" 
-                src={settings?.companyLogo || "/images/logo/logo.png"} 
-                alt="Knock Off Dues Logo" 
-                width={100} 
-                height={50} 
-                priority 
+              <Image
+                className="h-24 w-24 rounded-full object-cover mt-4"
+                src={settings?.companyLogo || "/images/logo/logo.png"}
+                alt="Knock Off Dues Logo"
+                width={100}
+                height={50}
+                priority
               />
             </Link>
           </div>

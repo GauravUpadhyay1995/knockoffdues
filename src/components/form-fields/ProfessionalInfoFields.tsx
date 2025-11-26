@@ -36,7 +36,24 @@ const ProfessionalInfoFields: React.FC<ProfessionalInfoFieldsProps> = ({
           ))}
         </select>
       </div>
-      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+          Office Email
+        </label>
+        <input
+          {...register('officeEmail', {
+            pattern: {
+              value: /^\S+@\S+$/i,
+              message: "Invalid email address"
+            }
+          })}
+          type="email"
+          placeholder="Office email if any"
+          className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
+          
+        />
+        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+      </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Total Experience (years)
@@ -48,7 +65,7 @@ const ProfessionalInfoFields: React.FC<ProfessionalInfoFieldsProps> = ({
           className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Current Salary
@@ -60,7 +77,7 @@ const ProfessionalInfoFields: React.FC<ProfessionalInfoFieldsProps> = ({
           className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Expected Salary
@@ -72,7 +89,7 @@ const ProfessionalInfoFields: React.FC<ProfessionalInfoFieldsProps> = ({
           className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Notice Period (days)
@@ -84,7 +101,7 @@ const ProfessionalInfoFields: React.FC<ProfessionalInfoFieldsProps> = ({
           className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 dark:text-white text-sm focus:ring-2 focus:ring-orange-500"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
           Career Gap (if any)

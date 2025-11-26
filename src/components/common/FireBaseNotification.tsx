@@ -6,6 +6,7 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import NotificationDropdown from "@/components/notification/AllNotification";
+ const FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "notification_local" : "notifications";
 export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isBadgeVisible, setIsBadgeVisible] = useState(true);
@@ -24,7 +25,7 @@ export default function NotificationBell() {
         if (!userId) return;
 
         const q = query(
-            collection(db, "notifications"),
+            collection(db, FIREBASE_DATABASE_NAME),
             where("userId", "==", userId),
             where("isSeen", "==", false)
         );
