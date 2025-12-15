@@ -10,6 +10,7 @@ import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider, SettingsProvider } from '@/context/AuthContext';
 import Drawer from '@/components/home/Drawer';
+import { PermissionProvider } from "@/context/PermissionContext";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -34,22 +35,25 @@ export default function RootLayout({
       <body className={`${outfit.className} dark:bg-gray-900`}>
         <Suspense fallback={null}>
           <TopLoadingBar />
-        
-         
+
+
         </Suspense>
         <AuthProvider>
-           <SettingsProvider>
-            <Drawer />
-          <ThemeProvider>
-            <SidebarProvider>
-              <LoadingProvider>
-                <LoadingScreen />
-                {children}
-              </LoadingProvider>
-            </SidebarProvider>
-          </ThemeProvider>
+          <SettingsProvider>
+            <PermissionProvider>
+              <Drawer />
+              <ThemeProvider>
+                <SidebarProvider>
+                  <LoadingProvider>
+                    <LoadingScreen />
+                    {children}
+                  </LoadingProvider>
+                </SidebarProvider>
+              </ThemeProvider>
+            </PermissionProvider>
           </SettingsProvider>
         </AuthProvider>
+
         <Toaster
           position="bottom-right"
           reverseOrder={false}

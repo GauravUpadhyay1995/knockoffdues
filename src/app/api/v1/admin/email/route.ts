@@ -12,7 +12,7 @@ export const PATCH = verifyAdmin(
 
     // Parse multipart/form-data
     const formData = await req.formData();
-    console.log("User updating settings:", Object.fromEntries(formData.entries()));
+  
 
     // Extract nested values correctly
     const allowed = formData.get("bulk_email_template[allowed]");

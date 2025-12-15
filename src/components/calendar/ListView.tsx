@@ -97,6 +97,7 @@ const ListView: React.FC<ListViewProps> = ({
 
                 {isOwner && !isPastMeeting && (
                   <div className="flex items-center space-x-2 mt-3 sm:mt-0 sm:ml-4">
+                
                     <button
                       onClick={() => onEditEvent(meeting)}
                       className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"

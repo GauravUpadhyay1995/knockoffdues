@@ -18,13 +18,17 @@ import { UserData, AccordionSection as AccordionSectionType } from '@/types';
 import { accordionSectionsConfig } from '@/config/accordionSections';
 import { statusFieldsConfig } from '@/config/statusFields';
 import Letters from '@/components/common/Letters';
-
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
 export default function UserEditForm() {
+
     const params = useParams();
     const userId = params.id as string;
     const loggedInUserData = JSON.parse(localStorage.getItem('admin') || '{}');
 
     const { user, departments, roleList, referenceList, loading, error, refresh } = useUserData(userId);
+
 
     // rename handleSubmit from custom hook
     const { isSubmitting, submitSuccess, handleSubmit: handleFormSubmit } = useFormSubmission(userId, user);
@@ -55,7 +59,15 @@ export default function UserEditForm() {
             reset(user);
         }
     }, [user, reset]);
+    const { permissions } = usePermissions();
 
+    // ⛔ Wait until permissions are loaded
+    if (loading) return <LoadingSpinner />;
+
+    // ⛔ If user does NOT have permission, show unauthorized
+    if (!permissions.includes("employee.read")) {
+        return <UnauthorizedComponent />;
+    }
     const toggleSection = (section: string) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
@@ -166,8 +178,10 @@ export default function UserEditForm() {
                                 register={register}
                                 roleList={roleList}
                             />
+                            <PermissionGuard permission="employee.update">
 
-                            <SubmitButton isSubmitting={isSubmitting} />
+                                <SubmitButton isSubmitting={isSubmitting} />
+                            </PermissionGuard>
                         </form>
                     )}
 
@@ -175,13 +189,13 @@ export default function UserEditForm() {
 
 
                         activeTab === 'letters' && (
-                            <Letters userData={user} />
 
+                            <Letters userData={user} />
                         )}
                 </div>
             </motion.div>
 
             {user && <ProfileDrawer data={{ resume: user.resume, photo: user.avatar }} />}
-        </motion.div>
+        </motion.div >
     );
 }

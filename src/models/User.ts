@@ -114,6 +114,7 @@ const userSchema = new mongoose.Schema({
   maritalStatus: {
     type: String,
     enum: ["Single", "Married", "Divorced", "Widowed"],
+    default: "Single",
   },
   referenceName: {
     type: String,

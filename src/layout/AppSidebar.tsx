@@ -1,461 +1,315 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
+import { usePermissions } from "@/context/PermissionContext";
 import {
-  // BoxCubeIcon,
   CalenderIcon,
-  // ListIcon,
-  // PageIcon,
-  // PieChartIcon,
-  // TableIcon,
   GroupIcon,
   ShootingStarIcon,
   FolderIcon,
   ChevronDownIcon,
   GridIcon,
-  HorizontaLDots,
   UserCircleIcon,
   DocsIcon,
-  BankIcon
-
+  BankIcon,
+  HorizontaLDots,
 } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
-import { usePermissions } from '@/hooks/usePermissions';
-import Image from "next/image";
-import { useTheme } from '@/context/ThemeContext';
+import { useTheme } from "@/context/ThemeContext";
 
+// ------------------------------
+// Submenu → Permission Mapper
+// ------------------------------
+const submenuPermissionMap: Record<string, { module: string; action: string }> = {
+  "All Teams": { module: "team", action: "read" },
+  "Add Team": { module: "team", action: "create" },
 
+  "All Events": { module: "event", action: "read" },
+  "Add Events": { module: "event", action: "create" },
+
+  "All Links-Docs": { module: "docs", action: "read" },
+  "Add Links-Docs": { module: "docs", action: "create" },
+
+  "All News": { module: "news", action: "read" },
+  "Add News": { module: "news", action: "create" },
+
+  "All TRLs": { module: "trl", action: "read" },
+  "Add TRL": { module: "trl", action: "create" },
+
+  "All Galleries": { module: "gallery", action: "read" },
+  "Add Gallery": { module: "gallery", action: "create" },
+
+  "Mail Setup": { module: "settings", action: "read" },
+  "Permissions": { module: "settings", action: "read" },
+  "Branches": { module: "settings", action: "read" },
+  "Department": { module: "department", action: "read" },
+  "Roles": { module: "settings", action: "read" },
+  "Company Setup": { module: "settings", action: "update" },
+};
+
+// ------------------------------
+// Nav Item Type
+// ------------------------------
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean, icon?: React.ReactNode }[];
+  subItems?: { name: string; path: string }[];
 };
 
+// ------------------------------
+// Component
+// ------------------------------
 const AppSidebar: React.FC = () => {
-  // const adminData = localStorage.getItem('admin');
-  // const modulePermission = adminData?.permissions;
-
-  const { theme } = useTheme();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
-  const { canAccess, isLoading } = usePermissions();
+  const { permissions, loading } = usePermissions();
+  console.log("permission",permissions)
+  const { theme } = useTheme();
 
-  // Move navItems inside so canAccess is available
+  // ------------------------------
+  // Hooks moved OUTSIDE loop (FIX)
+  // ------------------------------
+  const isActive = useCallback(
+    (path: string | undefined) => path === pathname,
+    [pathname]
+  );
 
+  const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
+
+  // ------------------------------
+  // Permission Check
+  // ------------------------------
+  const hasPermission = (module: string, action: string) => {
+    const key = `${module.toLowerCase()}.${action.toLowerCase()}`;
+    return permissions.includes(key);
+  };
+
+  const canShowSubmenu = (name: string) => {
+    const perm = submenuPermissionMap[name];
+    if (!perm) return true;
+    return hasPermission(perm.module, perm.action);
+  };
+
+  // ------------------------------
+  // NAV CONFIG
+  // ------------------------------
   const navItems: NavItem[] = [
+    { name: "Dashboard", icon: <GridIcon />, path: "/admin" },
+    { name: "Calender", icon: <CalenderIcon />, path: "/admin/calender" },
     {
-      icon: <GridIcon />,
-      name: "Dashboard",
-      path: "/admin",
-    },
-    {
-      icon: <CalenderIcon />,
-      name: "Calender",
-      path: "/admin/calender",
-    }, {
       name: "Account Management",
       icon: <BankIcon />,
-      path: "/admin/accounts",
-      subItems: [
-        { name: "Venders", path: "/admin/accounts/venders", pro: true },
-
-      ],
+      subItems: [{ name: "Venders", path: "/admin/accounts/venders" }],
     },
-
-    {
-      name: "Employee Management",
-      icon: <UserCircleIcon />,
-      path: "/admin/users-list",
-    },
-    {
-      name: "Tasks Management",
-      icon: <FolderIcon />,
-      path: "/admin/tasks",
-    },
-
+    { name: "Employee Management", icon: <UserCircleIcon />, path: "/admin/users-list" },
+    { name: "Tasks Management", icon: <FolderIcon />, path: "/admin/tasks" },
     {
       name: "Teams Management",
       icon: <GroupIcon />,
-      path: "/admin/teams",
       subItems: [
-        { name: "All Teams", path: "/admin/teams", pro: false },
-        { name: "Add Team", path: "/admin/teams/add", pro: false },
+        { name: "All Teams", path: "/admin/teams" },
+        { name: "Add Team", path: "/admin/teams/add" },
       ],
     },
     {
       name: "Events Management",
       icon: <GroupIcon />,
-      path: "/admin/events",
       subItems: [
-        { name: "All Events", path: "/admin/events", pro: false },
-        { name: "Add Events", path: "/admin/events/add", pro: false },
+        { name: "All Events", path: "/admin/events" },
+        { name: "Add Events", path: "/admin/events/add" },
       ],
     },
     {
       name: "Docs&Links Mgmt",
       icon: <GroupIcon />,
-      path: "/admin/links-docs",
       subItems: [
-        { name: "All Links-Docs", path: "/admin/links-docs", pro: false },
-        { name: "Add Links-Docs", path: "/admin/links-docs/add", pro: false },
+        { name: "All Links-Docs", path: "/admin/links-docs" },
+        { name: "Add Links-Docs", path: "/admin/links-docs/add" },
       ],
     },
     {
       name: "News Management",
       icon: <DocsIcon />,
-      path: "/admin/news",
       subItems: [
-        { name: "All News", path: "/admin/news", pro: false },
-        { name: "Add News", path: "/admin/news/add", pro: false },
+        { name: "All News", path: "/admin/news" },
+        { name: "Add News", path: "/admin/news/add" },
       ],
     },
-
     {
       name: "TRL Management",
       icon: <ShootingStarIcon />,
-      path: "/admin/trl",
       subItems: [
-        { name: "All TRLs", path: "/admin/trl", pro: false },
-        { name: "Add TRL", path: "/admin/trl/add", pro: false },
+        { name: "All TRLs", path: "/admin/trl" },
+        { name: "Add TRL", path: "/admin/trl/add" },
       ],
     },
     {
       name: "Gallery Management",
       icon: <FolderIcon />,
-      path: "/admin/gallery",
       subItems: [
-        { name: "All Galleries", path: "/admin/gallery", pro: false },
-        { name: "Add Gallery", path: "/admin/gallery/add", pro: false },
+        { name: "All Galleries", path: "/admin/gallery" },
+        { name: "Add Gallery", path: "/admin/gallery/add" },
       ],
     },
     {
       name: "Settings",
       icon: <FolderIcon />,
-      path: "/admin/settings",
       subItems: [
-         { name: "Mail Setup", path: "/admin/settings/emails", pro: true },
-        { name: "Permissions", path: "/admin/settings/permissions", pro: false },
-        { name: "Branches", path: "/admin/settings/branches", pro: false },
-        { name: "Department", path: "/admin/departments", pro: false },
-        { name: "Roles", path: "/admin/settings/roles", pro: false },
-        { name: "Company Setup", path: "/admin/settings/config", pro: true },
+        { name: "Mail Setup", path: "/admin/settings/emails" },
+        { name: "Permissions", path: "/admin/settings/permissions" },
+        { name: "Branches", path: "/admin/settings/branches" },
+        { name: "Department", path: "/admin/departments" },
+        { name: "Roles", path: "/admin/settings/roles" },
+        { name: "Company Setup", path: "/admin/settings/config" },
       ],
     },
-
-
   ];
 
+  // ------------------------------
+  // FILTER MAIN MENU BASED ON PERMISSIONS
+  // ------------------------------
+  const filterMenu = (nav: NavItem) => {
+    if (loading) return true;
 
-  const othersItems: NavItem[] = [
+    const moduleMap: Record<string, string> = {
+      "Employee Management": "employee",
+      "Teams Management": "team",
+      "Events Management": "event",
+      "Docs&Links Mgmt": "docs",
+      "News Management": "news",
+      "TRL Management": "trl",
+      "Gallery Management": "gallery",
+      "Tasks Management": "task",
+      "Account Management": "account",
+      "Settings": "settings",
+      "Dashboard": "dashboard",
+      "Calender":"calender"
+    };
 
+    const module = moduleMap[nav.name];
+    if (!module) return true;
 
-    // {
-    //   icon: <BoxCubeIcon />,
-    //   name: "UI Elements",
-    //   subItems: [
-    //     { name: "Alerts", path: "/admin/alerts", pro: false },
-    //     { name: "Avatar", path: "/admin/avatars", pro: false },
-    //     { name: "Badge", path: "/admin/badge", pro: false },
-    //     { name: "Buttons", path: "/admin/buttons", pro: false },
-    //     { name: "Images", path: "/admin/images", pro: false },
-    //     { name: "Videos", path: "/admin/videos", pro: false },
-    //   ],
-    // },
-    // {
-    //   icon: <PlugInIcon />,
-    //   name: "Authentication",
-    //   subItems: [
-    //     { name: "Sign In", path: "/signin", pro: false },
-    //     { name: "Sign Up", path: "/signup", pro: false },
-    //   ],
-    // },
-  ];
+    return hasPermission(module, "read");
 
-  const renderMenuItems = (
-    navItems: NavItem[],
-    menuType: "main" | "others"
-  ) => {
-    if (isLoading) {
-      return (
-        <ul className="flex flex-col gap-4">
-          {[1, 2, 3].map((i) => (
-            <li key={i} className="animate-pulse">
-              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            </li>
-          ))}
-        </ul>
-      );
-    }
+  };
 
+  // ------------------------------
+  // SIDEBAR MENU RENDER
+  // ------------------------------
+  const renderMenuItems = () => {
     return (
       <ul className="flex flex-col gap-4">
         {navItems.map((nav, index) => {
-          // Check if user has permission to view this menu item
-          if (nav.name === "Employee Management" && !canAccess("User", "read")) return null;
-          if (nav.name === "Teams Management" && !canAccess("Team", "read")) return null;
-          if (nav.name === "Events Management" && !canAccess("Event", "read")) return null;
-          if (nav.name === "Docs&Links Mgmt" && !canAccess("Docs & Links", "read")) return null;
-          if (nav.name === "News Management" && !canAccess("New", "read")) return null;
-          if (nav.name === "TRL Management" && !canAccess("TRL", "read")) return null;
-          if (nav.name === "Gallery Management" && !canAccess("Gallery", "read")) return null;
-          if (nav.name === "Dashboard" && !canAccess("Dashboard", "read")) return null;
-          if (nav.name === "Tasks Management" && !canAccess("Task", "read")) return null;
-          if (nav.name === "Departments" && !canAccess("Department", "read")) return null;
-          if (nav.name === "Account Management" && !canAccess("Account", "create")) return null;
-            if (nav.name === "Settings" && !canAccess("Setting", "create")) return null;
+          if (!filterMenu(nav)) return null;
 
+          const subItems = nav.subItems?.filter((sub) => canShowSubmenu(sub.name)) || [];
 
-          // Filter subItems for Upload Customers permission
-          let filteredSubItems = nav.subItems;
+          if (nav.subItems && subItems.length === 0) return null;
 
           return (
             <li key={nav.name}>
-              {filteredSubItems ? (
-                <button
-                  onClick={() => handleSubmenuToggle(index, menuType)}
-                  className={`menu-item group  ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-active"
-                    : "menu-item-inactive"
-                    } cursor-pointer ${!isExpanded && !isHovered
-                      ? "lg:justify-center"
-                      : "lg:justify-start"
-                    }`}
+              {!nav.subItems ? (
+                <Link
+                  href={nav.path!}
+                  className={`menu-item group ${
+                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  }`}
                 >
-                  <span
-                    className={` ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                      ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
-                      }`}
-                  >
+                  <span className={`${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>
                     {nav.icon}
                   </span>
+
                   {(isExpanded || isHovered || isMobileOpen) && (
-                    <span className={`menu-item-text`}>{nav.name}</span>
+                    <span className="menu-item-text">{nav.name}</span>
                   )}
-                  {(isExpanded || isHovered || isMobileOpen) && (
-                    <ChevronDownIcon
-                      className={`ml-auto w-5 h-5 transition-transform duration-200  ${openSubmenu?.type === menuType &&
-                        openSubmenu?.index === index
-                        ? "rotate-180 text-brand-500"
-                        : ""
-                        }`}
-                    />
-                  )}
-                </button>
+                </Link>
               ) : (
-                nav.path && (
-                  <Link
-                    href={nav.path}
-                    className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                      }`}
+                <>
+                  <button
+                    onClick={() => setOpenSubmenu(openSubmenu === index ? null : index)}
+                    className={`menu-item group ${
+                      openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
+                    }`}
                   >
                     <span
-                      className={`${isActive(nav.path)
-                        ? "menu-item-icon-active"
-                        : "menu-item-icon-inactive"
-                        }`}
+                      className={`${
+                        openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                      }`}
                     >
                       {nav.icon}
                     </span>
-                    {(isExpanded || isHovered || isMobileOpen) && (
-                      <span className={`menu-item-text`}>{nav.name}</span>
-                    )}
-                  </Link>
-                )
-              )}
-              {filteredSubItems && (isExpanded || isHovered || isMobileOpen) && (
-                <div
-                  ref={(el) => {
-                    subMenuRefs.current[`${menuType}-${index}`] = el;
-                  }}
-                  className="overflow-hidden transition-all duration-300"
-                  style={{
-                    height:
-                      openSubmenu?.type === menuType && openSubmenu?.index === index
-                        ? `${subMenuHeight[`${menuType}-${index}`]}px`
-                        : "0px",
-                  }}
-                >
-                  <ul className="mt-2 space-y-1 ml-9">
-                    {filteredSubItems.map((subItem) => (
-                      <li key={subItem.name}>
-                        <Link
-                          href={subItem.path}
-                          className={`menu-dropdown-item ${isActive(subItem.path)
-                            ? "menu-dropdown-item-active"
-                            : "menu-dropdown-item-inactive"
-                            }`}
-                        >
-                          {subItem.icon && (
-                            <span
-                              className={`ml-auto ${isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                                } menu-dropdown-badge `}
-                            >
-                              {subItem.icon}
-                            </span>
-                          )}
-                          {subItem.name}
-                          <span className="flex items-center gap-1 ml-auto">
 
-                            {subItem.new && (
-                              <span
-                                className={`ml-auto ${isActive(subItem.path)
-                                  ? "menu-dropdown-badge-active"
-                                  : "menu-dropdown-badge-inactive"
-                                  } menu-dropdown-badge `}
-                              >
-                                new
-                              </span>
-                            )}
-                            {subItem.pro && (
-                              <span
-                                className={`ml-auto ${isActive(subItem.path)
-                                  ? "menu-dropdown-badge-active"
-                                  : "menu-dropdown-badge-inactive"
-                                  } menu-dropdown-badge `}
-                              >
-                                pro
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    {(isExpanded || isHovered || isMobileOpen) && (
+                      <span className="menu-item-text">{nav.name}</span>
+                    )}
+
+                    {(isExpanded || isHovered || isMobileOpen) && (
+                      <ChevronDownIcon
+                        className={`ml-auto transition-transform ${
+                          openSubmenu === index ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
+                  </button>
+
+                  {(isExpanded || isHovered || isMobileOpen) &&
+                    openSubmenu === index && (
+                      <ul className="mt-2 space-y-1 ml-9">
+                        {subItems.map((sub) => (
+                          <li key={sub.name}>
+                            <Link
+                              href={sub.path}
+                              className={`menu-dropdown-item ${
+                                isActive(sub.path)
+                                  ? "menu-dropdown-item-active"
+                                  : "menu-dropdown-item-inactive"
+                              }`}
+                            >
+                              {sub.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                </>
               )}
             </li>
-
           );
         })}
       </ul>
     );
   };
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // const isActive = (path: string) => path === pathname;
-  const isActive = useCallback((path: string) => path === pathname, [pathname]);
-
-  useEffect(() => {
-    // Check if the current path matches any submenu item
-    let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
-      items.forEach((nav, index) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "others",
-                index,
-              });
-              submenuMatched = true;
-            }
-          });
-        }
-      });
-    });
-
-    // If no submenu item matches, close the open submenu
-    if (!submenuMatched) {
-      setOpenSubmenu(null);
-    }
-  }, [pathname, isActive]);
-
-  useEffect(() => {
-    // Set the height of the submenu items when the submenu is opened
-    if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`;
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
-      }
-    }
-  }, [openSubmenu]);
-
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-      return { type: menuType, index };
-    });
-  };
+  // ------------------------------
+  // RENDER SIDEBAR
+  // ------------------------------
   return (
     <aside
-      className={`z-50 fixed  flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out border-r border-gray-200 
-        ${isExpanded || isMobileOpen
-          ? "w-[290px]"
-          : isHovered
-            ? "w-[290px]"
-            : "w-[90px]"
-        }
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+      className={`z-50 fixed flex flex-col top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 h-screen border-r transition-all duration-300
+        ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-
-
-      <div className="flex mt-30 flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+      <div className="flex flex-col overflow-y-auto no-scrollbar mt-10">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "justify-start"
-                  }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(navItems, "main")}
-            </div>
+          <h2
+            className={`mb-4 text-xs uppercase flex text-gray-400 ${
+              isExpanded || isHovered ? "justify-start" : "lg:justify-center"
+            }`}
+          >
+            {isExpanded || isHovered ? "Menu" : <HorizontaLDots />}
+          </h2>
 
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "justify-start"
-                  }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
-            </div>
-          </div>
+          {renderMenuItems()}
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
+
+        {(isExpanded || isHovered || isMobileOpen) && <SidebarWidget />}
       </div>
-
-
     </aside>
   );
 };

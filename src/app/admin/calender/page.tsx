@@ -1,6 +1,10 @@
 // components/calendar/Calendar.tsx
 'use client';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
 import Swal from 'sweetalert2';
 import { Plus } from 'lucide-react';
 import {
@@ -44,8 +48,11 @@ interface Meeting {
 }
 
 const Calendar: React.FC = () => {
+  const { permissions } = usePermissions();
+
+
   const { admin } = useAuth();
-const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [view, setView] = useState('Month');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,6 +150,10 @@ const [currentDate, setCurrentDate] = useState(new Date());
     e.stopPropagation();
 
     if (!draggedEvent) return;
+    if (!permissions.includes("calender.update")) {
+      toast.error(`You don't have permission`);
+      return;
+    }
 
     const newStartDate = startOfDay(targetDate);
     const today = startOfDay(new Date());
@@ -389,19 +400,24 @@ const [currentDate, setCurrentDate] = useState(new Date());
     return eachDayOfInterval({ start: startOfCurrentWeek, end: endOfWeek(startOfCurrentWeek) });
   }, [currentDate]);
 
+  // ⛔ If user does NOT have permission, show unauthorized
+  if (!permissions.includes("calender.read")) {
+    return <UnauthorizedComponent />;
+  }
 
   return (
     <div className="min-h-screen dark:bg-gray-900 bg-white dark:text-gray-100 text-gray-700 font-inter flex flex-col ">
       <div className="mx-auto w-full flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 h-[calc(100vh-1rem)]">
         <aside className="w-full lg:w-114 border border-gray-200 bg-white dark:bg-gray-800 rounded-lg p-4 flex flex-col space-y-6 shadow-lg">
-          <button
-            onClick={handleAddEvent}
-            className="flex items-center justify-center space-x-2 bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            <Plus size={20} />
-            <span>Add Event</span>
-          </button>
-
+          <PermissionGuard permission="calender.create">
+            <button
+              onClick={handleAddEvent}
+              className="flex items-center justify-center space-x-2 bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              <Plus size={20} />
+              <span>Add Event</span>
+            </button>
+          </PermissionGuard>
           <MiniCalendar
             currentDate={currentDate}
             selectedDay={selectedDay}

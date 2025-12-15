@@ -14,8 +14,9 @@ import {
 import Button from '@/components/ui/button/Button';
 import Pagination from '../tables/Pagination';
 import { toast } from 'react-hot-toast';
-import { TaskPermissionGuard } from '@/components/common/PermissionGuard';
+import PermissionGuard from '@/components/common/PermissionGuard';
 import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
+import { usePermissions } from "@/context/PermissionContext";
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiFilter, FiChevronDown, FiDownload, FiChevronUp, FiX, FiRefreshCw, FiPlus } from 'react-icons/fi';
@@ -34,8 +35,8 @@ interface Task {
   startDate: string | Date;
   endDate: string | Date;
   assignedTo?: string;
-  assignedBy?: { _id: string; name: string; email: string,emp_id:string; };
-  updatedBy?: { _id: string; name: string; email: string ,emp_id:string;};
+  assignedBy?: { _id: string; name: string; email: string, emp_id: string; };
+  updatedBy?: { _id: string; name: string; email: string, emp_id: string; };
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -68,10 +69,11 @@ interface Props {
 
 // Memoized TaskListTable component
 const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
+  const { permissions } = usePermissions();
   const inputRef = useRef<HTMLInputElement>(null);
   const [tasks, setTasks] = useState<Task[]>(initialData);
   const [loading, setLoading] = useState(false);
-  const [assignedByUserList, setAssignedByUserList] = useState<{ _id: string; name: string; email: string,emp_id:string }[]>([]);
+  const [assignedByUserList, setAssignedByUserList] = useState<{ _id: string; name: string; email: string, emp_id: string }[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -227,18 +229,23 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
   const handleTitleUpdate = useCallback(
     async (task: Task) => {
       if (editingTaskId !== task._id) return;
+      if (!permissions.includes("task.update")) {
+        toast.error('You dont have permission');
+        return;
+      }
 
       const trimmedTitle = editedTitle.trim();
       setEditingTaskId(null);
 
       if (!trimmedTitle || trimmedTitle === task.taskName) return;
 
-      const submitData = new FormData();
-      submitData.append('taskName', trimmedTitle);
 
       const promise = fetch(`${process.env.NEXT_PUBLIC_API_URL}/tasks/update/${task._id}`, {
-        method: 'PATCH',
-        body: submitData,
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ taskName: trimmedTitle }),
       }).then(async res => {
         const result = await res.json();
         if (!res.ok || !result.success) {
@@ -290,25 +297,29 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
   }, [tasks, currentPage, pageSize]);
 
   if (!isAuthorized) return <UnauthorizedComponent />;
-
+  if (!permissions.includes("task.read")) {
+    return <UnauthorizedComponent />;
+  }
+  const canUpdateTask = permissions.includes("task.update");
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
       {loading && <LoadingScreen />}
 
-      <TaskPermissionGuard action="read">
+      <PermissionGuard permission="task.read">
         <div className="flex flex-col gap-4 p-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white"></h2>
             <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={handleAddClick}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <FiPlus className="w-6 h-6" />
-                Add Task
-              </Button>
+              <PermissionGuard permission="task.create">
+                <Button
+                  onClick={handleAddClick}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <FiPlus className="w-6 h-6" />
+                  Add Task
+                </Button></PermissionGuard>
               <Button
                 onClick={() => fetchTasks()}
                 variant="outline"
@@ -496,7 +507,7 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
             </span>
           </div>
         </div>
-      </TaskPermissionGuard>
+      </PermissionGuard>
 
       <div className="overflow-x-auto">
         <Table>
@@ -521,59 +532,77 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                     {(currentPage - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+
+
                     <input
                       ref={editingTaskId === task._id ? inputRef : null}
                       type="text"
                       value={editingTaskId === task._id ? editedTitle : task.taskName}
-                      readOnly={editingTaskId !== task._id || !task.isActive}
-                      onChange={e => setEditedTitle(e.target.value)}
+                      readOnly={
+                        editingTaskId !== task._id ||
+                        !task.isActive ||
+                        !canUpdateTask
+                      }
+                      onChange={e => {
+                        if (!canUpdateTask) return; // ⛔ block update
+                        setEditedTitle(e.target.value);
+                      }}
                       onClick={() => {
-                        if (!task.isActive) return;
+                        if (!task.isActive || !canUpdateTask) return; // ⛔ block edit mode
                         setEditingTaskId(task._id);
                         setEditedTitle(task.taskName);
                       }}
-                      onBlur={() => task.isActive && handleTitleUpdate(task)}
+                      onBlur={() => {
+                        if (task.isActive && canUpdateTask) {
+                          handleTitleUpdate(task);
+                        }
+                      }}
                       onKeyDown={e => {
-                        if (task.isActive && e.key === 'Enter') {
+                        if (task.isActive && canUpdateTask && e.key === 'Enter') {
                           e.preventDefault();
                           handleTitleUpdate(task);
                         }
                       }}
-                      className={`w-full bg-transparent rounded px-1 py-0.5 focus:ring-2 ${task.isActive ? 'focus:ring-green-500' : 'text-gray-400 italic cursor-not-allowed'}`}
+                      className={`w-full bg-transparent rounded px-1 py-0.5 
+    ${task.isActive && canUpdateTask
+                          ? "focus:ring-2 focus:ring-green-500"
+                          : "text-gray-400 italic cursor-not-allowed"
+                        }
+  `}
                     />
+
                     {task.isActive && (
-                      <PencilSquareIcon
-                        className="w-6 h-6 cursor-pointer text-gray-500 hover:text-green-600"
-                        onClick={() => {
-                          setEditingTaskId(task._id);
-                          setEditedTitle(task.taskName);
-                          setTimeout(() => inputRef.current?.focus(), 0);
-                        }}
-                      />
+                      <PermissionGuard permission="task.update">
+                        <PencilSquareIcon
+                          className="w-6 h-6 cursor-pointer text-gray-500 hover:text-green-600"
+                          onClick={() => {
+                            setEditingTaskId(task._id);
+                            setEditedTitle(task.taskName);
+                            setTimeout(() => inputRef.current?.focus(), 0);
+                          }}
+                        /></PermissionGuard>
                     )}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        task.stage === 'Completed'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : task.stage === 'InProgress'
-                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${task.stage === 'Completed'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : task.stage === 'InProgress'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                        }`}
                     >
                       {task.stage}
                     </span>
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        task.priority === 'High'
-                          ? 'bg-orange-500 text-orange-100 dark:bg-orange-500 dark:text-orange-100'
-                          : task.priority === 'Medium'
-                            ? 'bg-yellow-500 text-white dark:bg-yellow-900 dark:text-yellow-200'
-                            : 'bg-green-600 text-green-100 dark:bg-green-900 dark:text-green-100'
-                      }`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${task.priority === 'High'
+                        ? 'bg-orange-500 text-orange-100 dark:bg-orange-500 dark:text-orange-100'
+                        : task.priority === 'Medium'
+                          ? 'bg-yellow-500 text-white dark:bg-yellow-900 dark:text-yellow-200'
+                          : 'bg-green-600 text-green-100 dark:bg-green-900 dark:text-green-100'
+                        }`}
                     >
                       {task.priority}
                     </span>
@@ -585,10 +614,10 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     {task.assignedBy?.name || 'N/A'}
                     <br></br>
-                     {task.assignedBy?.emp_id}
+                    {task.assignedBy?.emp_id}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                    {task.updatedBy?.name  || 'N/A'} <br></br>
+                    {task.updatedBy?.name || 'N/A'} <br></br>
                     {task.updatedBy?.emp_id}
                   </TableCell>
                   <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
@@ -596,13 +625,13 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                   </TableCell>
                   <TableCell className="px-5 py-2 text-start text-theme-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-4">
-                      <TaskPermissionGuard action="update">
+                      <PermissionGuard permission="task.update">
                         <PencilSquareIcon
                           className={`w-6 h-6 transition-colors ${task.isActive ? 'text-gray-500 hover:text-green-600 cursor-pointer' : 'text-gray-300 cursor-not-allowed'}`}
                           onClick={task.isActive ? () => handleEditClick(task) : undefined}
                         />
-                      </TaskPermissionGuard>
-                      <TaskPermissionGuard action="update">
+                      </PermissionGuard>
+                      <PermissionGuard permission="task.update">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
@@ -612,15 +641,15 @@ const TaskListTable = memo(function TaskListTable({ initialData }: Props) {
                           />
                           <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 dark:peer-checked:bg-green-600" />
                         </label>
-                      </TaskPermissionGuard>
-                      <TaskPermissionGuard action="read">
+                      </PermissionGuard>
+                      <PermissionGuard permission="task.read">
                         <span
                           onClick={() => router.push(`tasks/${task._id}`)}
                           className="px-3 py-1 rounded-full text-xs font-medium bg-orange-500 text-orange-100 dark:bg-orange-500 dark:text-orange-100 cursor-pointer"
                         >
                           Details
                         </span>
-                      </TaskPermissionGuard>
+                      </PermissionGuard>
                     </div>
                   </TableCell>
                 </TableRow>

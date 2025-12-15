@@ -2,11 +2,10 @@
 
 import { ShieldExclamationIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
-
 export default function UnauthorizedComponent() {
   return (
     <div className="min-h-[80vh] w-full flex items-center justify-center p-4 sm:p-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -15,7 +14,7 @@ export default function UnauthorizedComponent() {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ 
+          transition={{
             type: "spring",
             stiffness: 260,
             damping: 20,
@@ -27,7 +26,7 @@ export default function UnauthorizedComponent() {
           <ShieldExclamationIcon className="w-24 h-24 text-red-500 mx-auto relative z-10" />
         </motion.div>
 
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -36,7 +35,7 @@ export default function UnauthorizedComponent() {
           Access Denied
         </motion.h2>
 
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
@@ -58,7 +57,7 @@ export default function UnauthorizedComponent() {
             Go Back
           </button>
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.history.back()}
             className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-base font-medium"
           >
             Return to Home
@@ -67,4 +66,6 @@ export default function UnauthorizedComponent() {
       </motion.div>
     </div>
   );
+
+
 } 

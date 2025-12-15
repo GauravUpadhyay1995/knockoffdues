@@ -1,56 +1,22 @@
-import React from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
+"use client";
 
-interface PermissionGuardProps {
-  module: string;
-  action: string | string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}
+import { ReactNode } from "react";
+import { usePermissions } from "@/context/PermissionContext";
 
-export const PermissionGuard: React.FC<PermissionGuardProps> = ({
-  module,
-  action,
+export default function PermissionGate({
+  permission,
   children,
   fallback = null
-}) => {
-  const { canAccess, isLoading } = usePermissions();
+}: {
+  permission: string;
+  children: ReactNode;
+  fallback?: ReactNode;
+}) {
+  const { permissions, loading } = usePermissions();
 
-  if (isLoading) {
-    return null;
-  }
+  if (loading) return null; // or a skeleton loader
 
-  return canAccess(module, action) ? <>{children}</> : <>{fallback}</>;
-};
+  if (!permissions.includes(permission)) return fallback;
 
-// Common permission checks
-export const UserPermissionGuard: React.FC<{
-  action: string | string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ action, children, fallback }) => (
-  <PermissionGuard module="User" action={action} fallback={fallback}>
-    {children}
-  </PermissionGuard>
-);
-
-
-export const TaskPermissionGuard: React.FC<{
-  action: string | string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ action, children, fallback }) => (
-  <PermissionGuard module="Task" action={action} fallback={fallback}>
-    {children}
-  </PermissionGuard>
-);
-
-export const CustomerPermissionGuard: React.FC<{
-  action: string | string[];
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}> = ({ action, children, fallback }) => (
-  <PermissionGuard module="Customer" action={action} fallback={fallback}>
-    {children}
-  </PermissionGuard>
-); 
+  return <>{children}</>;
+}

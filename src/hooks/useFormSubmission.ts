@@ -30,7 +30,7 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
       appendIfValue("dateOfBirth", data.dateOfBirth);
       appendIfValue("position", data.position);
       appendIfValue("jod", data.jod);
-      appendIfValue("maritalStatus", data.maritalStatus);
+      appendIfValue("maritalStatus", data.maritalStatus||"Single");
 
       // ------------------ Contact Information ------------------
       appendIfValue("email", data.email);

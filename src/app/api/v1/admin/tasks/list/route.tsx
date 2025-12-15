@@ -9,7 +9,6 @@ import mongoose from 'mongoose';
 export const GET = verifyAdmin(asyncHandler(async (req: NextRequest) => {
     await connectToDB();
     const user = (req as any).user;
-    console.log("user from middleware", user);
 
     const searchParams = req.nextUrl.searchParams;
 

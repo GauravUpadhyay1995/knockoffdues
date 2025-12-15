@@ -2,7 +2,7 @@
 import React from 'react';
 import { format, isBefore, isSameDay, startOfDay } from 'date-fns';
 import { GripVertical, Pencil, X, Users, Clock } from 'lucide-react';
-
+import PermissionGuard from '@/components/common/PermissionGuard';
 interface DayViewProps {
   selectedDay: Date;
   visibleMeetings: any[];
@@ -31,16 +31,16 @@ const DayView: React.FC<DayViewProps> = ({
   isDragging,
 }) => {
   const isPastDay = isBefore(selectedDay, startOfDay(new Date()));
- const dayMeetings = visibleMeetings
-  .filter(m => isSameDay(new Date(m.start), selectedDay))
-  .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  const dayMeetings = visibleMeetings
+    .filter(m => isSameDay(new Date(m.start), selectedDay))
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
 
   return (
     <div
       className="relative flex flex-col flex-grow overflow-y-auto bg-white dark:bg-gray-800 rounded-lg p-4"
-      // onDragOver={e => !isPastDay && onDragOver(e)}
-      // onDrop={e => !isPastDay && onDrop(e, selectedDay)}
+    // onDragOver={e => !isPastDay && onDragOver(e)}
+    // onDrop={e => !isPastDay && onDrop(e, selectedDay)}
     >
       {isDragging && !isPastDay && (
         <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-lg pointer-events-none z-10" />
@@ -62,9 +62,8 @@ const DayView: React.FC<DayViewProps> = ({
                 // draggable={isOwner && !isPastMeeting}
                 // onDragStart={e => !isPastMeeting && onDragStart(e, meeting)}
                 // onDragEnd={onDragEnd}
-                className={`flex items-start p-4 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg ${
-                  meeting.color
-                } ${isPastMeeting ? 'opacity-60' : ''}`}
+                className={`flex items-start p-4 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg ${meeting.color
+                  } ${isPastMeeting ? 'opacity-60' : ''}`}
               >
                 {!isPastMeeting && (
                   <GripVertical size={16} className="flex-shrink-0 opacity-70 mr-3 mt-1" />
@@ -111,20 +110,23 @@ const DayView: React.FC<DayViewProps> = ({
 
                 {isOwner && !isPastMeeting && (
                   <div className="flex items-center space-x-2 ml-4">
-                    <button
-                      onClick={() => onEditEvent(meeting)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                      title="Edit event"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => onDeleteEvent(meeting)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                      title="Delete event"
-                    >
-                      <X size={16} />
-                    </button>
+                    <PermissionGuard permission="calender.update">
+                      <button
+                        onClick={() => onEditEvent(meeting)}
+                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                        title="Edit event"
+                      >
+                        <Pencil size={16} />
+                      </button></PermissionGuard>
+                    <PermissionGuard permission="calender.delete">
+                      <button
+                        onClick={() => onDeleteEvent(meeting)}
+                        className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                        title="Delete event"
+                      >
+                        <X size={16} />
+                      </button>
+                    </PermissionGuard>
                   </div>
                 )}
               </div>

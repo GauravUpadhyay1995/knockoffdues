@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 import { useUserData } from "@/hooks/useUserData";
 import { FiMail, FiDelete, FiEye, FiDownload, FiRepeat } from "react-icons/fi";
+import PermissionGuard from '@/components/common/PermissionGuard';
 
 // ✅ Reusable IconButton component
 const IconButton = ({ Icon, title, onClick, color = "gray" }) => (
@@ -67,20 +68,22 @@ const LetterList = ({
                                 onClick={() => handlePreview(letter.letterType, userData)}
                                 color="orange"
                             />
-                            {!letter.isSent && (
+                            <PermissionGuard permission="employee.update">
+                                {!letter.isSent && (
+                                    <IconButton
+                                        Icon={FiDelete}
+                                        title="Delete"
+                                        onClick={() => handleDelete(letter._id)}
+                                        color="red"
+                                    />
+                                )}
                                 <IconButton
-                                    Icon={FiDelete}
-                                    title="Delete"
-                                    onClick={() => handleDelete(letter._id)}
-                                    color="red"
+                                    Icon={Icon}
+                                    title={letter.isSent ? "Re send Mail" : "Send Mail"}
+                                    onClick={() => handleSendMail(letter)}
+                                    color="green"
                                 />
-                            )}
-                            <IconButton
-                                Icon={Icon}
-                                title={letter.isSent ? "Re send Mail" : "Send Mail"}
-                                onClick={() => handleSendMail(letter)}
-                                color="green"
-                            />
+                            </PermissionGuard>
                         </div>
                     </div>
                 );
@@ -323,13 +326,16 @@ const LetterCard = ({ title, description, onGenerate, onPreview, loading }) => (
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{description}</p>
         <div className="flex space-x-2">
-            <button
-                type="button"
-                className="flex-1 px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors"
-                onClick={onGenerate}
-            >
-                {loading ? "Please Wait..." : "Generate"}
-            </button>
+            <PermissionGuard permission="employee.update">
+
+                <button
+                    type="button"
+                    className="flex-1 px-3 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors"
+                    onClick={onGenerate}
+                >
+                    {loading ? "Please Wait..." : "Generate"}
+                </button>
+            </PermissionGuard>
             <button
                 type="button"
                 onClick={onPreview}

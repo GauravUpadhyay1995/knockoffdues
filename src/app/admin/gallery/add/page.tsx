@@ -9,12 +9,17 @@ import { toast } from 'react-hot-toast';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { useLoading } from '@/context/LoadingContext';
 import ImageGallery from '@/components/ui/images/ImageGallery';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
+import { usePermissions } from "@/context/PermissionContext";
 
 
 export default function AddGalleryPage() {
+  const { permissions } = usePermissions();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+
   const { isLoading, setIsLoading } = useLoading();
 
   const [title, setTitle] = useState('');
@@ -149,6 +154,12 @@ export default function AddGalleryPage() {
       throw new Error(error.message || 'Failed to delete image');
     }
   };
+  if (id && !permissions.includes('gallery.update')) {
+    return <UnauthorizedComponent />;
+  } if(!id && !permissions.includes('gallery.create')){
+    return <UnauthorizedComponent />;
+  }
+
 
 
   if (isLoading) {
@@ -280,6 +291,7 @@ export default function AddGalleryPage() {
           >
             Back
           </button>
+
           <button
             type="submit"
             disabled={isLoading}

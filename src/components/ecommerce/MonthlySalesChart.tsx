@@ -5,6 +5,9 @@ import { MoreDotIcon } from "@/icons";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
 
 // Dynamically import the ReactApexChart component
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -12,6 +15,7 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 });
 
 export default function MonthlySalesChart() {
+  const {permissions}=usePermissions();
   const options: ApexOptions = {
     colors: ["#465fff"],
     chart: {
@@ -106,7 +110,10 @@ export default function MonthlySalesChart() {
   function closeDropdown() {
     setIsOpen(false);
   }
-
+    // ⛔ If user does NOT have permission, show unauthorized
+    if (!permissions.includes("dashboard.read")) {
+        return <UnauthorizedComponent />;
+    }
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6 sm:pt-6">
       <div className="flex items-center justify-between">

@@ -3,6 +3,7 @@ import React from 'react';
 import { format, isBefore } from 'date-fns';
 import { Calendar, Clock, Users, Pencil, X, GripVertical } from 'lucide-react';
 import { getColorForCategory } from '@/utils/calendarUtils';
+import PermissionGuard from '@/components/common/PermissionGuard';
 
 interface EventCardProps {
   meeting: any;
@@ -122,26 +123,30 @@ const EventCard: React.FC<EventCardProps> = ({
           {/* Actions */}
           {isOwner && !isPastMeeting && (
             <div className="flex items-center space-x-2 pt-2 border-t border-gray-700">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(meeting);
-                }}
-                className="text-xs sm:text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
-              >
-                <Pencil size={14} />
-                <span>Edit</span>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(meeting);
-                }}
-                className="text-xs sm:text-sm text-red-400 hover:text-red-300 transition-colors flex items-center space-x-1"
-              >
-                <X size={14} />
-                <span>Delete</span>
-              </button>
+              <PermissionGuard permission="calender.update">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(meeting);
+                  }}
+                  className="text-xs sm:text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1"
+                >
+                  <Pencil size={14} />
+                  <span>Edit</span>
+                </button>
+              </PermissionGuard>
+              <PermissionGuard permission="calender.delete">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(meeting);
+                  }}
+                  className="text-xs sm:text-sm text-red-400 hover:text-red-300 transition-colors flex items-center space-x-1"
+                >
+                  <X size={14} />
+                  <span>Delete</span>
+                </button>
+              </PermissionGuard>
             </div>
           )}
         </div>

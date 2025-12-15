@@ -312,7 +312,7 @@ export default function UserEditForm() {
       appendIfValue("name", data.name);
       appendIfValue("dateOfBirth", data.dateOfBirth);
       appendIfValue("position", data.position);
-      appendIfValue("maritalStatus", data.maritalStatus);
+      appendIfValue("maritalStatus", data.maritalStatus||"Single");
       appendIfValue("jod", data.jod);
 
 

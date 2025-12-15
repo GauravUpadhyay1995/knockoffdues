@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FiArrowLeft, FiCalendar, FiUser, FiClock, FiDownload, FiPaperclip, FiRefreshCw } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
+import { usePermissions } from "@/context/PermissionContext";
 
 interface User {
   _id: string;
@@ -75,6 +78,7 @@ const StatusBadge = memo(({ status }: { status: string }) => {
 StatusBadge.displayName = 'StatusBadge';
 
 const TaskDetailPage = () => {
+  const { permissions } = usePermissions();
   const [task, setTask] = useState<Task | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [description, setDescription] = useState('');
@@ -213,6 +217,9 @@ const TaskDetailPage = () => {
   useEffect(() => {
     fetchTask();
   }, [fetchTask]);
+  if (!permissions.includes("task.read")) {
+    return <UnauthorizedComponent />;
+  }
 
   if (loading) {
     return (
@@ -256,8 +263,8 @@ const TaskDetailPage = () => {
               <PriorityBadge priority={task.priority} />
               <span
                 className={`px-3 py-1 rounded-full text-sm font-medium ${task.isActive
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                   }`}
               >
                 {task.isActive ? 'Active' : 'Inactive'}
@@ -291,8 +298,8 @@ const TaskDetailPage = () => {
               <button
                 key={tab}
                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                    ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                   }`}
                 onClick={() => setActiveTab(tab)}
               >
@@ -408,8 +415,8 @@ const TaskDetailPage = () => {
                     <button
                       key={tab}
                       className={`pb-2 text-sm font-medium border-b-2 transition-colors ${commentTab === tab
-                          ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                         }`}
                       onClick={() => setCommentTab(tab)}
                     >
@@ -458,6 +465,7 @@ const TaskDetailPage = () => {
                     onChange={e => setDescription(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-600 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
+                      <PermissionGuard permission="task.update">
                   <div className="flex justify-end mt-3">
                     <button
                       type="submit"
@@ -466,7 +474,7 @@ const TaskDetailPage = () => {
                     >
                       {loading ? 'Posting...' : 'Post Comment'}
                     </button>
-                  </div>
+                  </div></PermissionGuard>
                 </form>
               )}
 
