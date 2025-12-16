@@ -16,7 +16,8 @@ import Pagination from '../tables/Pagination';
 import Label from "@/components/form/Label";
 import { toast } from 'react-hot-toast';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
-import { UserPermissionGuard } from '@/components/common/PermissionGuard';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
 import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -255,7 +256,7 @@ export default function TeamsListTable({ initialData }: Props) {
                 <LoadingScreen />
             )}
 
-            <UserPermissionGuard action="read">
+            <PermissionGuard permission="team.read">
                 <div className="flex flex-col gap-4 p-4">
                     {/* Header with filters and controls */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -380,7 +381,7 @@ export default function TeamsListTable({ initialData }: Props) {
                         </span>
                     </div>
                 </div>
-            </UserPermissionGuard>
+            </PermissionGuard>
 
             {/* Teams Table */}
             <div className="overflow-x-auto">
@@ -413,7 +414,7 @@ export default function TeamsListTable({ initialData }: Props) {
                                         </span>
                                     </TableCell>
                                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                                        <UserPermissionGuard action="update">
+                                        <PermissionGuard permission="team.update">
                                             <Button
                                                 onClick={() => handleEditClick(team)}
                                                 variant="ghost"
@@ -423,7 +424,7 @@ export default function TeamsListTable({ initialData }: Props) {
                                                 <PencilSquareIcon className="w-4 h-4" />
                                                 Edit
                                             </Button>
-                                        </UserPermissionGuard>
+                                        </PermissionGuard>
                                         
                                     </TableCell>
                                 </TableRow>

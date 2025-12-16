@@ -12,8 +12,9 @@ import Button from '@/components/ui/button/Button';
 import Pagination from '../tables/Pagination';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import Label from '@/components/form/Label';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
 import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
-import { UserPermissionGuard } from '@/components/common/PermissionGuard';
 import AddReminderModal from '@/components/common/AddReminderModel';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -193,7 +194,7 @@ export default function ReminderListTable({ initialData }: Props) {
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
       {loading && <LoadingScreen />}
 
-      <UserPermissionGuard action="read">
+      <PermissionGuard permission="account.read">
         <div className="flex flex-col gap-4 p-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
@@ -288,7 +289,7 @@ export default function ReminderListTable({ initialData }: Props) {
             </span>
           </div>
         </div>
-      </UserPermissionGuard>
+      </PermissionGuard>
 
       <div className="overflow-x-auto">
         <Table>

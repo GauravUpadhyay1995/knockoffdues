@@ -17,7 +17,8 @@ import {
 import Button from '@/components/ui/button/Button';
 import Pagination from '../tables/Pagination';
 import { toast } from 'react-hot-toast';
-import { UserPermissionGuard } from '@/components/common/PermissionGuard';
+import PermissionGuard from '@/components/common/PermissionGuard';
+import { usePermissions } from "@/context/PermissionContext";
 import UnauthorizedComponent from '@/components/common/UnauthorizedComponent';
 import * as XLSX from 'xlsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -270,7 +271,7 @@ export default function RolesListTable({ initialData }: Props) {
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] relative">
             {loading && <LoadingScreen />}
 
-            <UserPermissionGuard action="read">
+            <PermissionGuard permission="role.read">
                 <div className="flex flex-col gap-4 p-4">
                     {/* Header with filters and controls */}
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -381,7 +382,7 @@ export default function RolesListTable({ initialData }: Props) {
                         </span>
                     </div>
                 </div>
-            </UserPermissionGuard>
+            </PermissionGuard>
 
             {/* Roles Table */}
             <div className="overflow-x-auto">
@@ -451,7 +452,7 @@ export default function RolesListTable({ initialData }: Props) {
                                             : 'N/A'}
                                     </TableCell>
                                     <TableCell className="px-5 py-1 text-start text-theme-sm text-gray-600 dark:text-gray-400">
-                                        <UserPermissionGuard action="update">
+                                        <PermissionGuard permission="role.update">
                                             {/* <Button
                                                 onClick={() => handleEditClick(role)}
                                                 variant="ghost"
@@ -469,7 +470,7 @@ export default function RolesListTable({ initialData }: Props) {
                                                 <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600 dark:peer-checked:bg-purple-600">
                                                 </div>
                                             </label>
-                                        </UserPermissionGuard>
+                                        </PermissionGuard>
                                     </TableCell>
                                 </TableRow>
                             ))

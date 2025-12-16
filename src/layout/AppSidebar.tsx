@@ -67,7 +67,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { permissions, loading } = usePermissions();
-  console.log("permission",permissions)
+  console.log("permission", permissions)
   const { theme } = useTheme();
 
   // ------------------------------
@@ -179,7 +179,7 @@ const AppSidebar: React.FC = () => {
       "Employee Management": "employee",
       "Teams Management": "team",
       "Events Management": "event",
-      "Docs&Links Mgmt": "docs",
+      "Docs&Links Mgmt": "document",
       "News Management": "news",
       "TRL Management": "trl",
       "Gallery Management": "gallery",
@@ -187,7 +187,8 @@ const AppSidebar: React.FC = () => {
       "Account Management": "account",
       "Settings": "settings",
       "Dashboard": "dashboard",
-      "Calender":"calender"
+      "Calender": "calender",
+    
     };
 
     const module = moduleMap[nav.name];
@@ -215,9 +216,8 @@ const AppSidebar: React.FC = () => {
               {!nav.subItems ? (
                 <Link
                   href={nav.path!}
-                  className={`menu-item group ${
-                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
+                  className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                    }`}
                 >
                   <span className={`${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>
                     {nav.icon}
@@ -231,14 +231,12 @@ const AppSidebar: React.FC = () => {
                 <>
                   <button
                     onClick={() => setOpenSubmenu(openSubmenu === index ? null : index)}
-                    className={`menu-item group ${
-                      openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
-                    }`}
+                    className={`menu-item group ${openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
+                      }`}
                   >
                     <span
-                      className={`${
-                        openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                      }`}
+                      className={`${openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
+                        }`}
                     >
                       {nav.icon}
                     </span>
@@ -249,9 +247,8 @@ const AppSidebar: React.FC = () => {
 
                     {(isExpanded || isHovered || isMobileOpen) && (
                       <ChevronDownIcon
-                        className={`ml-auto transition-transform ${
-                          openSubmenu === index ? "rotate-180" : ""
-                        }`}
+                        className={`ml-auto transition-transform ${openSubmenu === index ? "rotate-180" : ""
+                          }`}
                       />
                     )}
                   </button>
@@ -263,11 +260,10 @@ const AppSidebar: React.FC = () => {
                           <li key={sub.name}>
                             <Link
                               href={sub.path}
-                              className={`menu-dropdown-item ${
-                                isActive(sub.path)
+                              className={`menu-dropdown-item ${isActive(sub.path)
                                   ? "menu-dropdown-item-active"
                                   : "menu-dropdown-item-inactive"
-                              }`}
+                                }`}
                             >
                               {sub.name}
                             </Link>
@@ -298,9 +294,8 @@ const AppSidebar: React.FC = () => {
       <div className="flex flex-col overflow-y-auto no-scrollbar mt-10">
         <nav className="mb-6">
           <h2
-            className={`mb-4 text-xs uppercase flex text-gray-400 ${
-              isExpanded || isHovered ? "justify-start" : "lg:justify-center"
-            }`}
+            className={`mb-4 text-xs uppercase flex text-gray-400 ${isExpanded || isHovered ? "justify-start" : "lg:justify-center"
+              }`}
           >
             {isExpanded || isHovered ? "Menu" : <HorizontaLDots />}
           </h2>
