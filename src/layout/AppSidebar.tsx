@@ -16,13 +16,13 @@ import {
   DocsIcon,
   BankIcon,
   HorizontaLDots,
-} from "../icons/index";
+} from "../icons";
 import SidebarWidget from "./SidebarWidget";
 import { useTheme } from "@/context/ThemeContext";
 
-// ------------------------------
-// Submenu → Permission Mapper
-// ------------------------------
+/* ------------------------------------------------------------------
+   SUBMENU → PERMISSION MAP (MATCHES FIREBASE KEYS)
+------------------------------------------------------------------ */
 const submenuPermissionMap: Record<string, { module: string; action: string }> = {
   "All Teams": { module: "team", action: "read" },
   "Add Team": { module: "team", action: "create" },
@@ -50,9 +50,9 @@ const submenuPermissionMap: Record<string, { module: string; action: string }> =
   "Company Setup": { module: "settings", action: "update" },
 };
 
-// ------------------------------
-// Nav Item Type
-// ------------------------------
+/* ------------------------------------------------------------------
+   TYPES
+------------------------------------------------------------------ */
 type NavItem = {
   name: string;
   icon: React.ReactNode;
@@ -60,32 +60,28 @@ type NavItem = {
   subItems?: { name: string; path: string }[];
 };
 
-// ------------------------------
-// Component
-// ------------------------------
+/* ------------------------------------------------------------------
+   COMPONENT
+------------------------------------------------------------------ */
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { permissions, loading } = usePermissions();
-  console.log("permission", permissions)
   const { theme } = useTheme();
-
-  // ------------------------------
-  // Hooks moved OUTSIDE loop (FIX)
-  // ------------------------------
-  const isActive = useCallback(
-    (path: string | undefined) => path === pathname,
-    [pathname]
-  );
 
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
 
-  // ------------------------------
-  // Permission Check
-  // ------------------------------
+  /* ------------------------------------------------------------------
+     HELPERS
+  ------------------------------------------------------------------ */
+  const isActive = useCallback(
+    (path?: string) => path === pathname,
+    [pathname]
+  );
+
   const hasPermission = (module: string, action: string) => {
-    const key = `${module.toLowerCase()}.${action.toLowerCase()}`;
-    return permissions.includes(key);
+    if (!Array.isArray(permissions)) return false;
+    return permissions.includes(`${module}.${action}`);
   };
 
   const canShowSubmenu = (name: string) => {
@@ -94,19 +90,22 @@ const AppSidebar: React.FC = () => {
     return hasPermission(perm.module, perm.action);
   };
 
-  // ------------------------------
-  // NAV CONFIG
-  // ------------------------------
+  /* ------------------------------------------------------------------
+     NAV CONFIG
+  ------------------------------------------------------------------ */
   const navItems: NavItem[] = [
     { name: "Dashboard", icon: <GridIcon />, path: "/admin" },
     { name: "Calender", icon: <CalenderIcon />, path: "/admin/calender" },
+
     {
       name: "Account Management",
       icon: <BankIcon />,
       subItems: [{ name: "Venders", path: "/admin/accounts/venders" }],
     },
+
     { name: "Employee Management", icon: <UserCircleIcon />, path: "/admin/users-list" },
     { name: "Tasks Management", icon: <FolderIcon />, path: "/admin/tasks" },
+
     {
       name: "Teams Management",
       icon: <GroupIcon />,
@@ -115,6 +114,7 @@ const AppSidebar: React.FC = () => {
         { name: "Add Team", path: "/admin/teams/add" },
       ],
     },
+
     {
       name: "Events Management",
       icon: <GroupIcon />,
@@ -123,14 +123,16 @@ const AppSidebar: React.FC = () => {
         { name: "Add Events", path: "/admin/events/add" },
       ],
     },
+
     {
       name: "Docs&Links Mgmt",
-      icon: <GroupIcon />,
+      icon: <DocsIcon />,
       subItems: [
         { name: "All Links-Docs", path: "/admin/links-docs" },
         { name: "Add Links-Docs", path: "/admin/links-docs/add" },
       ],
     },
+
     {
       name: "News Management",
       icon: <DocsIcon />,
@@ -139,6 +141,7 @@ const AppSidebar: React.FC = () => {
         { name: "Add News", path: "/admin/news/add" },
       ],
     },
+
     {
       name: "TRL Management",
       icon: <ShootingStarIcon />,
@@ -147,6 +150,7 @@ const AppSidebar: React.FC = () => {
         { name: "Add TRL", path: "/admin/trl/add" },
       ],
     },
+
     {
       name: "Gallery Management",
       icon: <FolderIcon />,
@@ -155,6 +159,7 @@ const AppSidebar: React.FC = () => {
         { name: "Add Gallery", path: "/admin/gallery/add" },
       ],
     },
+
     {
       name: "Settings",
       icon: <FolderIcon />,
@@ -169,123 +174,36 @@ const AppSidebar: React.FC = () => {
     },
   ];
 
-  // ------------------------------
-  // FILTER MAIN MENU BASED ON PERMISSIONS
-  // ------------------------------
+  /* ------------------------------------------------------------------
+     FILTER MAIN MENU (FIXED)
+  ------------------------------------------------------------------ */
   const filterMenu = (nav: NavItem) => {
     if (loading) return true;
 
+    // If submenu exists → allow if ANY submenu is allowed
+    if (nav.subItems?.length) {
+      return nav.subItems.some(sub => canShowSubmenu(sub.name));
+    }
+
     const moduleMap: Record<string, string> = {
-      "Employee Management": "employee",
-      "Teams Management": "team",
-      "Events Management": "event",
-      "Docs&Links Mgmt": "document",
-      "News Management": "news",
-      "TRL Management": "trl",
-      "Gallery Management": "gallery",
-      "Tasks Management": "task",
-      "Account Management": "account",
-      "Settings": "settings",
       "Dashboard": "dashboard",
-      "Calender": "calender",
-    
+      "Calender": "dashboard",
+      "Employee Management": "employee",
+      "Tasks Management": "task",
     };
 
     const module = moduleMap[nav.name];
     if (!module) return true;
 
     return hasPermission(module, "read");
-
   };
 
-  // ------------------------------
-  // SIDEBAR MENU RENDER
-  // ------------------------------
-  const renderMenuItems = () => {
-    return (
-      <ul className="flex flex-col gap-4">
-        {navItems.map((nav, index) => {
-          if (!filterMenu(nav)) return null;
-
-          const subItems = nav.subItems?.filter((sub) => canShowSubmenu(sub.name)) || [];
-
-          if (nav.subItems && subItems.length === 0) return null;
-
-          return (
-            <li key={nav.name}>
-              {!nav.subItems ? (
-                <Link
-                  href={nav.path!}
-                  className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                    }`}
-                >
-                  <span className={`${isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}>
-                    {nav.icon}
-                  </span>
-
-                  {(isExpanded || isHovered || isMobileOpen) && (
-                    <span className="menu-item-text">{nav.name}</span>
-                  )}
-                </Link>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setOpenSubmenu(openSubmenu === index ? null : index)}
-                    className={`menu-item group ${openSubmenu === index ? "menu-item-active" : "menu-item-inactive"
-                      }`}
-                  >
-                    <span
-                      className={`${openSubmenu === index ? "menu-item-icon-active" : "menu-item-icon-inactive"
-                        }`}
-                    >
-                      {nav.icon}
-                    </span>
-
-                    {(isExpanded || isHovered || isMobileOpen) && (
-                      <span className="menu-item-text">{nav.name}</span>
-                    )}
-
-                    {(isExpanded || isHovered || isMobileOpen) && (
-                      <ChevronDownIcon
-                        className={`ml-auto transition-transform ${openSubmenu === index ? "rotate-180" : ""
-                          }`}
-                      />
-                    )}
-                  </button>
-
-                  {(isExpanded || isHovered || isMobileOpen) &&
-                    openSubmenu === index && (
-                      <ul className="mt-2 space-y-1 ml-9">
-                        {subItems.map((sub) => (
-                          <li key={sub.name}>
-                            <Link
-                              href={sub.path}
-                              className={`menu-dropdown-item ${isActive(sub.path)
-                                  ? "menu-dropdown-item-active"
-                                  : "menu-dropdown-item-inactive"
-                                }`}
-                            >
-                              {sub.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                </>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  };
-
-  // ------------------------------
-  // RENDER SIDEBAR
-  // ------------------------------
+  /* ------------------------------------------------------------------
+     RENDER MENU
+  ------------------------------------------------------------------ */
   return (
     <aside
-      className={`z-50 fixed flex flex-col top-0 px-5 left-0 bg-white dark:bg-gray-900 text-gray-900 h-screen border-r transition-all duration-300
+      className={`z-50 fixed flex flex-col top-0 px-5 left-0 bg-white dark:bg-gray-900 h-screen border-r transition-all duration-300
         ${isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"}
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
@@ -293,14 +211,64 @@ const AppSidebar: React.FC = () => {
     >
       <div className="flex flex-col overflow-y-auto no-scrollbar mt-10">
         <nav className="mb-6">
-          <h2
-            className={`mb-4 text-xs uppercase flex text-gray-400 ${isExpanded || isHovered ? "justify-start" : "lg:justify-center"
-              }`}
-          >
+          <h2 className={`mb-4 text-xs uppercase text-gray-400 ${isExpanded || isHovered ? "text-left" : "text-center"}`}>
             {isExpanded || isHovered ? "Menu" : <HorizontaLDots />}
           </h2>
 
-          {renderMenuItems()}
+          <ul className="flex flex-col gap-4">
+            {navItems.map((nav, index) => {
+              if (!filterMenu(nav)) return null;
+
+              const subItems = nav.subItems?.filter(sub => canShowSubmenu(sub.name)) || [];
+              if (nav.subItems && subItems.length === 0) return null;
+
+              return (
+                <li key={nav.name}>
+                  {!nav.subItems ? (
+                    <Link
+                      href={nav.path!}
+                      className={`menu-item ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"}`}
+                    >
+                      {nav.icon}
+                      {(isExpanded || isHovered || isMobileOpen) && (
+                        <span className="menu-item-text">{nav.name}</span>
+                      )}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setOpenSubmenu(openSubmenu === index ? null : index)}
+                        className={`menu-item ${openSubmenu === index ? "menu-item-active" : "menu-item-inactive"}`}
+                      >
+                        {nav.icon}
+                        {(isExpanded || isHovered || isMobileOpen) && (
+                          <>
+                            <span className="menu-item-text">{nav.name}</span>
+                            <ChevronDownIcon className={`ml-auto transition-transform ${openSubmenu === index ? "rotate-180" : ""}`} />
+                          </>
+                        )}
+                      </button>
+
+                      {(isExpanded || isHovered || isMobileOpen) && openSubmenu === index && (
+                        <ul className="mt-2 space-y-1 ml-9">
+                          {subItems.map(sub => (
+                            <li key={sub.name}>
+                              <Link
+                                href={sub.path}
+                                className={`menu-dropdown-item ${isActive(sub.path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}`}
+                              >
+                                {sub.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         {(isExpanded || isHovered || isMobileOpen) && <SidebarWidget />}

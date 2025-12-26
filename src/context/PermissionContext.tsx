@@ -12,6 +12,7 @@ export const PermissionProvider = ({ children }: { children: React.ReactNode }) 
   const { admin } = useAuth();  
   const user= admin;
   const role = user?.role || null;
+  console.log("LoggedIn user Role",role)
   const { permissions, loading } = useRealtimePermissions(role);
   
 
