@@ -11,9 +11,9 @@ import { seedDefaultPermissions } from "@/lib/permissionSeeding";
 import { getFirebaseAdmin } from "@/lib/firebaseAdmin";
 
 // Firebase sync helpers
-import { 
-    syncRolePermissionsToFirebase, 
-    syncSuperAdminAllPermissions 
+import {
+    syncRolePermissionsToFirebase,
+    syncSuperAdminAllPermissions
 } from "@/lib/permissionSync";
 
 
@@ -45,7 +45,7 @@ export const DELETE = verifyAdmin(asyncHandler(async (req: NextRequest) => {
 
                 if (modulePerms.length > 0) {
                     modulePermissionsToRemove.push(...modulePerms);
-                    
+
                     const filteredPerms = doc.permissions.filter((perm: string) => {
                         if (perm.includes(".")) {
                             const [permModule] = perm.split(".");
@@ -78,7 +78,9 @@ export const DELETE = verifyAdmin(asyncHandler(async (req: NextRequest) => {
             }
 
             // Update super admin permissions
-            const allDocs = await Permission.find().select("permissions");
+            const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
+
+            const allDocs = await Permission.find().select(`${REALTIME_FIREBASE_DATABASE_NAME}`);
             const allPermissionsSet = new Set<string>();
             allDocs.forEach(doc => {
                 (doc.permissions || []).forEach(p => allPermissionsSet.add(p));
@@ -88,7 +90,7 @@ export const DELETE = verifyAdmin(asyncHandler(async (req: NextRequest) => {
 
             // Firebase global update
             const { db } = getFirebaseAdmin();
-            await db.ref("permissions/global").set({
+            await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}/global`).set({
                 updatedAt: Date.now(),
                 event: "module_deleted",
                 module: moduleName,
@@ -142,10 +144,11 @@ export const DELETE = verifyAdmin(asyncHandler(async (req: NextRequest) => {
 
         // Firebase Sync
         const { db } = getFirebaseAdmin();
+        const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
 
-        await db.ref("permissions").child(role).remove();
+        await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}`).child(role).remove();
 
-        await db.ref("permissions/global").set({
+        await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}/global`).set({
             updatedAt: Date.now(),
             event: "role_deleted",
             role,

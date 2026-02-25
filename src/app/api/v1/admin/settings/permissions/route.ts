@@ -11,9 +11,9 @@ import { seedDefaultPermissions } from "@/lib/permissionSeeding";
 import { getFirebaseAdmin } from "@/lib/firebaseAdmin";
 
 // Firebase sync helpers
-import { 
-    syncRolePermissionsToFirebase, 
-    syncSuperAdminAllPermissions 
+import {
+    syncRolePermissionsToFirebase,
+    syncSuperAdminAllPermissions
 } from "@/lib/permissionSync";
 
 
@@ -42,7 +42,7 @@ export const GET = asyncHandler(async (req: NextRequest) => {
 
     try {
         let rolesDocs = await Permission.find().select("role permissions updatedAt");
-
+        console.log("roleLOGS",rolesDocs)
         // Auto-seed if empty
         if (rolesDocs.length === 0) {
             await seedDefaultPermissions();
@@ -116,13 +116,14 @@ export const DELETE = verifyAdmin(asyncHandler(async (req: NextRequest) => {
         }
 
         const deletedDoc = await Permission.findOneAndDelete({ role });
+        const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
 
         // Firebase Sync
         const { db } = getFirebaseAdmin();
 
-        await db.ref("permissions").child(role).remove();
+        await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}`).child(role).remove();
 
-        await db.ref("permissions/global").set({
+        await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}/global`).set({
             updatedAt: Date.now(),
             event: "role_deleted",
             role,
@@ -174,7 +175,9 @@ export const PUT = verifyAdmin(asyncHandler(async (req: NextRequest) => {
     }
 
     // 🔥 FIX: Always rebuild from DB to keep super admin correct
-    const allDocs = await Permission.find().select("permissions");
+    const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
+
+    const allDocs = await Permission.find().select(`${REALTIME_FIREBASE_DATABASE_NAME}`);
     allDocs.forEach(doc => {
         (doc.permissions || []).forEach(p => allCollectedPermissions.add(p));
     });

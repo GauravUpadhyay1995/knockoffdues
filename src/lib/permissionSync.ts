@@ -7,8 +7,9 @@ export const syncRolePermissionsToFirebase = async (
     const { db } = getFirebaseAdmin();
 
     const safeRole = role.toLowerCase();
+    const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
 
-    await db.ref(`permissions/${safeRole}`).set({
+    await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}/${safeRole}`).set({
         permissions,
         updatedAt: Date.now()
     });
@@ -18,8 +19,9 @@ export const syncRolePermissionsToFirebase = async (
 
 export const syncSuperAdminAllPermissions = async (allPermissions: string[]) => {
     const { db } = getFirebaseAdmin();
+    const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
 
-    await db.ref("permissions/super admin").set({
+    await db.ref(`${REALTIME_FIREBASE_DATABASE_NAME}/super admin`).set({
         permissions: Array.from(new Set(allPermissions)),
         updatedAt: Date.now()
     });

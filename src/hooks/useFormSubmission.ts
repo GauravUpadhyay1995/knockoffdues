@@ -6,6 +6,7 @@ import { UserData } from '@/types';
 export const useFormSubmission = (userId: string, user: UserData | null) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  
 
   const handleSubmit = async (data: UserData) => {
     try {
@@ -28,6 +29,7 @@ export const useFormSubmission = (userId: string, user: UserData | null) => {
       // ------------------ Personal Information ------------------
       appendIfValue("name", data.name);
       appendIfValue("dateOfBirth", data.dateOfBirth);
+      
       appendIfValue("position", data.position);
       appendIfValue("jod", data.jod);
       appendIfValue("maritalStatus", data.maritalStatus||"Single");

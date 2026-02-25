@@ -7,29 +7,29 @@ export function useRealtimePermissions(role: string | null) {
     const [permissions, setPermissions] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+    const REALTIME_FIREBASE_DATABASE_NAME = process.env.NEXT_PUBLIC_ENVIROMENT === "development" ? "permissions_local" : "permissions";
     useEffect(() => {
         if (!role) {
             setLoading(false);
             return;
         }
 
- 
-        
-        const rolePath = ref(db, `permissions/${role.toLowerCase()}`);
-        
+
+        const rolePath = ref(db, `${REALTIME_FIREBASE_DATABASE_NAME}/${role.toLowerCase()}`);
+
         // Get the full path correctly
         const fullPath = rolePath.toString();
-        
+        console.log("fullPath=", `${fullPath}`)
+
 
         const unsubscribe = onValue(
-            rolePath, 
+            rolePath,
             (snapshot) => {
-                
-                
+
+
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    
+
                     if (data && data.permissions) {
                         setPermissions(data.permissions);
                         setError(null);
@@ -41,12 +41,12 @@ export function useRealtimePermissions(role: string | null) {
                     setPermissions([]);
                     setError(`No data found at path: ${fullPath}`);
                 }
-                
+
                 setLoading(false);
-            }, 
+            },
             (error) => {
-               
-                
+
+
                 // Handle specific errors
                 if (error.code === 'PERMISSION_DENIED') {
                     setError("Permission denied. Check Firebase database rules.");
@@ -55,7 +55,7 @@ export function useRealtimePermissions(role: string | null) {
                 } else {
                     setError(`Firebase error: ${error.message}`);
                 }
-                
+
                 setLoading(false);
                 setPermissions([]);
             }

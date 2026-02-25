@@ -6,6 +6,7 @@ import { uploadBufferToS3 } from '@/lib/uploadToS3';
 import { Types } from 'mongoose';
 import { verifyAdmin } from '@/lib/verifyAdmin';
 import { createNotification } from "@/lib/createNotification";
+import { createBirthdayEvent, deleteBirthdayEventByUserId } from '@/lib/createBirthdayEvent';
 
 export const PATCH = verifyAdmin(
   asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
@@ -26,6 +27,9 @@ export const PATCH = verifyAdmin(
     }
 
     const formData = await req.formData();
+    const dateOfBirth = formData.get("dateOfBirth");
+
+
     const updateFields: any = {};
     const rawNested: Record<string, any[]> = {
       academics: [],
@@ -302,6 +306,24 @@ export const PATCH = verifyAdmin(
     if (notificationPromises.length > 0) {
       await Promise.all(notificationPromises);
     }
+    const isVerifiedRaw = formData.get("isVerified");
+    const isVerified = isVerifiedRaw === "true";
+    console.log("isVerified==",isVerified)
+    if ( isVerified === false|| !dateOfBirth) {
+      const deleteBirthdayResult = await deleteBirthdayEventByUserId(userId);
+      console.log("deleteBirthdayResult-", deleteBirthdayResult);
+    }
+console.log("existing",existing.dateOfBirth)
+    if (dateOfBirth && isVerified) {
+      const bEvent = await createBirthdayEvent({
+        "userId": userId,
+        "birthdate": dateOfBirth,
+        "creatorId": admin.id,
+        "title": `🎉 ${formData.get("name")}'s Birthday`
+      });
+      console.log("bEvent", bEvent)
+    }
+
 
     return NextResponse.json({
       success: true,

@@ -49,7 +49,7 @@ export default function AdminLoginForm() {
         login(responce.token);
         localStorage.setItem('adminToken', responce.token || '');
         toast.success('Login successful!');
-        router.push('/admin');
+        router.push('/admin/profile');
       } else {
         setError(responce.message || 'Invalid credentials. Please try again.');
         toast.error(responce.message || 'Invalid credentials. Please try again.');

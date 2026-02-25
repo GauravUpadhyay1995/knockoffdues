@@ -1,0 +1,268 @@
+{
+  "permissions_local": {
+    "admin": {
+      "permissions": [
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete"
+      ],
+      "updatedAt": 1772003639931
+    },
+    "employee": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete"
+      ],
+      "updatedAt": 1772003640190
+    },
+    "hr": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "team.create",
+        "team.read",
+        "team.update",
+        "team.delete",
+        "news.create",
+        "news.read",
+        "news.update",
+        "news.delete",
+        "gallery.create",
+        "gallery.read",
+        "gallery.update",
+        "gallery.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "account.create",
+        "account.read",
+        "account.update",
+        "account.delete",
+        "dashboard.create",
+        "dashboard.read",
+        "dashboard.update",
+        "dashboard.delete"
+      ],
+      "updatedAt": 1772003640069
+    },
+    "lead": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete"
+      ],
+      "updatedAt": 1772003640313
+    },
+    "new": {
+      "permissions": [
+        "employee.read",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete"
+      ],
+      "updatedAt": 1772003640434
+    },
+    "super admin": {
+      "permissions": [
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete",
+        "team.create",
+        "team.read",
+        "team.update",
+        "team.delete",
+        "news.create",
+        "news.read",
+        "news.update",
+        "news.delete",
+        "gallery.create",
+        "gallery.read",
+        "gallery.update",
+        "gallery.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "account.create",
+        "account.read",
+        "account.update",
+        "account.delete",
+        "dashboard.create",
+        "dashboard.read",
+        "dashboard.update",
+        "dashboard.delete"
+      ],
+      "updatedAt": 1772003640552
+    }
+  },
+   "permissions": {
+    "admin": {
+      "permissions": [
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete"
+      ],
+      "updatedAt": 1772003639931
+    },
+    "employee": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete"
+      ],
+      "updatedAt": 1772003640190
+    },
+    "hr": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "team.create",
+        "team.read",
+        "team.update",
+        "team.delete",
+        "news.create",
+        "news.read",
+        "news.update",
+        "news.delete",
+        "gallery.create",
+        "gallery.read",
+        "gallery.update",
+        "gallery.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "account.create",
+        "account.read",
+        "account.update",
+        "account.delete",
+        "dashboard.create",
+        "dashboard.read",
+        "dashboard.update",
+        "dashboard.delete"
+      ],
+      "updatedAt": 1772003640069
+    },
+    "lead": {
+      "permissions": [
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete"
+      ],
+      "updatedAt": 1772003640313
+    },
+    "new": {
+      "permissions": [
+        "employee.read",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete"
+      ],
+      "updatedAt": 1772003640434
+    },
+    "super admin": {
+      "permissions": [
+        "employee.create",
+        "employee.read",
+        "employee.update",
+        "employee.delete",
+        "settings.create",
+        "settings.read",
+        "settings.update",
+        "settings.delete",
+        "task.create",
+        "task.read",
+        "task.update",
+        "task.delete",
+        "team.create",
+        "team.read",
+        "team.update",
+        "team.delete",
+        "news.create",
+        "news.read",
+        "news.update",
+        "news.delete",
+        "gallery.create",
+        "gallery.read",
+        "gallery.update",
+        "gallery.delete",
+        "calender.create",
+        "calender.read",
+        "calender.update",
+        "calender.delete",
+        "account.create",
+        "account.read",
+        "account.update",
+        "account.delete",
+        "dashboard.create",
+        "dashboard.read",
+        "dashboard.update",
+        "dashboard.delete"
+      ],
+      "updatedAt": 1772003640552
+    }
+  }
+}

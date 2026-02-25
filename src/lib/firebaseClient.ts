@@ -22,6 +22,7 @@ try {
 }
 
 export const db = getDatabase(app);
+console.log("REALTIME-DATABASE-NAME",db)
 
 // Optional: Log connection status
 const connectedRef = ref(db, '.info/connected');

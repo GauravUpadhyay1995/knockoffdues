@@ -30,8 +30,8 @@ const submenuPermissionMap: Record<string, { module: string; action: string }> =
   "All Events": { module: "event", action: "read" },
   "Add Events": { module: "event", action: "create" },
 
-  "All Links-Docs": { module: "docs", action: "read" },
-  "Add Links-Docs": { module: "docs", action: "create" },
+  "All Links-Docs": { module: "document", action: "read" },
+  "Add Links-Docs": { module: "document", action: "create" },
 
   "All News": { module: "news", action: "read" },
   "Add News": { module: "news", action: "create" },
@@ -48,6 +48,9 @@ const submenuPermissionMap: Record<string, { module: string; action: string }> =
   "Department": { module: "department", action: "read" },
   "Roles": { module: "settings", action: "read" },
   "Company Setup": { module: "settings", action: "update" },
+  "Venders": { module: "account", action: "read" },
+
+  
 };
 
 /* ------------------------------------------------------------------
@@ -67,6 +70,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const pathname = usePathname();
   const { permissions, loading } = usePermissions();
+  console.log("permissions",permissions)
   const { theme } = useTheme();
 
   const [openSubmenu, setOpenSubmenu] = useState<number | null>(null);
@@ -187,9 +191,17 @@ const AppSidebar: React.FC = () => {
 
     const moduleMap: Record<string, string> = {
       "Dashboard": "dashboard",
-      "Calender": "dashboard",
+      "Calender": "calender",
       "Employee Management": "employee",
       "Tasks Management": "task",
+      "Account Management":"account",
+      "Team Management":"team",
+      "Event Management":"event",
+      "Document Management":"document",
+      "News Management":"news",
+      "TRL Management":"trl",
+      "Gallery Management":"gallery",
+      "Setting Management":"setting"
     };
 
     const module = moduleMap[nav.name];
